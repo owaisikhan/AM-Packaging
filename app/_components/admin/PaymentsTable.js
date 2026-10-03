@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Ban } from "lucide-react";
-import { voidSupplierPayment } from "@/app/_lib/actions";
+import { voidCustomerPayment, voidSupplierPayment } from "@/app/_lib/actions";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { formatDate } from "@/app/_lib/date-helpers";
 import ReasonDialog from "@/app/_components/ui/ReasonDialog";
@@ -8,8 +8,10 @@ import Badge from "@/app/_components/ui/Badge";
 
 const METHOD = { cash: "Cash", bank: "Bank transfer", cheque: "Cheque", online: "Online / IBFT", other: "Other" };
 
-// Payments to a supplier, void ones kept in view with their reason.
-export default function PaymentsTable({ payments, showBill = true }) {
+// Payments to a supplier or from a customer, void ones kept in view with
+// their reason.
+export default function PaymentsTable({ payments, showBill = true, kind = "supplier" }) {
+  const isCustomer = kind === "customer";
   if (payments.length === 0) {
     return <p className="px-5 py-8 text-center text-sm text-muted">No payments yet.</p>;
   }
@@ -27,11 +29,14 @@ export default function PaymentsTable({ payments, showBill = true }) {
                 {formatDate(p.payment_date)} · {METHOD[p.method] ?? p.method}
                 {p.reference ? ` · ${p.reference}` : ""}
               </p>
-              {showBill && p.purchase_no ? (
+              {showBill && (isCustomer ? p.invoice_no : p.purchase_no) ? (
                 <p className="text-xs text-muted">
                   Against{" "}
-                  <Link href={`/admin/purchases/${p.purchase_id}`} className="font-mono font-semibold text-primary hover:underline">
-                    {p.purchase_no}
+                  <Link
+                    href={isCustomer ? `/admin/sales/${p.sale_id}` : `/admin/purchases/${p.purchase_id}`}
+                    className="font-mono font-semibold text-primary hover:underline"
+                  >
+                    {isCustomer ? p.invoice_no : p.purchase_no}
                   </Link>
                 </p>
               ) : null}
@@ -44,13 +49,13 @@ export default function PaymentsTable({ payments, showBill = true }) {
               </Badge>
             ) : (
               <ReasonDialog
-                action={voidSupplierPayment}
+                action={isCustomer ? voidCustomerPayment : voidSupplierPayment}
                 id={p.id}
                 triggerLabel="Void"
                 icon={<Ban size={16} aria-hidden />}
                 triggerClassName="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]"
                 title="Void this payment?"
-                warning={`The ${formatMoney(p.amount)} payment stays in the history marked void, and the supplier's balance goes back up by that amount.`}
+                warning={`The ${formatMoney(p.amount)} payment stays in the history marked void, and the ${isCustomer ? "customer" : "supplier"}'s balance goes back up by that amount.`}
                 confirmLabel="Void payment"
               />
             )}

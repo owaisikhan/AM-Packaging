@@ -58,6 +58,12 @@ Font: Inter (next/font). Radius 8/12/16/20. Shadows are soft and rare.
   (300ms pause, `router.replace` so history is not flooded, focus kept, top
   bar while loading). Selects and dates apply on change. No Apply button; a
   Clear filters button shows when any filter is set.
+- **Printable documents** (the invoice): an `article.invoice-sheet` card
+  holding the whole document; actions and admin-only panels sit outside it
+  in `no-print` wrappers. `PrintButton` calls `window.print()`, and the print
+  stylesheet hides the shell so only the sheet prints ("Save as PDF" is the
+  browser's own). Amounts in words use lakh and crore. On phones the item
+  table folds Qty and Rate into a line under the product name.
 - **Recipe-filled forms**: rows filled from a recipe follow the quantity
   until the person edits them; show "Recipe: X", "In stock: Y", and warn
   in words ("1.5 over recipe", "Only 140 in stock") before saving.

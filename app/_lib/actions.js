@@ -625,3 +625,133 @@ export async function voidProduction(_prev, formData) {
   revalidatePath("/admin", "layout");
   return ok("Run voided. The raw materials are back in stock and the finished goods have been taken out.");
 }
+
+// ---------------------------------------------------------------
+// Sales and customers
+// ---------------------------------------------------------------
+export async function createSale(_prev, formData) {
+  const { error: denied } = await guard(ROLES.WORKER);
+  if (denied) return denied;
+
+  const customerId = text(formData, "customer_id");
+  if (!customerId) return fail("Pick the customer.");
+  const { lines, error: lineError } = collectLines(formData);
+  if (lineError) return fail(lineError);
+
+  const discount = moneyField(formData, "discount");
+  const other = moneyField(formData, "other_charges");
+  const gstOn = formData.get("gst_enabled") === "on";
+  const gstRate = gstOn ? moneyField(formData, "gst_rate") : 0;
+  if ([discount, other, gstRate].some((n) => Number.isNaN(n) || n < 0)) {
+    return fail("Discount, other charges and GST must be numbers of zero or more.");
+  }
+  // Workers may take cash at the counter; post_sale records it for them.
+  const received = moneyField(formData, "amount_received");
+  if (Number.isNaN(received) || received < 0) return fail("The amount received must be zero or more.");
+
+  const saleDate = text(formData, "sale_date") || null;
+  const dueDate = text(formData, "due_date") || null;
+  if (saleDate && dueDate && dueDate < saleDate) return fail("The due date cannot be before the invoice date.");
+
+  const supabase = await createClient();
+  const { data: id, error } = await supabase.rpc("post_sale", {
+    p: {
+      customer_id: customerId,
+      sale_date: saleDate,
+      due_date: dueDate,
+      discount,
+      gst_rate: gstRate,
+      other_charges: other,
+      notes: text(formData, "notes"),
+      lines,
+      payment: received > 0 ? { amount: received, method: text(formData, "payment_method") || "cash", reference: text(formData, "payment_reference") } : null,
+    },
+  });
+  if (error) return fail(describe(error, "Could not save the invoice."));
+
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/sales/${id}?saved=1`);
+}
+
+export async function voidSale(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const reason = text(formData, "reason");
+  if (!reason) return fail("Write a reason for voiding this invoice.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("void_sale", { p_id: text(formData, "id"), p_reason: reason });
+  if (error) return fail(describe(error, "Could not void the invoice."));
+  revalidatePath("/admin", "layout");
+  return ok("Invoice voided. Its products are back in stock and any payments on it are void.");
+}
+
+export async function saveCustomer(_prev, formData) {
+  const id = text(formData, "id");
+  // Anyone signed in can add a customer; changing one is for admins (RLS agrees).
+  const { user, error: denied } = await guard(id ? ROLES.ADMIN : ROLES.WORKER);
+  if (denied) return denied;
+
+  const name = text(formData, "name");
+  if (!name) return fail("Enter the customer's name.");
+  const opening = number(formData, "opening_balance");
+  if (Number.isNaN(opening)) return fail("The opening balance must be a number, for example 25000 or 0.");
+
+  const row = {
+    name,
+    contact_person: text(formData, "contact_person"),
+    phone: text(formData, "phone"),
+    address: text(formData, "address"),
+    ntn: text(formData, "ntn"),
+    notes: text(formData, "notes"),
+  };
+  // Workers adding a customer cannot set money owed; an admin enters it.
+  if (user.role === ROLES.ADMIN) row.opening_balance = opening ?? 0;
+  if (id && formData.has("active")) row.active = text(formData, "active") !== "false";
+
+  const supabase = await createClient();
+  const { data, error } = id
+    ? await supabase.from("customers").update(row).eq("id", id).select("id").single()
+    : await supabase.from("customers").insert(row).select("id").single();
+  if (error) return fail(describe(error, "Could not save the customer."));
+
+  revalidatePath("/admin/customers");
+  revalidatePath("/admin/sales/new");
+  return ok(id ? `${name} updated.` : `${name} added.`, { id: data.id });
+}
+
+export async function recordCustomerPayment(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const amount = number(formData, "amount");
+  if (amount === null || Number.isNaN(amount) || amount <= 0) return fail("Enter the amount received, above zero.");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("record_customer_payment", {
+    p: {
+      customer_id: text(formData, "customer_id"),
+      sale_id: text(formData, "sale_id") || null,
+      payment_date: text(formData, "payment_date") || null,
+      amount,
+      method: text(formData, "method") || "cash",
+      reference: text(formData, "reference"),
+      note: text(formData, "note"),
+    },
+  });
+  if (error) return fail(describe(error, "Could not save the payment."));
+  revalidatePath("/admin/customers", "layout");
+  revalidatePath("/admin/sales", "layout");
+  return ok(`Payment of Rs ${new Intl.NumberFormat("en-PK", { maximumFractionDigits: 2 }).format(amount)} received and saved.`);
+}
+
+export async function voidCustomerPayment(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const reason = text(formData, "reason");
+  if (!reason) return fail("Write a reason for voiding this payment.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("void_customer_payment", { p_id: text(formData, "id"), p_reason: reason });
+  if (error) return fail(describe(error, "Could not void the payment."));
+  revalidatePath("/admin/customers", "layout");
+  revalidatePath("/admin/sales", "layout");
+  return ok("Payment voided. The customer's balance has gone back up by that amount.");
+}

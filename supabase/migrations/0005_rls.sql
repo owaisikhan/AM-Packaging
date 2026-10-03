@@ -26,7 +26,7 @@ begin
   foreach t in array array[
     'profiles', 'settings', 'item_categories', 'units', 'brands', 'sizes', 'microns', 'colors',
     'items', 'stock_movements', 'suppliers', 'customers', 'purchases', 'purchase_lines',
-    'sales', 'sale_lines', 'customer_payments', 'recipes', 'recipe_lines',
+    'sales', 'sale_lines', 'recipes', 'recipe_lines',
     'production_runs', 'production_consumption'
   ] loop
     execute format(
@@ -62,7 +62,7 @@ declare t text;
 begin
   foreach t in array array[
     'stock_movements', 'suppliers', 'customers', 'purchases', 'purchase_lines',
-    'sales', 'sale_lines', 'customer_payments',
+    'sales', 'sale_lines',
     'production_runs', 'production_consumption'
   ] loop
     execute format(
@@ -72,7 +72,7 @@ begin
 
   foreach t in array array[
     'suppliers', 'customers', 'purchases', 'sales',
-    'customer_payments', 'production_runs'
+    'production_runs'
   ] loop
     execute format(
       'create policy %I on public.%I for update to authenticated using (public.is_admin()) with check (public.is_admin())',
@@ -87,6 +87,16 @@ for select to authenticated using (public.is_admin());
 create policy supplier_payments_admin_insert on public.supplier_payments
 for insert to authenticated with check (public.is_admin());
 create policy supplier_payments_admin_update on public.supplier_payments
+for update to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- Money received from customers: admins read and record it. Workers take
+-- cash at the counter only through post_sale (security definer), tied to the
+-- invoice they are making (decided 2026-10-03).
+create policy customer_payments_admin_read on public.customer_payments
+for select to authenticated using (public.is_admin());
+create policy customer_payments_admin_insert on public.customer_payments
+for insert to authenticated with check (public.is_admin());
+create policy customer_payments_admin_update on public.customer_payments
 for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- A deactivated or non-admin user can still read their own profile, so the

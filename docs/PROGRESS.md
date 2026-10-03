@@ -9,13 +9,15 @@
       money is admin-only.
 - [x] Phase 3: Production (list, record run pre-filled from the recipe,
       run page with recipe vs actual, void). Search boxes filter as you type.
+- [x] Phase 4: Sales and Customers (invoice list, new invoice, printable
+      invoice with amount in words, customer list, add, edit, ledger,
+      payments received, void). Workers can enter cash taken at the counter
+      on a new invoice; other customer money is admin-only.
 
 ## Next
 
 - [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0006,
       create the first admin, set the env vars on Vercel (region bom1).
-- [ ] Phase 4: Sales and Customers (invoice form, printable invoice, customer
-      ledger, payments, void).
 - [ ] Phase 5: Dashboard charts and Reports (load the `dataviz` skill first).
 - [ ] Phase 6: polish pass, docs.
 
@@ -24,7 +26,7 @@
 - **Ask the client about importing existing records** (a register or Excel
   file with opening stock and customer/supplier balances). Deferred by the
   user on 2026-10-03: "Leave it for now, remind me in the future". Raise it
-  again when phase 4 is done. Until then, opening stock is entered on
+  again now that phase 4 is done (raised with the user on 2026-10-03). Until then, opening stock is entered on
   Stock > Opening stock / Adjust and opening balances on each customer and
   supplier.
 

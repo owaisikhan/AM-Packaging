@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil, Plus, Phone, MapPin, BookOpen } from "lucide-react";
 import { requirePageRole, ROLES } from "@/app/_lib/helpers";
-import { getOpenPurchases, getSupplier, getSupplierBalance, getSupplierLedger, getSupplierPayments } from "@/app/_lib/data-service";
+import { getCustomer, getCustomerBalance, getCustomerLedger, getCustomerPayments, getOpenSales } from "@/app/_lib/data-service";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { formatDate, todayISO } from "@/app/_lib/date-helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
@@ -11,48 +11,48 @@ import MoneyRow from "@/app/_components/ui/MoneyRow";
 import PaymentForm from "@/app/_components/admin/PaymentForm";
 import PaymentsTable from "@/app/_components/admin/PaymentsTable";
 
-export const metadata = { title: "Supplier ledger" };
+export const metadata = { title: "Customer ledger" };
 
 const money = (n) => formatMoney(n, { decimals: Number(n) % 1 !== 0 });
 
 function BalanceText({ value }) {
   const n = Number(value);
-  if (n > 0) return <span className="text-danger">{money(n)} <span className="text-xs font-semibold">to pay</span></span>;
+  if (n > 0) return <span className="text-danger">{money(n)} <span className="text-xs font-semibold">owed</span></span>;
   if (n < 0) return <span className="text-primary">{money(-n)} <span className="text-xs font-semibold">advance</span></span>;
   return <span className="text-muted">Settled</span>;
 }
 
-export default async function SupplierLedgerPage({ params, searchParams }) {
+export default async function CustomerLedgerPage({ params, searchParams }) {
   await requirePageRole(ROLES.ADMIN);
   const { id } = await params;
   const sp = await searchParams;
 
-  const supplier = await getSupplier(id);
-  if (!supplier) notFound();
+  const customer = await getCustomer(id);
+  if (!customer) notFound();
   const [balance, ledger, payments, openBills] = await Promise.all([
-    getSupplierBalance(id),
-    getSupplierLedger(id, { from: sp.from, to: sp.to }),
-    getSupplierPayments(id),
-    getOpenPurchases(id),
+    getCustomerBalance(id),
+    getCustomerLedger(id, { from: sp.from, to: sp.to }),
+    getCustomerPayments(id),
+    getOpenSales(id),
   ]);
   const closing = ledger.length ? ledger[ledger.length - 1].balance : 0;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={supplier.name}
-        subtitle="Supplier ledger: every purchase and payment, with the running balance."
-        crumbs={[{ label: "Home", href: "/admin" }, { label: "Suppliers", href: "/admin/suppliers" }, { label: supplier.name }]}
+        title={customer.name}
+        subtitle="Customer ledger: every invoice and payment received, with the running balance."
+        crumbs={[{ label: "Home", href: "/admin" }, { label: "Customers", href: "/admin/customers" }, { label: customer.name }]}
         actions={
           <>
-            <Link href="/admin/suppliers" className="btn-secondary">
+            <Link href="/admin/customers" className="btn-secondary">
               <ArrowLeft size={17} aria-hidden /> Back
             </Link>
-            <Link href={`/admin/suppliers/${id}/edit`} className="btn-secondary">
+            <Link href={`/admin/customers/${id}/edit`} className="btn-secondary">
               <Pencil size={15} aria-hidden /> Edit
             </Link>
-            <Link href={`/admin/purchases/new?supplier=${id}`} className="btn-primary">
-              <Plus size={18} aria-hidden /> New Purchase
+            <Link href={`/admin/sales/new?customer=${id}`} className="btn-primary">
+              <Plus size={18} aria-hidden /> New Invoice
             </Link>
           </>
         }
@@ -78,7 +78,7 @@ export default async function SupplierLedgerPage({ params, searchParams }) {
                   {sp.from || sp.to
                     ? `${sp.from ? formatDate(sp.from) : "Start"} to ${sp.to ? formatDate(sp.to) : "today"}`
                     : "All entries, oldest first"}
-                  . Void bills and payments are left out.
+                  . Void invoices and payments are left out.
                 </p>
               </div>
             </div>
@@ -106,8 +106,8 @@ export default async function SupplierLedgerPage({ params, searchParams }) {
                   <tr>
                     <th scope="col">Date</th>
                     <th scope="col">Entry</th>
-                    <th scope="col" className="text-right">Purchase (+)</th>
-                    <th scope="col" className="text-right">Payment (-)</th>
+                    <th scope="col" className="text-right">Invoice (+)</th>
+                    <th scope="col" className="text-right">Received (-)</th>
                     <th scope="col" className="text-right">Balance</th>
                   </tr>
                 </thead>
@@ -117,8 +117,8 @@ export default async function SupplierLedgerPage({ params, searchParams }) {
                       <td className="whitespace-nowrap text-sm text-secondary">{e.entry_date ? formatDate(e.entry_date) : "None"}</td>
                       <td className="min-w-[200px]">
                         <span className="block text-sm font-medium text-text">{e.description}</span>
-                        {e.purchase_id && e.ref ? (
-                          <Link href={`/admin/purchases/${e.purchase_id}`} className="font-mono text-xs font-semibold text-primary hover:underline">{e.ref}</Link>
+                        {e.sale_id && e.ref ? (
+                          <Link href={`/admin/sales/${e.sale_id}`} className="font-mono text-xs font-semibold text-primary hover:underline">{e.ref}</Link>
                         ) : null}
                       </td>
                       <td className="num text-right text-sm text-heading">{Number(e.debit) > 0 ? money(e.debit) : ""}</td>
@@ -136,32 +136,33 @@ export default async function SupplierLedgerPage({ params, searchParams }) {
           </section>
 
           <section className="card overflow-hidden">
-            <h2 className="card-title border-b border-border px-5 py-4">Payments made</h2>
-            <PaymentsTable payments={payments} />
+            <h2 className="card-title border-b border-border px-5 py-4">Payments received</h2>
+            <PaymentsTable kind="customer" payments={payments} />
           </section>
         </div>
 
         <div className="grid content-start gap-6 lg:grid-cols-2 2xl:grid-cols-1">
           <section className="card self-start p-5 sm:p-6">
             <div className="flex flex-col gap-2 border-b border-border pb-4 text-sm text-secondary">
-              {supplier.contact_person ? <p className="font-semibold text-heading">{supplier.contact_person}</p> : null}
-              {supplier.phone ? (
-                <a href={`tel:${supplier.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-primary">
-                  <Phone size={15} aria-hidden /> {supplier.phone}
+              {customer.contact_person ? <p className="font-semibold text-heading">{customer.contact_person}</p> : null}
+              {customer.phone ? (
+                <a href={`tel:${customer.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-primary">
+                  <Phone size={15} aria-hidden /> {customer.phone}
                 </a>
               ) : null}
-              {supplier.address ? (
+              {customer.ntn ? <p>NTN: <span className="font-medium text-text">{customer.ntn}</span></p> : null}
+              {customer.address ? (
                 <p className="flex items-start gap-2">
-                  <MapPin size={15} className="mt-0.5 shrink-0" aria-hidden /> {supplier.address}
+                  <MapPin size={15} className="mt-0.5 shrink-0" aria-hidden /> {customer.address}
                 </p>
               ) : null}
             </div>
             <div className="mt-4 flex flex-col gap-3">
               <MoneyRow label="Opening balance">{money(balance?.opening_balance ?? 0)}</MoneyRow>
-              <MoneyRow label="All purchases">{money(balance?.billed ?? 0)}</MoneyRow>
-              <MoneyRow label="All payments">{money(balance?.paid ?? 0)}</MoneyRow>
+              <MoneyRow label="All invoices">{money(balance?.billed ?? 0)}</MoneyRow>
+              <MoneyRow label="All received">{money(balance?.paid ?? 0)}</MoneyRow>
               <div className={`rounded-xl px-4 py-3 ${Number(balance?.balance) > 0 ? "bg-[#fef2f2] dark:bg-[#450a0a]" : "bg-primary-light"}`}>
-                <MoneyRow label="You owe them" strong tone={Number(balance?.balance) > 0 ? "danger" : "primary"}>
+                <MoneyRow label="They owe you" strong tone={Number(balance?.balance) > 0 ? "danger" : "primary"}>
                   {money(Math.max(Number(balance?.balance ?? 0), 0))}
                 </MoneyRow>
               </div>
@@ -169,9 +170,9 @@ export default async function SupplierLedgerPage({ params, searchParams }) {
           </section>
 
           <section className="card self-start p-5 sm:p-6">
-            <h2 className="card-title border-b border-border pb-4">Record a payment</h2>
+            <h2 className="card-title border-b border-border pb-4">Record a payment received</h2>
             <div className="mt-4">
-              <PaymentForm supplierId={id} openBills={openBills} today={todayISO()} />
+              <PaymentForm kind="customer" partyId={id} openBills={openBills} today={todayISO()} />
             </div>
           </section>
         </div>

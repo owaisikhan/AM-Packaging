@@ -43,6 +43,10 @@ chose (invenza-html.vercel.app); do not "fix" them.
   runs are voided (admin, with a reason), which writes reversing stock entries.
 - **Supplier money is admin-only** (balances, ledger, payments, voiding).
   Workers record purchases without a payment.
+- **Customer money is admin-only too**, with one exception: a worker can
+  enter the cash received when making an invoice (through security-definer
+  `post_sale`). Workers never see balances, ledgers or what an invoice has
+  had paid against it.
 - **Workers vs admins:** RLS is the real fence, `requirePageRole` /
   `requireRole` in pages and actions the second, hidden nav links cosmetic.
 - **Demo mode:** with no Supabase env vars the app runs on
@@ -56,8 +60,9 @@ chose (invenza-html.vercel.app); do not "fix" them.
 
 - Layout: `PageHeader`, `Sidebar` (collapse state in `sidebarState.js`), `Header`, `NavigationProgress` (PMC loading bar).
 - UI: `StatCard`, `Badge`, `FilterBar` (filters as query strings), `Pagination`, `EmptyState`, `FormMessage`, `SubmitButton`, `MoneyRow`, `ReasonDialog` (void with a reason; pass icons as elements, not components).
-- Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `SupplierPaymentForm`, `PaymentsTable`, `ProductionForm`, `RunStatus`.
-- Formatting: `format-helpers.js` (money as "Rs 1,250"), `date-helpers.js` (Asia/Karachi).
+- Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `PaymentForm` and `PaymentsTable` (both take `kind="supplier" | "customer"`), `ProductionForm`, `RunStatus`, `SaleForm`, `SalesTable` (with `OverduePill`), `CustomerForm`, `SupplierForm`.
+- Print: `PrintButton` and the `.invoice-sheet` / `no-print` classes.
+- Formatting: `format-helpers.js` (money as "Rs 1,250", `amountInWords` in lakh/crore), `date-helpers.js` (Asia/Karachi).
 
 ## Verifying a change
 

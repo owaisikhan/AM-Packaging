@@ -154,3 +154,47 @@ select code, on_hand from item_stock where code='PT-3';
 select void_production((select id from production_runs where run_no='PRD-00002'), 'Wrong product picked');
 select code, on_hand from item_stock where code in ('PT-3','T-46-72-40C') order by code;
 select run_no, status, void_reason from production_list order by run_no;
+
+\echo ''
+\echo '=== Phase 4: sales, customer payments and ledger ==='
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+\echo '--- admin makes 20 cartons so there is stock to sell'
+select post_production(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty_made',20,'materials', jsonb_build_array(
+  jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',144)))) is not null as made;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b',false);
+\echo '--- worker sells 5 cartons at 4800 with 10,000 cash at the counter (expect sold, paid 10000 recorded by Ali Raza)'
+select post_sale(jsonb_build_object('customer_id',(select id from customers limit 1),'due_date', (current_date - 3)::text,
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty',5,'rate',4800)),
+  'payment', jsonb_build_object('amount',10000,'method','cash'))) is not null as sold;
+\echo '--- worker reads customer payments (expect 0), records a separate payment (expect admin error), opens a ledger (expect admin error)'
+select count(*) as worker_sees_customer_payments from customer_payments;
+select record_customer_payment(jsonb_build_object('customer_id',(select id from customers limit 1),'amount',100));
+select * from customer_ledger((select id from customers limit 1));
+\echo '--- worker inserts a payment directly (expect row-level security error)'
+insert into customer_payments (customer_id, amount) values ((select id from customers limit 1), 1);
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+select p.amount, pr.full_name as recorded_by from customer_payments p join profiles pr on pr.id = p.created_by where p.status = 'posted';
+insert into customers (name) values ('Sialkot Exporters');
+\echo '--- payment linked to another customer''s invoice (expect: different customer)'
+select record_customer_payment(jsonb_build_object('customer_id',(select id from customers where name='Sialkot Exporters'),
+  'sale_id',(select id from sales where invoice_no='INV-00003'),'amount',10));
+\echo '--- admin records 4,000 against the invoice (expect id)'
+select record_customer_payment(jsonb_build_object('customer_id',(select id from customers where name='Faisalabad Traders (Pvt) Ltd'),
+  'sale_id',(select id from sales where invoice_no='INV-00003'),'amount',4000,'method','bank','reference','MCB-1')) is not null as received;
+\echo '--- sale list (expect INV-00001 void; INV-00002 (phase 3 sale) unpaid; INV-00003 partly paid 14000 of 24000, overdue = t)'
+select invoice_no, total, paid, payment_status, overdue from sale_list order by invoice_no;
+select * from sale_totals();
+\echo '--- ledger (expect: opening 25000, invoices 28800 and 24000, payments 10000 and 4000, last balance 63800 = customer_balances)'
+select entry_date, kind, ref, description, debit, credit, balance from customer_ledger((select id from customers where name='Faisalabad Traders (Pvt) Ltd'));
+select balance as view_balance from customer_balances where name='Faisalabad Traders (Pvt) Ltd';
+select * from customer_totals();
+\echo '--- void the 4,000 payment (expect balance 67800)'
+select void_customer_payment((select id from customer_payments where reference='MCB-1'), 'Cheque returned');
+select balance from customer_balances where name='Faisalabad Traders (Pvt) Ltd';
+\echo '--- void the invoice (expect INV-00003: tape back up by 5, its cash payment void, status void; balance 25000 + 28800 = 53800)'
+select on_hand as tape_before from item_stock where code='T-46-72-40C';
+select void_sale((select id from sales where invoice_no='INV-00003'), 'Customer returned the goods');
+select on_hand as tape_after from item_stock where code='T-46-72-40C';
+select invoice_no, payment_status from sale_list order by invoice_no;
+select status, void_reason from customer_payments order by created_at;
+select balance from customer_balances where name='Faisalabad Traders (Pvt) Ltd';

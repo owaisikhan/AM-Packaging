@@ -10,7 +10,7 @@ import PageHeader from "@/app/_components/layout/PageHeader";
 import PaymentStatus from "@/app/_components/admin/PaymentStatus";
 import MoneyRow from "@/app/_components/ui/MoneyRow";
 import ReasonDialog from "@/app/_components/ui/ReasonDialog";
-import SupplierPaymentForm from "@/app/_components/admin/SupplierPaymentForm";
+import PaymentForm from "@/app/_components/admin/PaymentForm";
 import PaymentsTable from "@/app/_components/admin/PaymentsTable";
 
 export const metadata = { title: "Purchase" };
@@ -175,7 +175,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
               {!isVoid && left > 0 ? (
                 <div className="border-t border-border p-5">
                   <p className="mb-3 text-sm font-semibold text-heading">Record a payment</p>
-                  <SupplierPaymentForm supplierId={p.supplier_id} purchaseId={p.id} today={todayISO()} suggested={left} />
+                  <PaymentForm supplierId={p.supplier_id} purchaseId={p.id} today={todayISO()} suggested={left} />
                 </div>
               ) : null}
             </section>

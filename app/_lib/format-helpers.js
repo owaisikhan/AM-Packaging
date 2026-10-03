@@ -45,3 +45,41 @@ export function initials(name) {
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
 }
+
+const ONES = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+  "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+const TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+function belowHundred(n) {
+  if (n < 20) return ONES[n];
+  return `${TENS[Math.floor(n / 10)]}${n % 10 ? ` ${ONES[n % 10]}` : ""}`;
+}
+
+function belowThousand(n) {
+  const h = Math.floor(n / 100);
+  const rest = n % 100;
+  return [h ? `${ONES[h]} Hundred` : "", rest ? belowHundred(rest) : ""].filter(Boolean).join(" ");
+}
+
+/** Whole number in Pakistani style words: 1152000 -> "Eleven Lakh Fifty Two Thousand". */
+function wholeToWords(n) {
+  if (n === 0) return "Zero";
+  const parts = [];
+  const crore = Math.floor(n / 10000000);
+  const lakh = Math.floor((n % 10000000) / 100000);
+  const thousand = Math.floor((n % 100000) / 1000);
+  const rest = n % 1000;
+  if (crore) parts.push(`${wholeToWords(crore)} Crore`);
+  if (lakh) parts.push(`${belowHundred(lakh)} Lakh`);
+  if (thousand) parts.push(`${belowHundred(thousand)} Thousand`);
+  if (rest) parts.push(belowThousand(rest));
+  return parts.join(" ");
+}
+
+/** "Rupees Eleven Lakh Fifty Two Thousand and Fifty Paisa Only", for invoices. */
+export function amountInWords(value) {
+  const n = Math.round(Math.abs(Number(value) || 0) * 100);
+  const rupees = Math.floor(n / 100);
+  const paisa = n % 100;
+  return `Rupees ${wholeToWords(rupees)}${paisa ? ` and ${belowHundred(paisa)} Paisa` : ""} Only`;
+}

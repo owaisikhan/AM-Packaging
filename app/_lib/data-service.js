@@ -585,3 +585,198 @@ export async function getRecipesForProducts() {
   const data = unwrap(await supabase.from("recipes").select("item_id, notes, recipe_lines(raw_item_id, qty_per_unit)"), "the recipes");
   return Object.fromEntries(data.map((r) => [r.item_id, { notes: r.notes, lines: r.recipe_lines ?? [] }]));
 }
+
+// ---------------------------------------------------------------
+// Customers
+// ---------------------------------------------------------------
+export async function getCustomerOptions() {
+  if (isDemoMode) return demo.demoCustomers.filter((c) => c.active).map(({ id, name }) => ({ id, name }));
+  const supabase = await createClient();
+  return unwrap(await supabase.from("customers").select("id, name").eq("active", true).order("name"), "the customers");
+}
+
+export async function getCustomer(id) {
+  if (isDemoMode) return demo.demoCustomers.find((c) => c.id === id) ?? null;
+  const supabase = await createClient();
+  return unwrap(await supabase.from("customers").select("*").eq("id", id).maybeSingle(), "the customer");
+}
+
+/** Admins get balances (customer_balances); workers get the plain list. */
+export async function getCustomersPage({ q, page, owing, isAdmin }) {
+  if (isDemoMode) {
+    const needle = (q || "").toLowerCase();
+    const rows = demo.demoCustomerBalances
+      .map((b) => ({ ...demo.demoCustomers.find((c) => c.id === b.id), ...b }))
+      .filter((r) => (!needle || `${r.name} ${r.phone}`.toLowerCase().includes(needle)) && (!owing || r.balance > 0))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return demoPage(rows, page);
+  }
+  const supabase = await createClient();
+  const { from, to } = pageRange(page);
+  let query = isAdmin
+    ? supabase.from("customer_balances").select("*", { count: "exact" })
+    : supabase.from("customers").select("id, name, phone, active, contact_person", { count: "exact" });
+  if (q) {
+    const safe = q.replace(/[%,()]/g, " ").trim();
+    if (safe) query = query.or(`name.ilike.%${safe}%,phone.ilike.%${safe}%`);
+  }
+  if (owing && isAdmin) query = query.gt("balance", 0);
+  const { data, error, count } = await query.order("name").range(from, to);
+  if (error) throw new Error(`Could not load the customers: ${error.message}`);
+  return { rows: data ?? [], total: count ?? 0 };
+}
+
+export async function getCustomerTotals() {
+  if (isDemoMode) {
+    const rows = demo.demoCustomerBalances;
+    return {
+      customers: rows.filter((r) => r.active).length,
+      receivable: rows.filter((r) => r.balance > 0).reduce((t, r) => t + r.balance, 0),
+      owing: rows.filter((r) => r.balance > 0).length,
+    };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("customer_totals");
+  if (error) throw new Error(`Could not total the customers: ${error.message}`);
+  return data?.[0] ?? { customers: 0, receivable: 0, owing: 0 };
+}
+
+export async function getCustomerBalance(id) {
+  if (isDemoMode) return demo.demoCustomerBalances.find((b) => b.id === id) ?? null;
+  const supabase = await createClient();
+  return unwrap(await supabase.from("customer_balances").select("*").eq("id", id).maybeSingle(), "the customer balance");
+}
+
+/** Running-balance ledger, worked out by customer_ledger() in Postgres. */
+export async function getCustomerLedger(id, { from, to } = {}) {
+  if (isDemoMode) return demo.demoCustomerLedger(id, from || null, to || null);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("customer_ledger", { p_customer_id: id, p_from: from || null, p_to: to || null });
+  if (error) throw new Error(`Could not load the ledger: ${error.message}`);
+  return data ?? [];
+}
+
+export async function getCustomerPayments(customerId) {
+  if (isDemoMode) {
+    return demo.demoCustomerPayments
+      .filter((p) => p.customer_id === customerId)
+      .map((p) => ({ ...p, invoice_no: demo.demoSales.find((s) => s.id === p.sale_id)?.invoice_no ?? null }))
+      .sort((a, b) => b.payment_date.localeCompare(a.payment_date) || b.created_at.localeCompare(a.created_at));
+  }
+  const supabase = await createClient();
+  const data = unwrap(
+    await supabase
+      .from("customer_payments")
+      .select("*, sales(invoice_no)")
+      .eq("customer_id", customerId)
+      .order("payment_date", { ascending: false })
+      .order("created_at", { ascending: false }),
+    "the payments",
+  );
+  return data.map((p) => ({ ...p, invoice_no: p.sales?.invoice_no ?? null }));
+}
+
+/** Invoices with something left to receive, for the payment form. */
+export async function getOpenSales(customerId) {
+  if (isDemoMode) {
+    return demo.demoSales.filter((s) => s.customer_id === customerId && (s.payment_status === "unpaid" || s.payment_status === "partly"));
+  }
+  const supabase = await createClient();
+  return unwrap(
+    await supabase
+      .from("sale_list")
+      .select("id, invoice_no, sale_date, total, paid, payment_status")
+      .eq("customer_id", customerId)
+      .in("payment_status", ["unpaid", "partly"])
+      .order("sale_date"),
+    "the open invoices",
+  );
+}
+
+// ---------------------------------------------------------------
+// Sales
+// ---------------------------------------------------------------
+
+/** filters: { customer, status, from, to, q, page }. status may be "overdue". */
+export async function getSalesPage(filters = {}) {
+  const { customer, status, from: dateFrom, to: dateTo, q, page } = filters;
+  if (isDemoMode) {
+    const needle = (q || "").toLowerCase();
+    const rows = demo.demoSales.filter(
+      (r) =>
+        (!customer || r.customer_id === customer) &&
+        (!status || (status === "overdue" ? r.overdue : r.payment_status === status)) &&
+        (!dateFrom || r.sale_date >= dateFrom) &&
+        (!dateTo || r.sale_date <= dateTo) &&
+        (!needle || `${r.invoice_no} ${r.customer_name}`.toLowerCase().includes(needle)),
+    );
+    return demoPage(rows, page);
+  }
+  const supabase = await createClient();
+  const { from, to } = pageRange(page);
+  let query = supabase.from("sale_list").select("*", { count: "exact" });
+  if (customer) query = query.eq("customer_id", customer);
+  if (status === "overdue") query = query.eq("overdue", true);
+  else if (status) query = query.eq("payment_status", status);
+  if (dateFrom) query = query.gte("sale_date", dateFrom);
+  if (dateTo) query = query.lte("sale_date", dateTo);
+  if (q) {
+    const safe = q.replace(/[%,()]/g, " ").trim();
+    if (safe) query = query.or(`invoice_no.ilike.%${safe}%,customer_name.ilike.%${safe}%`);
+  }
+  const { data, error, count } = await query
+    .order("sale_date", { ascending: false })
+    .order("invoice_no", { ascending: false })
+    .range(from, to);
+  if (error) throw new Error(`Could not load the invoices: ${error.message}`);
+  return { rows: data ?? [], total: count ?? 0 };
+}
+
+export async function getSaleTotals({ from, to, customer } = {}) {
+  if (isDemoMode) {
+    const rows = demo.demoSales.filter(
+      (r) => r.status === "posted" && (!from || r.sale_date >= from) && (!to || r.sale_date <= to) && (!customer || r.customer_id === customer),
+    );
+    const total = rows.reduce((t, r) => t + r.total, 0);
+    const paid = rows.reduce((t, r) => t + Math.min(r.paid, r.total), 0);
+    return { invoices: rows.length, total, paid, unpaid: Math.max(total - paid, 0) };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("sale_totals", { p_from: from || null, p_to: to || null, p_customer: customer || null });
+  if (error) throw new Error(`Could not total the sales: ${error.message}`);
+  return data?.[0] ?? { invoices: 0, total: 0, paid: 0, unpaid: 0 };
+}
+
+/** An invoice with its lines and customer; payments only for admins. */
+export async function getSale(id, { withPayments = false } = {}) {
+  if (isDemoMode) {
+    const sale = demo.demoSales.find((s) => s.id === id);
+    if (!sale) return null;
+    return {
+      sale,
+      customer: demo.demoCustomers.find((c) => c.id === sale.customer_id),
+      lines: demo.demoSaleLines.filter((l) => l.sale_id === id),
+      payments: withPayments ? demo.demoCustomerPayments.filter((p) => p.sale_id === id) : [],
+    };
+  }
+  const supabase = await createClient();
+  const sale = unwrap(await supabase.from("sale_list").select("*").eq("id", id).maybeSingle(), "the invoice");
+  if (!sale) return null;
+  const [customerRes, linesRes, creatorRes, paymentsRes] = await Promise.all([
+    supabase.from("customers").select("*").eq("id", sale.customer_id).maybeSingle(),
+    supabase.from("sale_lines").select("id, item_id, qty, rate, amount, items(name, code, units(short_name))").eq("sale_id", id),
+    sale.created_by ? supabase.from("profiles").select("full_name").eq("id", sale.created_by).maybeSingle() : { data: null },
+    withPayments ? supabase.from("customer_payments").select("*").eq("sale_id", id).order("payment_date") : { data: [] },
+  ]);
+  return {
+    sale: { ...sale, created_by_name: creatorRes.data?.full_name ?? "" },
+    customer: unwrap(customerRes, "the customer"),
+    lines: unwrap(linesRes, "the invoice lines").map((l) => ({
+      ...l,
+      item_name: l.items?.name ?? "",
+      item_code: l.items?.code ?? "",
+      unit: l.items?.units?.short_name ?? "",
+    })),
+    payments: paymentsRes.data ?? [],
+  };
+}

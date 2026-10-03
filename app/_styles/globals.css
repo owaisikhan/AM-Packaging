@@ -487,3 +487,11 @@ button:not(:disabled),
   .app-main { margin-left: 0 !important; }
   body, html { background: #fff !important; }
 }
+
+/* Printing an invoice: only the sheet, full width, no card chrome */
+@media print {
+  .invoice-sheet { border: 0 !important; box-shadow: none !important; max-width: none !important; padding: 0 !important; }
+  .app-main main { padding: 0 !important; }
+  .invoice-lines thead th { background: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { margin: 14mm; }
+}

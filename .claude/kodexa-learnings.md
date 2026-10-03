@@ -27,6 +27,8 @@ for the rules.
 | L-009 | 2026-10-03 | gotcha | Card/table switch at 768px is too low with a 260px sidebar; use 1280px | type: dashboard | logged |
 | L-010 | 2026-10-03 | gotcha | Never pass an icon component into a client component; pass an element | all | logged |
 | L-011 | 2026-10-03 | correction | Search boxes filter as you type, not on Enter or an Apply button | all | logged |
+| L-012 | 2026-10-03 | choice | Workers may take cash at the counter on a sale; all other customer money admin-only | project | project |
+| L-013 | 2026-10-03 | gotcha | Four stat cards in a row clip seven-figure rupee totals at 1440 with the sidebar | type: dashboard | logged |
 
 ## Entries
 
@@ -116,4 +118,20 @@ for the rules.
 - **Lesson:** List search filters as you type: debounce about 300ms, update the URL with router.replace (not push) inside a transition, keep focus in the box, show the global loading bar without dimming, reset to page 1, and drop the Apply button in favour of a Clear filters button that appears only when a filter is set.
 - **Scope:** all
 - **Target in skill:** references/types/dashboard.md (filters) and references/loading-states.md (useTrackPending for search)
+- **Status:** logged
+
+### L-012 · 2026-10-03 · strong · choice
+- **Said / saw:** chose "Record cash received, no balances" for workers on sales
+- **Context:** phase 4 planning, AM Packaging
+- **Lesson:** Recorded in CLAUDE.md for this project. A worker can enter the cash taken when making an invoice; the payment row is written by security-definer `post_sale`, and RLS keeps `customer_payments` admin-only otherwise. Workers see "Recorded" or "Void", never paid or balance.
+- **Scope:** project
+- **Target in skill:** none (project rule); the pattern (definer posting function as the only worker path into an admin-only table) may suit small-business-ledger-app
+- **Status:** project
+
+### L-013 · 2026-10-03 · medium · gotcha
+- **Said / saw:** render check flagged "Rs 1,307,200" clipped in a four-across StatCard row at 1440 with the 260px sidebar
+- **Context:** sales list, phase 4
+- **Lesson:** In rupee dashboards with a sidebar, put money StatCards four across only from 1536px (2xl) and two by two below; a clipped-figure check on `.num` elements catches it.
+- **Scope:** type: dashboard
+- **Target in skill:** references/types/dashboard.md; small-business-ledger-app references/verifying-ui.md
 - **Status:** logged

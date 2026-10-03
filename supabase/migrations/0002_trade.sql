@@ -289,9 +289,13 @@ end $$;
 -- ---------------------------------------------------------------
 -- post_sale: invoice + lines + stock out + optional payment received
 -- ---------------------------------------------------------------
+-- security definer: customer payments are admin-only (RLS), but a worker may
+-- take cash at the counter while making the invoice. This function checks
+-- the caller is staff and validates every line itself; created_by still
+-- records the real user through auth.uid().
 create or replace function public.post_sale(p jsonb)
 returns uuid
-language plpgsql
+language plpgsql security definer set search_path = public
 as $$
 declare
   v_id    uuid;
@@ -609,3 +613,168 @@ as $$
          count(*) filter (where balance > 0)
   from public.supplier_balances
 $$;
+
+-- ---------------------------------------------------------------
+-- Customer payments (admin only), outside of an invoice
+-- p = { customer_id, sale_id?, payment_date, amount, method, reference, note }
+-- ---------------------------------------------------------------
+create or replace function public.record_customer_payment(p jsonb)
+returns uuid
+language plpgsql
+as $$
+declare
+  v_id       uuid;
+  v_customer uuid := (p->>'customer_id')::uuid;
+  v_sale     uuid := nullif(p->>'sale_id', '')::uuid;
+  v_amount   numeric := (p->>'amount')::numeric;
+  v_row      public.sales;
+  v_name     text;
+begin
+  perform public.require_admin('record a payment from a customer');
+  select name into v_name from public.customers where id = v_customer;
+  if v_name is null then
+    raise exception 'Pick the customer this payment came from.';
+  end if;
+  if coalesce(v_amount, 0) <= 0 then
+    raise exception 'Enter the amount received, above zero.';
+  end if;
+
+  if v_sale is not null then
+    select * into v_row from public.sales where id = v_sale;
+    if v_row.id is null then
+      raise exception 'That invoice no longer exists. Refresh the page and try again.';
+    end if;
+    if v_row.customer_id <> v_customer then
+      raise exception 'Invoice % is for a different customer, not %. Pick an invoice of % or leave the invoice empty.',
+        v_row.invoice_no, v_name, v_name;
+    end if;
+    if v_row.status = 'void' then
+      raise exception 'Invoice % is void, so a payment cannot be linked to it.', v_row.invoice_no;
+    end if;
+  end if;
+
+  insert into public.customer_payments (customer_id, sale_id, payment_date, amount, method, reference, note)
+  values (v_customer, v_sale, coalesce((p->>'payment_date')::date, current_date), v_amount,
+    coalesce(nullif(p->>'method', ''), 'cash'), coalesce(p->>'reference', ''), coalesce(p->>'note', ''))
+  returning id into v_id;
+  return v_id;
+end $$;
+
+create or replace function public.void_customer_payment(p_id uuid, p_reason text)
+returns void
+language plpgsql
+as $$
+declare v_row public.customer_payments;
+begin
+  perform public.require_admin('void a payment');
+  if length(trim(coalesce(p_reason, ''))) = 0 then
+    raise exception 'Write a reason for voiding this payment.';
+  end if;
+  select * into v_row from public.customer_payments where id = p_id for update;
+  if v_row.id is null then raise exception 'That payment no longer exists.'; end if;
+  if v_row.status = 'void' then raise exception 'This payment is already void.'; end if;
+  update public.customer_payments set status = 'void', void_reason = trim(p_reason) where id = p_id;
+end $$;
+
+-- ---------------------------------------------------------------
+-- Sales list with what has been received against each invoice.
+-- security_invoker: workers cannot read payments, so "paid" reads 0 for
+-- them; the app shows workers no payment columns.
+-- ---------------------------------------------------------------
+create or replace view public.sale_list
+with (security_invoker = true)
+as
+select
+  s.id, s.invoice_no, s.sale_date, s.due_date, s.customer_id, c.name as customer_name,
+  s.subtotal, s.discount, s.gst_rate, s.gst_amount, s.other_charges, s.total,
+  s.notes, s.status, s.void_reason, s.created_by, s.created_at,
+  coalesce(l.line_count, 0) as line_count,
+  coalesce(pm.paid, 0) as paid,
+  case
+    when s.status = 'void' then 'void'
+    when coalesce(pm.paid, 0) >= s.total then 'paid'
+    when coalesce(pm.paid, 0) > 0 then 'partly'
+    else 'unpaid'
+  end as payment_status,
+  (s.status = 'posted' and s.due_date is not null and s.due_date < current_date
+    and coalesce(pm.paid, 0) < s.total) as overdue
+from public.sales s
+join public.customers c on c.id = s.customer_id
+left join (select sale_id, count(*) as line_count from public.sale_lines group by sale_id) l on l.sale_id = s.id
+left join (
+  select sale_id, sum(amount) as paid from public.customer_payments
+  where status = 'posted' and sale_id is not null group by sale_id
+) pm on pm.sale_id = s.id;
+
+create or replace function public.sale_totals(p_from date default null, p_to date default null, p_customer uuid default null)
+returns table (invoices bigint, total numeric, paid numeric, unpaid numeric)
+language sql stable
+as $$
+  select count(*), coalesce(sum(total), 0), coalesce(sum(least(paid, total)), 0),
+         coalesce(sum(greatest(total - paid, 0)), 0)
+  from public.sale_list
+  where status = 'posted'
+    and (p_from is null or sale_date >= p_from)
+    and (p_to is null or sale_date <= p_to)
+    and (p_customer is null or customer_id = p_customer)
+$$;
+
+create or replace function public.customer_totals()
+returns table (customers bigint, receivable numeric, owing bigint)
+language sql stable
+as $$
+  select count(*) filter (where active),
+         coalesce(sum(balance) filter (where balance > 0), 0),
+         count(*) filter (where balance > 0)
+  from public.customer_balances
+$$;
+
+-- Customer ledger with a running balance. Positive = they owe us.
+create or replace function public.customer_ledger(p_customer_id uuid, p_from date default null, p_to date default null)
+returns table (
+  entry_date date, kind text, entry_id uuid, sale_id uuid, ref text,
+  description text, debit numeric, credit numeric, balance numeric
+)
+language plpgsql stable
+as $$
+declare v_open numeric;
+begin
+  perform public.require_admin('see a customer ledger');
+
+  select opening_balance into v_open from public.customers where id = p_customer_id;
+  if v_open is null then
+    raise exception 'That customer no longer exists.';
+  end if;
+
+  if p_from is not null then
+    v_open := v_open
+      + coalesce((select sum(s.total) from public.sales s
+                  where s.customer_id = p_customer_id and s.status = 'posted' and s.sale_date < p_from), 0)
+      - coalesce((select sum(cp.amount) from public.customer_payments cp
+                  where cp.customer_id = p_customer_id and cp.status = 'posted' and cp.payment_date < p_from), 0);
+  end if;
+
+  return query
+  with e as (
+    select p_from as d, 0 as ord, null::timestamptz as ts, 'opening'::text as k, null::uuid as eid, null::uuid as sid, ''::text as r,
+      case when p_from is null then 'Opening balance' else 'Balance brought forward' end as descr,
+      greatest(v_open, 0) as dr, greatest(-v_open, 0) as cr
+    union all
+    select s.sale_date, 1, s.created_at, 'invoice', s.id, s.id, s.invoice_no, 'Invoice'::text, s.total, 0::numeric
+    from public.sales s
+    where s.customer_id = p_customer_id and s.status = 'posted'
+      and (p_from is null or s.sale_date >= p_from) and (p_to is null or s.sale_date <= p_to)
+    union all
+    select cp.payment_date, 1, cp.created_at, 'payment', cp.id, cp.sale_id, coalesce(s.invoice_no, ''),
+      'Payment, ' || cp.method || case when cp.reference <> '' then ' (' || cp.reference || ')' else '' end,
+      0::numeric, cp.amount
+    from public.customer_payments cp
+    left join public.sales s on s.id = cp.sale_id
+    where cp.customer_id = p_customer_id and cp.status = 'posted'
+      and (p_from is null or cp.payment_date >= p_from) and (p_to is null or cp.payment_date <= p_to)
+  )
+  select e.d, e.k, e.eid, e.sid, e.r, e.descr, e.dr, e.cr,
+    sum(e.dr - e.cr) over (order by e.ord, e.d, e.ts rows between unbounded preceding and current row)
+  from e
+  order by e.ord, e.d, e.ts;
+end $$;

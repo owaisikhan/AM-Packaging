@@ -51,7 +51,7 @@ export default async function PurchasesPage({ searchParams }) {
         }
       />
 
-      <div className={`grid grid-cols-2 gap-3 sm:gap-4 ${isAdmin ? "xl:grid-cols-4" : ""}`}>
+      <div className={`grid grid-cols-2 gap-3 sm:gap-4 ${isAdmin ? "2xl:grid-cols-4" : ""}`}>
         <StatCard icon={Receipt} label={`Bills ${period}`} value={totals.bills} tone="info" valueTone="plain" />
         <StatCard icon={Wallet} label={`Spent ${period}`} value={formatMoney(totals.total)} tone="primary" valueTone="plain" />
         {isAdmin ? (

@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-03: Phase 4 (sales, invoices and customers)
+
+- Decision: workers can enter the cash a customer pays when they make the
+  invoice ("Record cash received, no balances"). Customer balances, the
+  ledger, separate payments and voiding are admin-only. `post_sale` is
+  security definer so it can write that one payment row for a worker;
+  `customer_payments` is otherwise admin-only under RLS.
+- Database: `record_customer_payment`, `void_customer_payment`,
+  `customer_ledger` (running balance in SQL), `sale_list` view (paid,
+  payment status, overdue), `sale_totals`, `customer_totals`. A payment
+  cannot be linked to another customer's invoice or a void invoice.
+  Voiding an invoice puts the stock back and voids its payments.
+- Pages: Sales list (month cards, overdue pill with days late), New Invoice
+  (finished products only, "only N in stock" warning, payment received),
+  the printable invoice (company block from Settings, billed to, amount in
+  words in lakh and crore, signature line, VOID stamp; Print / Save as PDF
+  prints only the sheet), Customers list with balances, add and edit
+  customer (with NTN), and the customer ledger with payments.
+- `SupplierPaymentForm` became `PaymentForm` with `kind="supplier" |
+  "customer"`; `PaymentsTable` takes the same `kind`.
+- Purchases and Sales stat cards go four across only from 1536px: a
+  seven-figure month total was clipped at 1440.
+- Activity entries for invoices and customers now link to them.
+
 ## 2026-10-03: Phase 3 (production) and live search
 
 - Search boxes now filter as you type (user: "when i start typing the search
