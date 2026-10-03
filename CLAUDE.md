@@ -7,7 +7,7 @@ Industry** (packaging tape manufacturer, Faisalabad). The full plan, including
 the client's voice-note requirements, is in `docs/PLAN.md`. What is built and
 what is next is in `docs/PROGRESS.md`.
 
-Built with the kodexa-builder skill (v1.4.0). Load it for any new feature or
+Built with the kodexa-builder skill (v1.5.0). Load it for any new feature or
 design work, and log preferences, corrections and reversals to
 `.claude/kodexa-learnings.md` as they happen.
 

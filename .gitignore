@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local screenshots and scratch
 /shots
+
+# Unzipped staging copy of the skill update; the .skill file is committed
+.claude/kodexa-skill-update/kodexa-builder/
