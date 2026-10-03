@@ -23,6 +23,7 @@ export const demoCategories = [
   { id: "cat-tube", name: "Paper Tube", kind: "raw", active: true, sort_order: 2 },
   { id: "cat-box", name: "Carton Box", kind: "raw", active: true, sort_order: 3 },
   { id: "cat-film", name: "Shrink Film", kind: "raw", active: true, sort_order: 4 },
+  { id: "cat-granules", name: "Granules", kind: "raw", active: true, sort_order: 5 },
   { id: "cat-tape", name: "Tape Carton", kind: "finished", active: true, sort_order: 1 },
   { id: "cat-stretch", name: "Stretch Film", kind: "finished", active: true, sort_order: 2 },
   { id: "cat-strip", name: "Plastic Strip", kind: "finished", active: true, sort_order: 3 },
@@ -87,6 +88,8 @@ export const demoItems = [
   item({ id: "i-cb-46", kind: "raw", name: "Carton Box 46mm (72 rolls)", code: "CB-46", category_id: "cat-box", category_name: "Carton Box", brand_id: "b-pakbox", brand_name: "Pak Box", unit_id: "u-pcs", unit: "pcs", on_hand: 845, low_stock_level: 200, default_rate: 85 }),
   item({ id: "i-cb-72", kind: "raw", name: "Carton Box 72mm (36 rolls)", code: "CB-72", category_id: "cat-box", category_name: "Carton Box", brand_id: "b-royal", brand_name: "Royal Cartons", unit_id: "u-pcs", unit: "pcs", on_hand: 140, low_stock_level: 200, default_rate: 92 }),
   item({ id: "i-sf", kind: "raw", name: "Shrink Film", code: "SF-01", category_id: "cat-film", category_name: "Shrink Film", unit_id: "u-kg", unit: "kg", on_hand: 412.5, low_stock_level: 100, default_rate: 540 }),
+  item({ id: "i-g-lldpe", kind: "raw", name: "LLDPE Granules", code: "GR-LLDPE", category_id: "cat-granules", category_name: "Granules", unit_id: "u-kg", unit: "kg", on_hand: 1850, low_stock_level: 500, default_rate: 395 }),
+  item({ id: "i-g-pp", kind: "raw", name: "PP Granules (Blue)", code: "GR-PP-BL", category_id: "cat-granules", category_name: "Granules", unit_id: "u-kg", unit: "kg", on_hand: 140, low_stock_level: 200, default_rate: 360 }),
   item({ id: "i-t-46-72-40c", kind: "finished", name: "Tape 46mm x 72yd 40 mic Clear", code: "T46-72-40C", category_id: "cat-tape", category_name: "Tape Carton", size_id: "s-46-72", size_label: "46mm x 72yd", micron_id: "m-40", micron_value: 40, color_id: "c-clear", color_name: "Clear", unit_id: "u-ctn", unit: "ctn", rolls_per_carton: 72, on_hand: 326, low_stock_level: 50, default_rate: 4800 }),
   item({ id: "i-t-46-70-40b", kind: "finished", name: "Tape 46mm x 70yd 40 mic Brown", code: "T46-70-40B", category_id: "cat-tape", category_name: "Tape Carton", size_id: "s-46-70", size_label: "46mm x 70yd", micron_id: "m-40", micron_value: 40, color_id: "c-brown", color_name: "Brown", unit_id: "u-ctn", unit: "ctn", rolls_per_carton: 72, on_hand: 41, low_stock_level: 50, default_rate: 4650 }),
   item({ id: "i-t-24-72-36c", kind: "finished", name: "Tape 24mm x 72yd 36 mic Clear", code: "T24-72-36C", category_id: "cat-tape", category_name: "Tape Carton", size_id: "s-24-72", size_label: "24mm x 72yd", micron_id: "m-36", micron_value: 36, color_id: "c-clear", color_name: "Clear", unit_id: "u-ctn", unit: "ctn", rolls_per_carton: 144, on_hand: 118, low_stock_level: 30, default_rate: 4200 }),
@@ -117,11 +120,11 @@ export const demoSettings = {
 };
 
 export const demoMovements = [
-  { id: 9, movement_date: "2026-10-03", qty: -24, type: "sale", note: "INV-00018", created_at: "2026-10-03T07:20:00Z", actor_name: "Ali Raza" },
-  { id: 8, movement_date: "2026-10-02", qty: 60, type: "production_in", note: "PRD-00011", created_at: "2026-10-02T12:05:00Z", actor_name: "Muhammad Bilal Hussain" },
+  { id: 9, movement_date: "2026-10-03", qty: 24, type: "production_in", note: "PRD-00012", ref_table: "production_runs", ref_id: "pr-12", created_at: "2026-10-03T07:20:00Z", actor_name: "Ali Raza" },
+  { id: 8, movement_date: "2026-10-02", qty: 60, type: "production_in", note: "PRD-00011", ref_table: "production_runs", ref_id: "pr-11", created_at: "2026-10-02T12:05:00Z", actor_name: "Muhammad Bilal Hussain" },
   { id: 7, movement_date: "2026-10-01", qty: -2, type: "adjustment", note: "Two cartons water damaged", created_at: "2026-10-01T09:00:00Z", actor_name: "Ahmed Munir" },
   { id: 6, movement_date: "2026-09-30", qty: -100, type: "sale", note: "INV-00016", created_at: "2026-09-30T10:00:00Z", actor_name: "Ali Raza" },
-  { id: 5, movement_date: "2026-09-29", qty: 120, type: "production_in", note: "PRD-00009", created_at: "2026-09-29T11:00:00Z", actor_name: "Ali Raza" },
+  { id: 5, movement_date: "2026-09-29", qty: -40, type: "sale", note: "INV-00015", created_at: "2026-09-29T11:00:00Z", actor_name: "Ali Raza" },
   { id: 1, movement_date: "2026-09-05", qty: 272, type: "opening", note: "Counted on day one", created_at: "2026-09-05T06:00:00Z", actor_name: "Ahmed Munir" },
 ];
 
@@ -240,3 +243,59 @@ export function demoSupplierLedger(supplierId, from, to) {
     return { ...r, balance: bal };
   });
 }
+
+// ---------------------------------------------------------------
+// Phase 3: recipes and production runs
+// ---------------------------------------------------------------
+export const demoRecipes = {
+  "i-t-46-72-40c": { notes: "Standard pack, 72 rolls", lines: [
+    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-40c", qty_per_unit: 3950 },
+    { raw_item_id: "i-pt-star", qty_per_unit: 72 }, { raw_item_id: "i-sf", qty_per_unit: 0.15 }] },
+  "i-t-46-70-40b": { notes: "Standard pack, 72 rolls", lines: [
+    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-45b", qty_per_unit: 3840 },
+    { raw_item_id: "i-pt-star", qty_per_unit: 72 }, { raw_item_id: "i-sf", qty_per_unit: 0.15 }] },
+  "i-t-24-72-36c": { notes: "144 rolls per carton", lines: [
+    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-40c", qty_per_unit: 3950 },
+    { raw_item_id: "i-pt-star", qty_per_unit: 144 }, { raw_item_id: "i-sf", qty_per_unit: 0.12 }] },
+  "i-sf-500": { notes: "", lines: [{ raw_item_id: "i-g-lldpe", qty_per_unit: 2.6 }] },
+  "i-ps-12": { notes: "", lines: [{ raw_item_id: "i-g-pp", qty_per_unit: 10 }] },
+};
+
+// actual: optional overrides of what was really used, by material
+const runSeed = [
+  { id: "pr-12", run_no: "PRD-00012", run_date: "2026-10-03", item_id: "i-t-46-72-40c", qty_made: 24, by: "Muhammad Bilal Hussain", at: "2026-10-03T08:10:00Z" },
+  { id: "pr-11", run_no: "PRD-00011", run_date: "2026-10-02", item_id: "i-t-46-72-40c", qty_made: 60, by: "Muhammad Bilal Hussain", at: "2026-10-02T12:05:00Z", actual: { "i-sf": 10.5, "i-pt-star": 4340 }, notes: "Two cores split on the slitter" },
+  { id: "pr-10", run_no: "PRD-00010", run_date: "2026-10-01", item_id: "i-sf-500", qty_made: 120, by: "Ali Raza", at: "2026-10-01T11:00:00Z", actual: { "i-g-lldpe": 318 } },
+  { id: "pr-09", run_no: "PRD-00009", run_date: "2026-09-29", item_id: "i-t-46-70-40b", qty_made: 40, by: "Ali Raza", at: "2026-09-29T11:00:00Z" },
+  { id: "pr-08", run_no: "PRD-00008", run_date: "2026-09-27", item_id: "i-ps-12", qty_made: 30, by: "Imran Khan", at: "2026-09-27T09:30:00Z" },
+  { id: "pr-07", run_no: "PRD-00007", run_date: "2026-09-26", item_id: "i-t-24-72-36c", qty_made: 15, by: "Ali Raza", at: "2026-09-26T10:00:00Z", status: "void", void_reason: "Wrong size picked, re-entered as PRD-00009" },
+  { id: "pr-06", run_no: "PRD-00006", run_date: "2026-09-24", item_id: "i-t-60-72-40p", qty_made: 20, by: "Muhammad Bilal Hussain", at: "2026-09-24T10:00:00Z",
+    manual: [{ raw_item_id: "i-jr-40c", qty: 65000 }, { raw_item_id: "i-pt-star", qty: 960 }, { raw_item_id: "i-cb-72", qty: 20 }] },
+];
+
+const r3 = (n) => Math.round(n * 1000) / 1000;
+
+export const demoProductionConsumption = runSeed.flatMap((r) => {
+  const recipe = demoRecipes[r.item_id];
+  const rows = r.manual
+    ? r.manual.map((m) => ({ raw_item_id: m.raw_item_id, qty: m.qty, expected_qty: null }))
+    : recipe.lines.map((l) => {
+        const expected = r3(l.qty_per_unit * r.qty_made);
+        return { raw_item_id: l.raw_item_id, qty: r.actual?.[l.raw_item_id] ?? expected, expected_qty: expected };
+      });
+  return rows.map((row, i) => {
+    const it = demoItems.find((x) => x.id === row.raw_item_id);
+    return { id: `${r.id}-c${i}`, run_id: r.id, ...row, item_name: it?.name ?? "", unit: it?.unit ?? "", on_hand: it?.on_hand ?? 0 };
+  });
+});
+
+export const demoProductionRuns = runSeed.map((r) => {
+  const it = demoItems.find((x) => x.id === r.item_id);
+  const cons = demoProductionConsumption.filter((c) => c.run_id === r.id);
+  return {
+    id: r.id, run_no: r.run_no, run_date: r.run_date, item_id: r.item_id, item_name: it.name, item_code: it.code,
+    category_name: it.category_name, unit: it.unit, qty_made: r.qty_made, notes: r.notes ?? "", status: r.status ?? "posted",
+    void_reason: r.void_reason ?? "", created_by: null, created_by_name: r.by, created_at: r.at,
+    materials: cons.length, over_recipe: cons.filter((c) => c.expected_qty !== null && c.qty > c.expected_qty).length,
+  };
+});

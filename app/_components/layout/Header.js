@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Bell, ChevronDown, LogOut, Menu, Moon, Search, Sun } from "lucide-react";
 import { initials, formatQtyUnit } from "@/app/_lib/format-helpers";
 import { signOut } from "@/app/_lib/actions";
 import { toggleSidebar } from "./sidebarState";
 import { THEME_KEY } from "./themeState";
+import { useTrackPending } from "./NavigationProgress";
 
 function useClickOutside(ref, onOutside) {
   useEffect(() => {
@@ -25,6 +27,28 @@ function useClickOutside(ref, onOutside) {
 
 export default function Header({ user, alerts, alertCount }) {
   const [menu, setMenu] = useState(null); // "alerts" | "user" | null
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchTimer = useRef(null);
+  const [searching, startSearch] = useTransition();
+  useTrackPending(searching, { dim: false });
+
+  // Typing in the header searches stock as you go. On the Stock page it
+  // replaces the URL (no history entry per letter); from any other page the
+  // first search moves you to Stock. The header stays mounted, so the box
+  // keeps focus.
+  function searchStock(value, now = false) {
+    clearTimeout(searchTimer.current);
+    const q = value.trim();
+    const onStock = pathname === "/admin/stock";
+    if (!q && !onStock && !now) return;
+    const url = q ? `/admin/stock?q=${encodeURIComponent(q)}` : "/admin/stock";
+    startSearch(() => {
+      if (onStock) router.replace(url, { scroll: false });
+      else router.push(url);
+    });
+  }
   const alertsRef = useRef(null);
   const userRef = useRef(null);
 
@@ -47,7 +71,16 @@ export default function Header({ user, alerts, alertCount }) {
         <Menu size={20} aria-hidden />
       </button>
 
-      <form action="/admin/stock" method="get" className="relative hidden max-w-md flex-1 sm:block" role="search">
+      <form
+        action="/admin/stock"
+        method="get"
+        onSubmit={(e) => {
+          e.preventDefault();
+          searchStock(e.currentTarget.q.value, true);
+        }}
+        className="relative hidden max-w-md flex-1 sm:block"
+        role="search"
+      >
         <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           Search items
@@ -56,6 +89,13 @@ export default function Header({ user, alerts, alertCount }) {
           id="global-search"
           name="q"
           type="search"
+          autoComplete="off"
+          defaultValue={pathname === "/admin/stock" ? searchParams.get("q") ?? "" : ""}
+          onChange={(e) => {
+            clearTimeout(searchTimer.current);
+            const value = e.target.value;
+            searchTimer.current = setTimeout(() => searchStock(value), 300);
+          }}
           placeholder="Search items, codes, brands..."
           className="h-10 w-full rounded-xl border border-border bg-background pl-10 pr-4 text-sm outline-none transition focus:border-primary focus:bg-surface"
         />

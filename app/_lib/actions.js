@@ -570,3 +570,58 @@ export async function voidSupplierPayment(_prev, formData) {
   revalidatePath("/admin/purchases", "layout");
   return ok("Payment voided. The supplier's balance has gone back up by that amount.");
 }
+
+// ---------------------------------------------------------------
+// Production
+// ---------------------------------------------------------------
+export async function createProduction(_prev, formData) {
+  const { error: denied } = await guard(ROLES.WORKER);
+  if (denied) return denied;
+
+  const itemId = text(formData, "item_id");
+  if (!itemId) return fail("Pick the product that was made.");
+  const qtyMade = number(formData, "qty_made");
+  if (qtyMade === null || Number.isNaN(qtyMade) || qtyMade <= 0) return fail("Enter how many were made, above zero.");
+
+  const ids = formData.getAll("material_id").map(String);
+  const qtys = formData.getAll("material_qty").map((v) => String(v).replace(/,/g, "").trim());
+  const materials = [];
+  const seen = new Set();
+  for (let i = 0; i < ids.length; i += 1) {
+    if (!ids[i] && !qtys[i]) continue;
+    if (!ids[i]) return fail(`Material row ${i + 1} has no material. Pick one or remove the row.`);
+    const qty = Number(qtys[i]);
+    if (!Number.isFinite(qty) || qty <= 0) return fail(`Material row ${i + 1} needs a quantity above zero, or remove the row if it was not used.`);
+    if (seen.has(ids[i])) return fail("The same raw material is listed twice. Combine those rows into one.");
+    seen.add(ids[i]);
+    materials.push({ item_id: ids[i], qty });
+  }
+  if (materials.length === 0) return fail("Add the raw materials used for this run.");
+
+  const supabase = await createClient();
+  const { data: id, error } = await supabase.rpc("post_production", {
+    p: {
+      item_id: itemId,
+      qty_made: qtyMade,
+      run_date: text(formData, "run_date") || null,
+      notes: text(formData, "notes"),
+      materials,
+    },
+  });
+  if (error) return fail(describe(error, "Could not save the production run."));
+
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/production/${id}?saved=1`);
+}
+
+export async function voidProduction(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const reason = text(formData, "reason");
+  if (!reason) return fail("Write a reason for voiding this production run.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("void_production", { p_id: text(formData, "id"), p_reason: reason });
+  if (error) return fail(describe(error, "Could not void the production run."));
+  revalidatePath("/admin", "layout");
+  return ok("Run voided. The raw materials are back in stock and the finished goods have been taken out.");
+}

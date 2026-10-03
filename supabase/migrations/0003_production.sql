@@ -107,6 +107,9 @@ begin
   if (p->'materials') is null or jsonb_array_length(p->'materials') = 0 then
     raise exception 'Add the raw materials used for this run.';
   end if;
+  if (select count(*) <> count(distinct x->>'item_id') from jsonb_array_elements(p->'materials') x) then
+    raise exception 'The same raw material is listed twice. Combine those rows into one.';
+  end if;
 
   v_no := public.next_doc_no('production');
 
@@ -145,7 +148,7 @@ create or replace function public.void_production(p_id uuid, p_reason text)
 returns void
 language plpgsql
 as $$
-declare v_row public.production_runs; c record;
+declare v_row public.production_runs; c record; v_name text; v_unit text; v_left numeric;
 begin
   perform public.require_admin('void a production run');
   if length(trim(coalesce(p_reason, ''))) = 0 then
@@ -154,6 +157,13 @@ begin
   select * into v_row from public.production_runs where id = p_id for update;
   if v_row.id is null then raise exception 'That production run no longer exists.'; end if;
   if v_row.status = 'void' then raise exception 'Run % is already void.', v_row.run_no; end if;
+
+  select s.name, s.unit, s.on_hand into v_name, v_unit, v_left
+  from public.item_stock s where s.id = v_row.item_id;
+  if v_left < v_row.qty_made then
+    raise exception 'Run % made % % of "%", but only % % are left in stock (the rest have been sold or used). Void those sales first, or correct the stock with an adjustment.',
+      v_row.run_no, public.fmt_qty(v_row.qty_made), v_unit, v_name, public.fmt_qty(v_left), v_unit;
+  end if;
 
   -- Return the raw materials first, then take the finished goods back out,
   -- so the stock guard sees the true position.
@@ -167,3 +177,48 @@ begin
 
   update public.production_runs set status = 'void', void_reason = trim(p_reason) where id = p_id;
 end $$;
+
+-- ---------------------------------------------------------------
+-- Production list for the screens: product, unit, who entered it, how many
+-- materials, and how many of them went over the recipe.
+-- ---------------------------------------------------------------
+create or replace view public.production_list
+with (security_invoker = true)
+as
+select
+  r.id, r.run_no, r.run_date, r.item_id, i.name as item_name, i.code as item_code,
+  c.name as category_name, u.short_name as unit, r.qty_made, r.notes, r.status, r.void_reason,
+  r.created_by, pr.full_name as created_by_name, r.created_at,
+  coalesce(m.materials, 0) as materials,
+  coalesce(m.over_recipe, 0) as over_recipe
+from public.production_runs r
+join public.items i on i.id = r.item_id
+join public.item_categories c on c.id = i.category_id
+join public.units u on u.id = i.unit_id
+left join public.profiles pr on pr.id = r.created_by
+left join (
+  select run_id, count(*) as materials,
+         count(*) filter (where expected_qty is not null and qty > expected_qty) as over_recipe
+  from public.production_consumption group by run_id
+) m on m.run_id = r.id;
+
+-- Card figures. Quantities are summed per unit (cartons, rolls, bundles),
+-- never added across units.
+create or replace function public.production_totals(p_from date default null, p_to date default null, p_item uuid default null)
+returns jsonb
+language sql stable
+as $$
+  with runs as (
+    select * from public.production_list
+    where status = 'posted'
+      and (p_from is null or run_date >= p_from)
+      and (p_to is null or run_date <= p_to)
+      and (p_item is null or item_id = p_item)
+  )
+  select jsonb_build_object(
+    'runs', (select count(*) from runs),
+    'products', (select count(distinct item_id) from runs),
+    'made', coalesce((select jsonb_agg(jsonb_build_object('unit', unit, 'qty', qty) order by qty desc)
+                      from (select unit, sum(qty_made) as qty from runs group by unit) t), '[]'::jsonb)
+  )
+$$;

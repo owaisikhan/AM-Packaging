@@ -56,7 +56,7 @@ chose (invenza-html.vercel.app); do not "fix" them.
 
 - Layout: `PageHeader`, `Sidebar` (collapse state in `sidebarState.js`), `Header`, `NavigationProgress` (PMC loading bar).
 - UI: `StatCard`, `Badge`, `FilterBar` (filters as query strings), `Pagination`, `EmptyState`, `FormMessage`, `SubmitButton`, `MoneyRow`, `ReasonDialog` (void with a reason; pass icons as elements, not components).
-- Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `SupplierPaymentForm`, `PaymentsTable`.
+- Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `SupplierPaymentForm`, `PaymentsTable`, `ProductionForm`, `RunStatus`.
 - Formatting: `format-helpers.js` (money as "Rs 1,250"), `date-helpers.js` (Asia/Karachi).
 
 ## Verifying a change

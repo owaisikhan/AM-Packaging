@@ -13,6 +13,21 @@ import EmptyState from "@/app/_components/ui/EmptyState";
 
 export const metadata = { title: "Stock history" };
 
+const REF_PATHS = { production_runs: "/admin/production", purchases: "/admin/purchases", sales: "/admin/sales" };
+
+// The note on a stock entry, linked to the document behind it when there is one.
+function MovementNote({ m }) {
+  const base = REF_PATHS[m.ref_table];
+  if (base && m.ref_id) {
+    return (
+      <Link href={`${base}/${m.ref_id}`} className="font-mono font-semibold text-primary hover:underline">
+        {m.note || "Open"}
+      </Link>
+    );
+  }
+  return m.note || "None";
+}
+
 function Detail({ label, children }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-border py-3 last:border-0">
@@ -99,7 +114,7 @@ export default async function StockItemPage({ params, searchParams }) {
                     <li key={m.id} className="flex items-start justify-between gap-3 px-4 py-4">
                       <span className="min-w-0">
                         <MovementType type={m.type} />
-                        <span className="mt-1.5 block text-sm text-secondary">{m.note || "None"}</span>
+                        <span className="mt-1.5 block text-sm text-secondary"><MovementNote m={m} /></span>
                         <span className="block text-xs text-muted">
                           {formatDate(m.movement_date)} · {m.actor_name}
                         </span>
@@ -133,7 +148,7 @@ export default async function StockItemPage({ params, searchParams }) {
                             <div className="text-xs text-muted">{formatDateTime(m.created_at)}</div>
                           </td>
                           <td><MovementType type={m.type} /></td>
-                          <td className="min-w-[180px] text-sm text-secondary">{m.note || "None"}</td>
+                          <td className="min-w-[180px] text-sm text-secondary"><MovementNote m={m} /></td>
                           <td className={`num text-right text-[15px] font-bold ${qty > 0 ? "text-primary" : "text-danger"}`}>
                             {qty > 0 ? "+" : "-"}
                             {formatQty(Math.abs(qty))} <span className="text-xs font-medium text-muted">{item.unit}</span>

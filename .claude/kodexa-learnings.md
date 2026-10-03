@@ -26,6 +26,7 @@ for the rules.
 | L-008 | 2026-10-03 | choice | Supplier money (balances, ledger, payments) admin-only; workers record bills | project | project |
 | L-009 | 2026-10-03 | gotcha | Card/table switch at 768px is too low with a 260px sidebar; use 1280px | type: dashboard | logged |
 | L-010 | 2026-10-03 | gotcha | Never pass an icon component into a client component; pass an element | all | logged |
+| L-011 | 2026-10-03 | correction | Search boxes filter as you type, not on Enter or an Apply button | all | logged |
 
 ## Entries
 
@@ -107,4 +108,12 @@ for the rules.
 - **Lesson:** Props from server to client components must be serialisable: pass icons as elements (`icon={<Ban size={16} />}`), never as component references. The build does not catch it; only rendering the page does.
 - **Scope:** all
 - **Target in skill:** references/folder-structure.md or conventions
+- **Status:** logged
+
+### L-011 · 2026-10-03 · strong · correction
+- **Said / saw:** "fix the search bars where when i start typing the search should start and update the list below"
+- **Context:** list pages (Stock, Purchases, Activity...) used a search that applied on Enter or an Apply button
+- **Lesson:** List search filters as you type: debounce about 300ms, update the URL with router.replace (not push) inside a transition, keep focus in the box, show the global loading bar without dimming, reset to page 1, and drop the Apply button in favour of a Clear filters button that appears only when a filter is set.
+- **Scope:** all
+- **Target in skill:** references/types/dashboard.md (filters) and references/loading-states.md (useTrackPending for search)
 - **Status:** logged

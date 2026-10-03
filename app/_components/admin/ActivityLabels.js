@@ -48,6 +48,8 @@ export function recordHref(entry) {
       return `/admin/purchases/${id}`;
     case "supplier":
       return `/admin/suppliers/${id}`;
+    case "production":
+      return `/admin/production/${id}`;
     case "user":
       return "/admin/users";
     case "settings":

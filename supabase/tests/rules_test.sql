@@ -130,3 +130,27 @@ select payment_status from purchase_list where purchase_no='PUR-00001';
 select summary from activity_log where module in ('payment','purchase') order by id;
 \echo '--- supplier totals (expect 2 suppliers, payable 2000 = Karachi opening balance, 1 with balance)'
 select * from supplier_totals();
+
+\echo ''
+\echo '=== Phase 3: production list, totals and voiding ==='
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b',false);
+\echo '--- worker lists runs (expect PRD-00001, made 10 ctn by Ali Raza, 4 materials, 1 over recipe: tubes 725 vs 720)'
+select run_no, item_name, qty_made, unit, created_by_name, materials, over_recipe, status from production_list;
+\echo '--- duplicate material rows (expect: listed twice)'
+select post_production(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty_made',1,'materials', jsonb_build_array(
+  jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',72),
+  jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',1))));
+\echo '--- worker voids a run (expect admin error)'
+select void_production((select id from production_runs where run_no='PRD-00001'), 'test');
+select production_totals();
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+\echo '--- admin sells 6 cartons, then voids the run (expect: not enough stock of the tape, only 4 left)'
+select post_sale(jsonb_build_object('customer_id',(select id from customers limit 1),'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty',6,'rate',4800)))) is not null as sold;
+select void_production((select id from production_runs where run_no='PRD-00001'), 'Counted wrong');
+\echo '--- admin records a second run of 2 and voids it (expect materials back: tubes 275 -> 131 -> 275)'
+select post_production(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty_made',2,'materials', jsonb_build_array(
+  jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',144)))) is not null as made;
+select code, on_hand from item_stock where code='PT-3';
+select void_production((select id from production_runs where run_no='PRD-00002'), 'Wrong product picked');
+select code, on_hand from item_stock where code in ('PT-3','T-46-72-40C') order by code;
+select run_no, status, void_reason from production_list order by run_no;

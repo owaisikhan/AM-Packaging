@@ -54,8 +54,13 @@ Font: Inter (next/font). Radius 8/12/16/20. Shadows are soft and rare.
   reason, and the record stays visible marked void with that reason.
 - **Form pages**: two columns; details on the left, a narrow right column with
   the summary/check card and a full-width green Save button.
-- Filters are query strings (shareable, back button works). Selects apply on
-  change; search applies on Enter or Apply.
+- Filters are query strings (shareable). **Search filters as you type**
+  (300ms pause, `router.replace` so history is not flooded, focus kept, top
+  bar while loading). Selects and dates apply on change. No Apply button; a
+  Clear filters button shows when any filter is set.
+- **Recipe-filled forms**: rows filled from a recipe follow the quantity
+  until the person edits them; show "Recipe: X", "In stock: Y", and warn
+  in words ("1.5 over recipe", "Only 140 in stock") before saving.
 
 ## Rules that do not bend
 

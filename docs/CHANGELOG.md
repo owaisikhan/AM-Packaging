@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-03: Phase 3 (production) and live search
+
+- Search boxes now filter as you type (user: "when i start typing the search
+  should start and update the list below"). 300ms after the last key the
+  list updates; the URL is replaced, not pushed, so the back button is not
+  filled with one entry per letter; focus stays in the box; the top loading
+  bar shows while results load. Selects and dates still apply at once. The
+  Apply button is gone; a Clear filters button appears when a filter is set.
+  The header search works the same way and lands on Stock.
+- Database: `production_list` view (product, unit, who entered it, materials,
+  how many went over the recipe) and `production_totals` (quantities summed
+  per unit, never across units). `post_production` refuses the same material
+  twice. `void_production` explains in words when the finished goods have
+  already been sold instead of a generic stock error.
+- Pages: Production list with month cards, Record Production (materials
+  filled in from the recipe and following the quantity made until edited,
+  "over recipe" and "only N in stock" warnings, a "when you save" summary),
+  and the run page with recipe vs actual per material and void.
+- Stock history notes such as PRD-00011 now link to the run or purchase.
+
 ## 2026-10-03: Phase 2 (purchases and suppliers)
 
 - Decision: supplier balances, the supplier ledger, supplier payments and

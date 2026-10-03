@@ -165,18 +165,7 @@ export async function getItemMovements(itemId, page = 1) {
 }
 
 export async function getRecipe(itemId) {
-  if (isDemoMode) {
-    if (itemId !== "i-t-46-72-40c") return null;
-    return {
-      notes: "Standard pack",
-      lines: [
-        { raw_item_id: "i-cb-46", qty_per_unit: 1 },
-        { raw_item_id: "i-jr-40c", qty_per_unit: 3950 },
-        { raw_item_id: "i-pt-star", qty_per_unit: 72 },
-        { raw_item_id: "i-sf", qty_per_unit: 0.15 },
-      ],
-    };
-  }
+  if (isDemoMode) return demo.demoRecipes[itemId] ?? null;
   const supabase = await createClient();
   const recipe = unwrap(
     await supabase.from("recipes").select("id, notes, recipe_lines(raw_item_id, qty_per_unit)").eq("item_id", itemId).maybeSingle(),
@@ -503,4 +492,96 @@ export async function getPurchase(id, { withPayments = false } = {}) {
     lines,
     payments: paymentsRes.data ?? [],
   };
+}
+
+// ---------------------------------------------------------------
+// Production
+// ---------------------------------------------------------------
+
+/** filters: { item, status, from, to, q, page } */
+export async function getProductionPage(filters = {}) {
+  const { item, status, from: dateFrom, to: dateTo, q, page } = filters;
+  if (isDemoMode) {
+    const needle = (q || "").toLowerCase();
+    const rows = demo.demoProductionRuns.filter(
+      (r) =>
+        (!item || r.item_id === item) &&
+        (!status || (status === "over" ? r.over_recipe > 0 && r.status === "posted" : r.status === status)) &&
+        (!dateFrom || r.run_date >= dateFrom) &&
+        (!dateTo || r.run_date <= dateTo) &&
+        (!needle || `${r.run_no} ${r.item_name} ${r.item_code ?? ""}`.toLowerCase().includes(needle)),
+    );
+    return demoPage(rows, page);
+  }
+  const supabase = await createClient();
+  const { from, to } = pageRange(page);
+  let query = supabase.from("production_list").select("*", { count: "exact" });
+  if (item) query = query.eq("item_id", item);
+  if (status === "over") query = query.eq("status", "posted").gt("over_recipe", 0);
+  else if (status) query = query.eq("status", status);
+  if (dateFrom) query = query.gte("run_date", dateFrom);
+  if (dateTo) query = query.lte("run_date", dateTo);
+  if (q) {
+    const safe = q.replace(/[%,()]/g, " ").trim();
+    if (safe) query = query.or(`run_no.ilike.%${safe}%,item_name.ilike.%${safe}%,item_code.ilike.%${safe}%`);
+  }
+  const { data, error, count } = await query
+    .order("run_date", { ascending: false })
+    .order("run_no", { ascending: false })
+    .range(from, to);
+  if (error) throw new Error(`Could not load the production runs: ${error.message}`);
+  return { rows: data ?? [], total: count ?? 0 };
+}
+
+/** { runs, products, made: [{ unit, qty }] } from production_totals(). */
+export async function getProductionTotals({ from, to, item } = {}) {
+  if (isDemoMode) {
+    const rows = demo.demoProductionRuns.filter(
+      (r) => r.status === "posted" && (!from || r.run_date >= from) && (!to || r.run_date <= to) && (!item || r.item_id === item),
+    );
+    const byUnit = {};
+    rows.forEach((r) => {
+      byUnit[r.unit] = (byUnit[r.unit] ?? 0) + r.qty_made;
+    });
+    return {
+      runs: rows.length,
+      products: new Set(rows.map((r) => r.item_id)).size,
+      made: Object.entries(byUnit).map(([unit, qty]) => ({ unit, qty })).sort((a, b) => b.qty - a.qty),
+    };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("production_totals", { p_from: from || null, p_to: to || null, p_item: item || null });
+  if (error) throw new Error(`Could not total the production: ${error.message}`);
+  return data ?? { runs: 0, products: 0, made: [] };
+}
+
+/** A run with the materials it used: expected (recipe) and actual. */
+export async function getProductionRun(id) {
+  if (isDemoMode) {
+    const run = demo.demoProductionRuns.find((r) => r.id === id);
+    if (!run) return null;
+    return { run, materials: demo.demoProductionConsumption.filter((c) => c.run_id === id) };
+  }
+  const supabase = await createClient();
+  const run = unwrap(await supabase.from("production_list").select("*").eq("id", id).maybeSingle(), "the production run");
+  if (!run) return null;
+  const rows = unwrap(
+    await supabase
+      .from("production_consumption")
+      .select("id, raw_item_id, qty, expected_qty, items(name, units(short_name))")
+      .eq("run_id", id),
+    "the materials used",
+  );
+  return {
+    run,
+    materials: rows.map((m) => ({ ...m, item_name: m.items?.name ?? "", unit: m.items?.units?.short_name ?? "" })),
+  };
+}
+
+/** Every product's recipe in one go: { [item_id]: { notes, lines } }. */
+export async function getRecipesForProducts() {
+  if (isDemoMode) return demo.demoRecipes;
+  const supabase = await createClient();
+  const data = unwrap(await supabase.from("recipes").select("item_id, notes, recipe_lines(raw_item_id, qty_per_unit)"), "the recipes");
+  return Object.fromEntries(data.map((r) => [r.item_id, { notes: r.notes, lines: r.recipe_lines ?? [] }]));
 }

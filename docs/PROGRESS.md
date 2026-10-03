@@ -7,12 +7,13 @@
 - [x] Phase 2: Purchases (list, new, detail, void) and Suppliers (list, add,
       edit, ledger with running balance, payments, void payment). Supplier
       money is admin-only.
+- [x] Phase 3: Production (list, record run pre-filled from the recipe,
+      run page with recipe vs actual, void). Search boxes filter as you type.
 
 ## Next
 
 - [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0006,
       create the first admin, set the env vars on Vercel (region bom1).
-- [ ] Phase 3: Production (run form pre-filled from recipe, list, detail, void).
 - [ ] Phase 4: Sales and Customers (invoice form, printable invoice, customer
       ledger, payments, void).
 - [ ] Phase 5: Dashboard charts and Reports (load the `dataviz` skill first).
