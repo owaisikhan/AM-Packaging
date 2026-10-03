@@ -31,6 +31,9 @@ for the rules.
 | L-014 | 2026-10-03 | correction | "Add new X" links inside a form open in the same tab and return with X picked | all | logged |
 | L-015 | 2026-10-03 | gotcha | Dark mode: native select options need a solid background; translucent select fill does not reach them | all | logged |
 | L-016 | 2026-10-03 | gap | Run a measured contrast audit in both themes; brand fills often fail as text | all | logged |
+| L-017 | 2026-10-04 | gotcha | Multi-unit inventories: never sum quantities across units in a chart; per category or in money | type: dashboard | logged |
+| L-018 | 2026-10-04 | gotcha | Period totals are columns; smooth area lines between sparse daily totals invent values | all | logged |
+| L-019 | 2026-10-04 | gap | Build a profit report early: it exposed demo recipe data that made goods cost more than they sell for | type: dashboard | logged |
 | L-013 | 2026-10-03 | gotcha | Four stat cards in a row clip seven-figure rupee totals at 1440 with the sidebar | type: dashboard | logged |
 
 ## Entries
@@ -161,4 +164,28 @@ for the rules.
 - **Lesson:** Ship a contrast audit with the render checks: walk every text node, composite its colour over the real background (alpha and opacity included), and flag below 4.5:1 (3:1 for large text) in light and dark. When a chosen brand colour fails as text, keep it as the fill and add an `-ink` text token rather than changing the palette.
 - **Scope:** all
 - **Target in skill:** small-business-ledger-app references/verifying-ui.md; anti-slop gate
+- **Status:** logged
+
+### L-017 · 2026-10-04 · strong · gotcha
+- **Said / saw:** plan called for "cartons per product over time (stacked bar)", "stock by category donut in units" and a material-use line; finished goods are ctn, roll and bdl, raw materials pcs, kg and m
+- **Context:** phase 5 charts, AM Packaging
+- **Lesson:** In an inventory with mixed units, a chart never adds quantities across units. Chart one category or material at a time (pills or a picker, unit in the label), and use rupees whenever a chart sums across categories. Say so when this changes a planned chart.
+- **Scope:** type: dashboard
+- **Target in skill:** references/types/dashboard.md (charts); small-business-ledger-app
+- **Status:** logged
+
+### L-018 · 2026-10-04 · medium · gotcha
+- **Said / saw:** first render of daily Sales vs Purchases as monotone areas showed smooth hills between single invoices; material use as lines curved between run days
+- **Context:** dashboard and Reports, sparse daily data
+- **Lesson:** Totals per day, week or month are columns. Lines only for continuous measures. If a line is needed, use linear segments, not monotone curves.
+- **Scope:** all
+- **Target in skill:** dataviz choosing-a-form (period totals)
+- **Status:** logged
+
+### L-019 · 2026-10-04 · medium · gap
+- **Said / saw:** the first profit report showed a tape carton costing Rs 37,900 to make against a Rs 4,800 price; the demo recipe used 3,950 m of jumbo roll per carton
+- **Context:** phase 5, demo data built in phase 3
+- **Lesson:** Sanity-check demo numbers against the domain (cost vs price, material per unit) when seeding, and treat the first profit or margin report as a data check.
+- **Scope:** type: dashboard
+- **Target in skill:** small-business-ledger-app (demo data)
 - **Status:** logged

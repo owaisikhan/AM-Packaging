@@ -39,7 +39,7 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
   and figures and saying what to do next.
 - **Migrations are append-only.** Never edit one that has been applied to the
   live project; add a new numbered file. (None are applied yet as of
-  2026-10-03, so 0001 to 0006 can still be edited.)
+  2026-10-03, so 0001 to 0007 can still be edited.)
 - **Nothing is deleted from the ledger.** Purchases, sales and production
   runs are voided (admin, with a reason), which writes reversing stock entries.
 - **Supplier money is admin-only** (balances, ledger, payments, voiding).
@@ -52,7 +52,7 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
   `requireRole` in pages and actions the second, hidden nav links cosmetic.
 - **Demo mode:** with no Supabase env vars the app runs on
   `app/_lib/demo-data.js` and saving is off. Keep demo rows shaped exactly like
-  the real query rows.
+  the real query rows. `DEMO_ROLE=worker` shows it as a worker.
 - Design language follows the reference site exactly: tokens and component
   classes in `app/_styles/globals.css`. Do not add features from the
   reference that the client did not ask for.
@@ -63,6 +63,8 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 - UI: `StatCard`, `Badge`, `FilterBar` (filters as query strings), `Pagination`, `EmptyState`, `FormMessage`, `SubmitButton`, `MoneyRow`, `ReasonDialog` (void with a reason; pass icons as elements, not components).
 - Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `PaymentForm` and `PaymentsTable` (both take `kind="supplier" | "customer"`), `ProductionForm`, `RunStatus`, `SaleForm`, `SalesTable` (with `OverduePill`), `CustomerForm`, `SupplierForm`.
 - Print: `PrintButton` and the `.invoice-sheet` / `no-print` classes.
+- Charts (`app/_components/charts/`): `ChartFrame` (card with Chart / Table toggle), `ColumnChart`, `TrendChart`, `DonutChart`, `RankBars`, `StackBar`; shape rows with `periodView` in `app/_lib/chart-data.js`. Load the `dataviz` skill before adding a chart. Never sum quantities across units.
+- Reports: `app/_lib/reports.js` builds each tab for both the page and the CSV; `demo-reports.js` mirrors `0007_reports.sql` for demo mode.
 - Formatting: `format-helpers.js` (money as "Rs 1,250", `amountInWords` in lakh/crore), `date-helpers.js` (Asia/Karachi).
 
 ## Verifying a change

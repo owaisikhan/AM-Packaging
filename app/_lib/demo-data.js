@@ -137,7 +137,7 @@ export const demoActivity = [
   { id: 407, created_at: "2026-10-01T09:00:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "adjusted", module: "stock", record_id: "7", record_label: "Tape 46mm x 72yd 40 mic Clear (ctn)", summary: "Ahmed Munir adjusted stock of Tape 46mm x 72yd 40 mic Clear (ctn) by -2 (reason: Two cartons water damaged)", changes: { after: { qty: -2, type: "adjustment", note: "Two cartons water damaged" } } },
   { id: 406, created_at: "2026-09-30T14:30:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "voided", module: "purchase", record_id: "pu-6", record_label: "PUR-00006", summary: "Ahmed Munir voided purchase PUR-00006 from Pak Box Industries (Pvt) Ltd (Rs 34,400), reason: Entered twice, see PUR-00007", changes: { status: { from: "posted", to: "void" }, void_reason: { from: "", to: "Entered twice, see PUR-00007" } } },
   { id: 405, created_at: "2026-09-30T10:00:00Z", user_id: "demo-w1", actor_name: "Ali Raza", action: "created", module: "customer", record_id: "cus-gph", record_label: "Gujranwala Packaging House", summary: "Ali Raza created customer Gujranwala Packaging House", changes: { after: { name: "Gujranwala Packaging House", phone: "0300 1234567", opening_balance: 0 } } },
-  { id: 404, created_at: "2026-09-29T08:15:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "created", module: "recipe", record_id: "rc1", record_label: "Tape 46mm x 72yd 40 mic Clear", summary: "Ahmed Munir created the recipe for Tape 46mm x 72yd 40 mic Clear (per unit: 1 pcs Carton Box 46mm, 3,950 m Jumbo Roll 40 micron Clear, 72 pcs Paper Tube 3 inch, 0.15 kg Shrink Film)", changes: { before: [], after: [{ material: "Carton Box 46mm", qty_per_unit: 1 }, { material: "Jumbo Roll 40 micron Clear", qty_per_unit: 3950 }] } },
+  { id: 404, created_at: "2026-09-29T08:15:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "created", module: "recipe", record_id: "rc1", record_label: "Tape 46mm x 72yd 40 mic Clear", summary: "Ahmed Munir created the recipe for Tape 46mm x 72yd 40 mic Clear (per unit: 1 pcs Carton Box 46mm, 300 m Jumbo Roll 40 micron Clear, 72 pcs Paper Tube 3 inch, 0.15 kg Shrink Film)", changes: { before: [], after: [{ material: "Carton Box 46mm", qty_per_unit: 1 }, { material: "Jumbo Roll 40 micron Clear", qty_per_unit: 300 }] } },
   { id: 403, created_at: "2026-09-28T16:45:00Z", user_id: "demo-admin-2", actor_name: "Usman Ahmed", action: "deleted", module: "settings", record_id: "b-old", record_label: "Local Tubes", summary: "Usman Ahmed deleted brand Local Tubes", changes: { before: { name: "Local Tubes", active: true } } },
   { id: 402, created_at: "2026-09-28T16:40:00Z", user_id: "demo-admin-2", actor_name: "Usman Ahmed", action: "created", module: "user", record_id: "demo-w3", record_label: "Imran Khan", summary: "Usman Ahmed created user Imran Khan as worker", changes: { after: { full_name: "Imran Khan", role: "worker", active: true } } },
   { id: 401, created_at: "2026-09-28T16:00:00Z", user_id: "demo-admin-2", actor_name: "Usman Ahmed", action: "logout", module: "session", record_id: "demo-admin-2", record_label: "Usman Ahmed", summary: "Usman Ahmed signed out", changes: null },
@@ -249,13 +249,13 @@ export function demoSupplierLedger(supplierId, from, to) {
 // ---------------------------------------------------------------
 export const demoRecipes = {
   "i-t-46-72-40c": { notes: "Standard pack, 72 rolls", lines: [
-    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-40c", qty_per_unit: 3950 },
+    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-40c", qty_per_unit: 300 },
     { raw_item_id: "i-pt-star", qty_per_unit: 72 }, { raw_item_id: "i-sf", qty_per_unit: 0.15 }] },
   "i-t-46-70-40b": { notes: "Standard pack, 72 rolls", lines: [
-    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-45b", qty_per_unit: 3840 },
+    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-45b", qty_per_unit: 290 },
     { raw_item_id: "i-pt-star", qty_per_unit: 72 }, { raw_item_id: "i-sf", qty_per_unit: 0.15 }] },
   "i-t-24-72-36c": { notes: "144 rolls per carton", lines: [
-    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-40c", qty_per_unit: 3950 },
+    { raw_item_id: "i-cb-46", qty_per_unit: 1 }, { raw_item_id: "i-jr-40c", qty_per_unit: 300 },
     { raw_item_id: "i-pt-star", qty_per_unit: 144 }, { raw_item_id: "i-sf", qty_per_unit: 0.12 }] },
   "i-sf-500": { notes: "", lines: [{ raw_item_id: "i-g-lldpe", qty_per_unit: 2.6 }] },
   "i-ps-12": { notes: "", lines: [{ raw_item_id: "i-g-pp", qty_per_unit: 10 }] },
@@ -270,7 +270,7 @@ const runSeed = [
   { id: "pr-08", run_no: "PRD-00008", run_date: "2026-09-27", item_id: "i-ps-12", qty_made: 30, by: "Imran Khan", at: "2026-09-27T09:30:00Z" },
   { id: "pr-07", run_no: "PRD-00007", run_date: "2026-09-26", item_id: "i-t-24-72-36c", qty_made: 15, by: "Ali Raza", at: "2026-09-26T10:00:00Z", status: "void", void_reason: "Wrong size picked, re-entered as PRD-00009" },
   { id: "pr-06", run_no: "PRD-00006", run_date: "2026-09-24", item_id: "i-t-60-72-40p", qty_made: 20, by: "Muhammad Bilal Hussain", at: "2026-09-24T10:00:00Z",
-    manual: [{ raw_item_id: "i-jr-40c", qty: 65000 }, { raw_item_id: "i-pt-star", qty: 960 }, { raw_item_id: "i-cb-72", qty: 20 }] },
+    manual: [{ raw_item_id: "i-jr-40c", qty: 3100 }, { raw_item_id: "i-pt-star", qty: 960 }, { raw_item_id: "i-cb-72", qty: 20 }] },
 ];
 
 const r3 = (n) => Math.round(n * 1000) / 1000;

@@ -3,7 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "./supabase-server";
 import { isDemoMode, ROLES } from "./config";
-import { demoProfile } from "./demo-data";
+import { demoProfile, demoProfiles } from "./demo-data";
 
 export { ROLES };
 
@@ -12,7 +12,12 @@ export { ROLES };
  * Cached per request so the layout and the page share one lookup.
  */
 export const getCurrentUser = cache(async () => {
-  if (isDemoMode) return demoProfile;
+  // DEMO_ROLE=worker shows the demo as a worker sees it, for reviewing screens.
+  if (isDemoMode) {
+    if (process.env.DEMO_ROLE !== "worker") return demoProfile;
+    const { created_at: _c, ...worker } = demoProfiles.find((p) => p.role === "worker");
+    return worker;
+  }
 
   const supabase = await createClient();
   const { data: claimsData, error } = await supabase.auth.getClaims();

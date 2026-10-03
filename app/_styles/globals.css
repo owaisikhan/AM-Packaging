@@ -426,6 +426,38 @@ button:not(:disabled),
   }
 }
 
+/* Chart colours (validated with the dataviz palette check, both themes).
+   series: categorical, always in this order; age: ordinal ramp for ageing
+   buckets (newest to oldest); over/under: diverging pair for recipe
+   difference; good/warn/bad: stock status, always with an icon and label. */
+:root {
+  --series-1: #22b573;
+  --series-2: #3b82f6;
+  --series-3: #f59e0b;
+  --age-1: #86b6ef;
+  --age-2: #2a78d6;
+  --age-3: #104281;
+  --div-under: #2a78d6;
+  --div-over: #e34948;
+  --status-good: #0ca30c;
+  --status-warn: #fab219;
+  --status-bad: #d03b3b;
+  --chart-grid: #eef1f4;
+  --chart-axis: #d5dbe1;
+}
+.dark {
+  --series-1: #1a9a60;
+  --series-2: #3b82f6;
+  --series-3: #c98500;
+  --age-1: #256abf;
+  --age-2: #5598e7;
+  --age-3: #b7d3f6;
+  --div-under: #3987e5;
+  --div-over: #e66767;
+  --chart-grid: #2b3a4f;
+  --chart-axis: #3b4a60;
+}
+
 /* Badge colours, light and dark (from the reference) */
 .badge-success { background: #dcfce7; color: #15803d; }
 .badge-warning { background: #fef3c7; color: #b45309; }

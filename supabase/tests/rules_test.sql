@@ -198,3 +198,44 @@ select on_hand as tape_after from item_stock where code='T-46-72-40C';
 select invoice_no, payment_status from sale_list order by invoice_no;
 select status, void_reason from customer_payments order by created_at;
 select balance from customer_balances where name='Faisalabad Traders (Pvt) Ltd';
+
+\echo '=== Phase 5: reports'
+\echo '--- trade series by day, last 3 days (expect a row per day, zeros on quiet days; sales and purchases match the posted totals)'
+select * from report_trade_series(current_date - 2, current_date, 'day');
+select (select coalesce(sum(total),0) from sales where status='posted') as posted_sales,
+       (select sum(sales) from report_trade_series(current_date - 400, current_date, 'month')) as report_sales;
+\echo '--- end before start (expect: the end date is before the start date)'
+select * from report_trade_series(current_date, current_date - 1, 'day');
+\echo '--- admin buys every raw material once so costs are known (expect purchased = t)'
+select post_purchase(jsonb_build_object('supplier_id',(select id from suppliers limit 1),
+  'lines', jsonb_build_array(
+    jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',1000,'rate',12),
+    jsonb_build_object('item_id',(select id from items where code='JR-40C'),'qty',40000,'rate',0.5),
+    jsonb_build_object('item_id',(select id from items where code='SF'),'qty',10,'rate',400),
+    jsonb_build_object('item_id',(select id from items where code='CB-48'),'qty',100,'rate',85)))) is not null as purchased;
+\echo '--- item costs (expect raw = purchase rate: CB-48 85, JR-40C 0.5, PT-3 12, SF 400; tape = materials of all runs / cartons made = 31628 / 30 = 1054.2667, known)'
+select i.code, ic.unit_cost, ic.cost_known from item_costs ic join items i on i.id = ic.item_id order by i.code;
+\echo '--- stock value by category and stock flow by month'
+select category, kind, items, value, unpriced from report_stock_value();
+select * from report_stock_flow(current_date - 31, current_date, 'month');
+\echo '--- top customers, suppliers, products'
+select name, invoices, total from report_top_customers(current_date - 400, current_date);
+select name, bills, total from report_top_suppliers(current_date - 400, current_date);
+select name, unit, qty, amount from report_top_products(current_date - 400, current_date);
+\echo '--- production by category in its own unit, and per product'
+select category, unit, sum(qty) as qty, sum(runs) as runs from report_production_series(current_date - 6, current_date, 'day') group by 1, 2;
+select * from report_production_by_product(current_date - 30, current_date);
+\echo '--- material use and recipe difference'
+select name, unit, sum(used) as used, sum(expected) as expected from report_material_use(current_date - 6, current_date, 'day') group by 1, 2;
+select name, unit, used, expected, difference, difference_pct, runs from report_material_summary(current_date - 30, current_date);
+\echo '--- ageing (expect the receivable buckets to add up to customer_balances, opening balance in Over 60 days)'
+select side, name, bucket, amount from report_ageing();
+select (select sum(amount) from report_ageing() where side='receivable') as aged,
+       (select sum(balance) from customer_balances where balance > 0) as owed;
+\echo '--- profit by month (expect October revenue 28800, cost 6 x 1054.2667 = 6325.60, gross profit 22474.40)'
+select * from report_profit(current_date - 31, current_date, 'month');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b',false);
+\echo '--- worker: production figures allowed (expect rows); money reports refused (expect 2 admin errors)'
+select count(*) > 0 as worker_sees_production from report_production_series(current_date - 6, current_date, 'day');
+select * from report_profit(current_date - 31, current_date, 'month');
+select * from report_ageing();

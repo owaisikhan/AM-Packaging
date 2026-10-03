@@ -83,3 +83,25 @@ export function amountInWords(value) {
   const paisa = n % 100;
   return `Rupees ${wholeToWords(rupees)}${paisa ? ` and ${belowHundred(paisa)} Paisa` : ""} Only`;
 }
+
+const compactFmt = new Intl.NumberFormat("en-PK", { maximumFractionDigits: 1 });
+
+/**
+ * Short figures for chart axes, the way the business counts:
+ * 950 -> "950", 45,000 -> "45K", 4,60,000 -> "4.6 lakh", 1,20,00,000 -> "1.2 crore".
+ */
+export function formatCompact(value) {
+  const n = toNumber(value);
+  const a = Math.abs(n);
+  const sign = n < 0 ? "-" : "";
+  if (a >= 1e7) return `${sign}${compactFmt.format(a / 1e7)} crore`;
+  if (a >= 1e5) return `${sign}${compactFmt.format(a / 1e5)} lakh`;
+  if (a >= 1e3) return `${sign}${compactFmt.format(a / 1e3)}K`;
+  return `${sign}${compactFmt.format(a)}`;
+}
+
+/** "Rs 4.6 lakh" */
+export function formatCompactMoney(value) {
+  const s = formatCompact(value);
+  return s.startsWith("-") ? `-Rs ${s.slice(1)}` : `Rs ${s}`;
+}

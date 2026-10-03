@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "./supabase-server";
 import { isDemoMode } from "./config";
 import * as demo from "./demo-data";
+import * as reports from "./demo-reports";
 
 // Every read query lives in this file. Server-only.
 // In demo mode (no database configured) the same functions answer from the
@@ -279,7 +280,7 @@ export async function getLowStockAlerts() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("item_stock")
-    .select("id, name, on_hand, unit, stock_status, kind")
+    .select("id, name, on_hand, unit, stock_status, kind, low_stock_level")
     .eq("active", true)
     .in("stock_status", ["low", "out"])
     .order("stock_status", { ascending: false })
@@ -779,4 +780,98 @@ export async function getSale(id, { withPayments = false } = {}) {
     })),
     payments: paymentsRes.data ?? [],
   };
+}
+
+// ---------------------------------------------------------------
+// Reports and dashboard charts (0007_reports.sql). Money reports are
+// admin-only in the database; production figures are for all staff.
+// Ranges are ISO dates; grain is "day", "week" or "month".
+// ---------------------------------------------------------------
+
+/** Postgres numerics can arrive as strings; charts need numbers. */
+function numeric(rows, keys) {
+  return (rows ?? []).map((r) => {
+    const out = { ...r };
+    for (const k of keys) if (out[k] !== null && out[k] !== undefined) out[k] = Number(out[k]);
+    return out;
+  });
+}
+
+async function rpcRows(fn, args, what, keys) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(fn, args);
+  if (error) throw new Error(`Could not load ${what}: ${error.message}`);
+  return numeric(data, keys);
+}
+
+export async function getTradeSeries({ from, to, grain = "day" }) {
+  if (isDemoMode) return reports.tradeSeries(from, to, grain);
+  return rpcRows("report_trade_series", { p_from: from, p_to: to, p_grain: grain }, "sales and purchases", ["sales", "purchases"]);
+}
+
+export async function getTopCustomers({ from, to, limit = 10 }) {
+  if (isDemoMode) return reports.topCustomers(from, to, limit);
+  return rpcRows("report_top_customers", { p_from: from, p_to: to, p_limit: limit }, "the top customers", ["total"]);
+}
+
+export async function getTopSuppliers({ from, to, limit = 10 }) {
+  if (isDemoMode) return reports.topSuppliers(from, to, limit);
+  return rpcRows("report_top_suppliers", { p_from: from, p_to: to, p_limit: limit }, "the top suppliers", ["total"]);
+}
+
+export async function getTopProducts({ from, to, limit = 5 }) {
+  if (isDemoMode) return reports.topProducts(from, to, limit);
+  return rpcRows("report_top_products", { p_from: from, p_to: to, p_limit: limit }, "the best-selling products", ["qty", "amount"]);
+}
+
+export async function getProductionSeries({ from, to, grain = "day" }) {
+  if (isDemoMode) return reports.productionSeries(from, to, grain);
+  return rpcRows("report_production_series", { p_from: from, p_to: to, p_grain: grain }, "production figures", ["qty"]);
+}
+
+export async function getProductionByProduct({ from, to }) {
+  if (isDemoMode) return reports.productionByProduct(from, to);
+  return rpcRows("report_production_by_product", { p_from: from, p_to: to }, "production per product", ["qty"]);
+}
+
+export async function getMaterialUse({ from, to, grain = "day" }) {
+  if (isDemoMode) return reports.materialUse(from, to, grain);
+  return rpcRows("report_material_use", { p_from: from, p_to: to, p_grain: grain }, "material use", ["used", "expected"]);
+}
+
+export async function getMaterialSummary({ from, to }) {
+  if (isDemoMode) return reports.materialSummary(from, to);
+  return rpcRows("report_material_summary", { p_from: from, p_to: to }, "material use", ["used", "expected", "difference", "difference_pct"]);
+}
+
+export async function getStockValue() {
+  if (isDemoMode) return reports.stockValue();
+  return rpcRows("report_stock_value", {}, "the stock value", ["value"]);
+}
+
+export async function getStockFlow({ from, to, grain = "month" }) {
+  if (isDemoMode) return reports.stockFlow(from, to, grain);
+  return rpcRows("report_stock_flow", { p_from: from, p_to: to, p_grain: grain }, "stock in and out", ["value_in", "value_out"]);
+}
+
+export async function getAgeing(asOf) {
+  if (isDemoMode) return reports.ageing(asOf);
+  return rpcRows("report_ageing", { p_as_of: asOf }, "the ageing of balances", ["amount"]);
+}
+
+export async function getProfit({ from, to, grain = "month" }) {
+  if (isDemoMode) return reports.profit(from, to, grain);
+  return rpcRows("report_profit", { p_from: from, p_to: to, p_grain: grain }, "the profit report", ["revenue", "cost", "gross_profit"]);
+}
+
+/** Balances for the Receivables & Payables report (largest first). */
+export async function getPartyBalances(side, limit = 10) {
+  if (isDemoMode) {
+    const rows = side === "customer" ? demo.demoCustomerBalances : demo.demoSupplierBalances;
+    return rows.filter((r) => r.balance > 0).sort((a, b) => b.balance - a.balance).slice(0, limit).map(({ id, name, balance }) => ({ id, name, balance }));
+  }
+  const supabase = await createClient();
+  const view = side === "customer" ? "customer_balances" : "supplier_balances";
+  const data = unwrap(await supabase.from(view).select("id, name, balance").gt("balance", 0).order("balance", { ascending: false }).limit(limit), "the balances");
+  return numeric(data, ["balance"]);
 }

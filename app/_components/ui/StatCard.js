@@ -17,7 +17,7 @@ const VALUE_TONES = {
 
 // Count card from the reference list pages: tinted icon tile, small caps
 // label, big figure. The figure never wraps.
-export default function StatCard({ icon: Icon, label, value, tone = "primary", valueTone }) {
+export default function StatCard({ icon: Icon, label, value, tone = "primary", valueTone, note }) {
   return (
     <div className="stat-card max-sm:flex-col max-sm:items-start max-sm:gap-3 max-sm:p-4">
       <span className={clsx("stat-icon max-sm:h-10 max-sm:w-10 max-sm:rounded-xl", TONES[tone])}>
@@ -28,6 +28,7 @@ export default function StatCard({ icon: Icon, label, value, tone = "primary", v
         <p className={clsx("num text-[21px] font-bold leading-tight sm:text-[26px]", VALUE_TONES[valueTone ?? tone] ?? VALUE_TONES.plain)}>
           {value}
         </p>
+        {note ? <p className="mt-0.5 text-xs text-secondary">{note}</p> : null}
       </div>
     </div>
   );

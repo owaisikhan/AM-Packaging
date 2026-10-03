@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-10-04: Phase 5 (dashboard charts and reports)
+
+- Database (`0007_reports.sql`): `item_costs` view (raw: average purchase
+  rate; product: average material cost per unit over its runs), and report
+  functions for sales and purchases per period, top customers, suppliers
+  and products, production per category, material use against the recipe,
+  stock value and stock in/out, ageing of balances (payments clear the
+  oldest bills first; opening balances count as over 60 days) and gross
+  profit. Money reports are admin-only; production figures are for all
+  staff. Quiet days come back as zero rows. Tests cover the figures and
+  the role checks.
+- Dashboard: KPI cards for today (sales, purchases, production runs, money
+  to receive; workers see production and stock), Sales vs Purchases with
+  Daily / Weekly / Monthly pills, a This month card, Production output per
+  category, a Stock health donut, Top 5 products and stock alerts with
+  meters against the low-stock level. Workers see no money.
+- Reports page: seven tabs, a period filter (presets or dates, group by
+  day, week or month), stat cards, charts with a Table view, and a CSV
+  download of the same tables.
+- Deviations from the plan, because units differ (ctn, roll, bdl, kg, m):
+  production is charted per category, material use one material at a time,
+  and stock by category in rupees as bars (eight categories is too many for
+  a donut). The dashboard donut shows stock health (in, low, out) instead.
+- Demo data: the tape recipes used 3,950 m of jumbo roll per carton, which
+  made a carton cost more than it sells for. Now 290 to 300 m, matching a
+  1,270 mm jumbo slit into 46 mm strips.
+- `DEMO_ROLE=worker` shows the demo as a worker sees it.
+- Removed the unused `ComingSoon` placeholder.
+
 ## 2026-10-03: Dark mode and readability fixes
 
 - Dark mode: the open list of a select was white with light text on Windows

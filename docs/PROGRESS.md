@@ -13,12 +13,16 @@
       invoice with amount in words, customer list, add, edit, ledger,
       payments received, void). Workers can enter cash taken at the counter
       on a new invoice; other customer money is admin-only.
+- [x] Phase 5: Dashboard charts (sales vs purchases daily/weekly/monthly,
+      production output per category, stock health, top products, stock
+      alerts with meters) and Reports (sales, purchases, production, raw
+      material use vs recipe, stock value and flow, receivables and
+      payables with ageing, gross profit), each with a table view and CSV.
 
 ## Next
 
-- [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0006,
+- [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0007,
       create the first admin, set the env vars on Vercel (region bom1).
-- [ ] Phase 5: Dashboard charts and Reports (load the `dataviz` skill first).
 - [ ] Phase 6: polish pass, docs.
 
 ## Reminders

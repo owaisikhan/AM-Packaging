@@ -44,6 +44,7 @@ RLS, password sign-in), Vercel. Deploy region `bom1` beside Supabase
 ```bash
 npm install
 npm run dev          # with no .env.local: demo mode on sample data
+DEMO_ROLE=worker npm run dev   # the demo as a worker sees it
 ```
 
 To connect a database:

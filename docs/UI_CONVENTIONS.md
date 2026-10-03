@@ -75,6 +75,38 @@ Font: Inter (next/font). Radius 8/12/16/20. Shadows are soft and rare.
   until the person edits them; show "Recipe: X", "In stock: Y", and warn
   in words ("1.5 over recipe", "Only 140 in stock") before saving.
 
+## Charts (dashboard and Reports)
+
+Built with the `dataviz` skill; components in `app/_components/charts/`.
+
+- **Colours by job, from tokens in `globals.css`**, validated with the dataviz
+  palette check against the card colour in both themes:
+  - Series, always in this order: `--series-1` green, `--series-2` blue,
+    `--series-3` amber (sales and revenue are green, purchases and cost
+    blue, everywhere).
+  - Ageing buckets: `--age-1..3`, one blue from light to dark.
+  - Recipe difference: `--div-under` blue / `--div-over` red.
+  - Stock status: `--status-good/warn/bad`, always with an icon and a word.
+- **Never add quantities across units.** Cartons, rolls, bundles, kg and
+  metres are shown one category or material at a time (pills or a picker).
+  Anything summed across categories is in rupees.
+- **One axis.** Revenue, cost and gross profit share one rupee axis; never
+  a second y-axis.
+- **Totals per day, week or month are columns**, not smooth lines: a curve
+  between two days invents values that never happened.
+- **Ranked lists and part-to-whole are HTML** (`RankBars`, `StackBar`): the
+  name and figure in text, a thin bar under it. Long names wrap on phones
+  and nothing needs a hover.
+- Every chart card (`ChartFrame`) has a **Chart / Table** toggle with the
+  same figures, a legend for two or more series, an empty-state sentence,
+  and text in text colours (never the series colour).
+- Bars at most 24px, 4px rounded tops; lines 2px; hairline solid grid.
+- Axis money is short and local ("Rs 4.6 lakh", `formatCompactMoney`);
+  tooltips and tables show whole rupees.
+- Reports: tabs as links, one filter row (period presets, dates, group by)
+  above everything it scopes; the CSV download is built from the same
+  tables as the page (`app/_lib/reports.js`).
+
 ## Rules that do not bend
 
 - Money and quantities use `.num` (no wrap, tabular figures) and always carry
