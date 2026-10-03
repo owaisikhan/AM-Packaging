@@ -4,12 +4,12 @@ import clsx from "clsx";
 export default function MoneyRow({ label, children, strong = false, tone, className }) {
   return (
     <div className={clsx("flex items-baseline justify-between gap-4", strong ? "py-1" : "", className)}>
-      <span className={strong ? "text-base font-bold text-heading" : "text-sm text-muted"}>{label}</span>
+      <span className={strong ? "text-base font-bold text-heading" : "text-sm text-secondary"}>{label}</span>
       <span
         className={clsx(
           "num text-right",
           strong ? "text-xl font-extrabold" : "text-sm font-semibold",
-          tone === "primary" ? "text-primary" : tone === "danger" ? "text-danger" : "text-heading",
+          tone === "primary" ? "text-primary-ink" : tone === "danger" ? "text-danger-ink" : "text-heading",
         )}
       >
         {children}

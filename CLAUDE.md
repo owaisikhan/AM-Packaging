@@ -20,7 +20,8 @@ money and quantities never wrap, colour never the only signal.
 
 Palette exceptions: Inter as the only typeface, green #22B573 primary and the
 green gradient dashboard banner. All come from the reference design the user
-chose (invenza-html.vercel.app); do not "fix" them.
+chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
+`text-primary-ink` / `text-danger-ink` (the fills are too faint as text).
 
 ## Ground rules
 

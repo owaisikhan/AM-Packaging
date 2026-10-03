@@ -59,7 +59,7 @@ export default async function SettingsPage({ searchParams }) {
                 href={`/admin/settings?tab=${t.key}`}
                 aria-current={t.key === tab.key ? "page" : undefined}
                 className={`-mb-px flex min-h-[48px] items-center border-b-2 px-4 text-sm font-medium transition-colors ${
-                  t.key === tab.key ? "border-primary font-semibold text-primary" : "border-transparent text-muted hover:text-text"
+                  t.key === tab.key ? "border-primary font-semibold text-primary-ink" : "border-transparent text-muted hover:text-text"
                 }`}
               >
                 {t.label}

@@ -47,7 +47,7 @@ export default function LoginForm({ next, demo }) {
         <LogIn size={18} aria-hidden /> Sign in
       </SubmitButton>
       {demo ? (
-        <p className="rounded-xl border border-[#b7e4cc] bg-primary-light px-4 py-3 text-center text-sm text-primary-dark dark:border-[#1d5c3e] dark:text-primary">
+        <p className="rounded-xl border border-[#b7e4cc] bg-primary-light px-4 py-3 text-center text-sm text-primary-ink dark:border-[#1d5c3e]">
           Demo mode: no database is connected. Press Sign in to look around with sample data.
         </p>
       ) : null}

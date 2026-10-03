@@ -26,7 +26,7 @@ export default function AdjustStockForm({ items, initialItem, today }) {
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label htmlFor="item_id" className="form-label">
-              Item<span className="ml-0.5 text-danger">*</span>
+              Item<span className="ml-0.5 text-danger-ink">*</span>
             </label>
             <select id="item_id" name="item_id" value={itemId} onChange={(e) => setItemId(e.target.value)} required className="form-select">
               <option value="">Pick an item</option>
@@ -61,7 +61,7 @@ export default function AdjustStockForm({ items, initialItem, today }) {
                   <input type="radio" name="type" value={o.v} checked={type === o.v} onChange={() => setType(o.v)} className="mt-1 accent-[var(--color-primary)]" />
                   <span>
                     <span className="block text-sm font-semibold text-heading">{o.t}</span>
-                    <span className="block text-xs text-muted">{o.d}</span>
+                    <span className="block text-xs text-secondary">{o.d}</span>
                   </span>
                 </label>
               ))}
@@ -80,7 +80,7 @@ export default function AdjustStockForm({ items, initialItem, today }) {
 
           <div>
             <label htmlFor="qty" className="form-label">
-              Quantity{item ? ` (${item.unit})` : ""}<span className="ml-0.5 text-danger">*</span>
+              Quantity{item ? ` (${item.unit})` : ""}<span className="ml-0.5 text-danger-ink">*</span>
             </label>
             <input id="qty" name="qty" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} required placeholder="e.g. 120" className="form-input" />
           </div>
@@ -91,7 +91,7 @@ export default function AdjustStockForm({ items, initialItem, today }) {
           <div className="sm:col-span-2">
             <label htmlFor="note" className="form-label">
               {type === "adjustment" ? "Reason" : "Note"}
-              {type === "adjustment" ? <span className="ml-0.5 text-danger">*</span> : null}
+              {type === "adjustment" ? <span className="ml-0.5 text-danger-ink">*</span> : null}
             </label>
             <input
               id="note"
@@ -114,19 +114,19 @@ export default function AdjustStockForm({ items, initialItem, today }) {
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-muted">This entry</dt>
-              <dd className={`num font-semibold ${signed < 0 ? "text-danger" : "text-primary"}`}>
+              <dd className={`num font-semibold ${signed < 0 ? "text-danger-ink" : "text-primary-ink"}`}>
                 {item && signed !== 0 ? `${signed > 0 ? "+" : "-"}${formatQty(Math.abs(signed))} ${item.unit}` : "None"}
               </dd>
             </div>
             <div className="flex justify-between gap-3 border-t border-border pt-3">
               <dt className="font-semibold text-heading">After saving</dt>
-              <dd className={`num text-lg font-bold ${after !== null && after < 0 ? "text-danger" : "text-primary"}`}>
+              <dd className={`num text-lg font-bold ${after !== null && after < 0 ? "text-danger-ink" : "text-primary-ink"}`}>
                 {after !== null ? `${formatQty(after)} ${item.unit}` : "None"}
               </dd>
             </div>
           </dl>
           {after !== null && after < 0 ? (
-            <p className="mt-3 text-xs font-medium text-danger">Stock cannot go below zero. Lower the quantity.</p>
+            <p className="mt-3 text-xs font-medium text-danger-ink">Stock cannot go below zero. Lower the quantity.</p>
           ) : null}
         </div>
         <FormMessage state={state} />

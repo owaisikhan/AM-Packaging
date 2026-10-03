@@ -76,7 +76,7 @@ export default function SalesTable({ rows, total, page, perPage, params, isAdmin
             {rows.map((r) => (
               <tr key={r.id} className={r.status === "void" ? "opacity-60" : ""}>
                 <td className="whitespace-nowrap">
-                  <Link href={`/admin/sales/${r.id}`} className="font-mono font-semibold text-heading hover:text-primary">
+                  <Link href={`/admin/sales/${r.id}`} className="font-mono font-semibold text-heading hover:text-primary-ink">
                     {r.invoice_no}
                   </Link>
                   {r.due_date ? <div className="text-xs text-muted">Due {formatDate(r.due_date)}</div> : null}

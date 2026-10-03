@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-03: Dark mode and readability fixes
+
+- Dark mode: the open list of a select was white with light text on Windows
+  (user report with screenshot). Options now get a solid dark background,
+  and use the app's own font (Inter, 16px, medium) in both themes.
+- A contrast check now measures every piece of text on every page in both
+  themes. It found the reference green (#22B573) used as text at 2.65:1 and
+  red (#EF4444) at 3.8:1, below the 4.5:1 minimum. Green and red stay as
+  fills (buttons, banner, icons); words and figures now use the `primary-ink`
+  (#15803D, bright green in dark) and `danger-ink` (#DC2626, light red in
+  dark) tokens. The red fill moved to #DC2626 so white button text passes.
+  White text on the green buttons (2.65:1) is unchanged: it is the
+  reference design the user chose.
+- "New customer" on New Invoice and "New supplier" on New Purchase open in
+  the same tab (user: "i dont want that" new tab). Saving goes straight back
+  to the form with the new customer or supplier picked.
+
 ## 2026-10-03: Phase 4 (sales, invoices and customers)
 
 - Decision: workers can enter the cash a customer pays when they make the

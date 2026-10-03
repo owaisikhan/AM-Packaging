@@ -73,7 +73,7 @@ export default async function Dashboard({ searchParams }) {
           <Link href="/admin/stock" className="inline-flex min-h-[40px] items-center gap-2 rounded-[10px] border border-white/25 bg-white/10 px-4 text-[13px] font-medium text-white hover:bg-white/20">
             <Boxes size={15} aria-hidden /> View stock
           </Link>
-          <Link href="/admin/stock?status=low" className="inline-flex min-h-[40px] items-center gap-2 rounded-[10px] border border-white bg-white px-4 text-[13px] font-bold text-primary shadow-sm hover:-translate-y-px">
+          <Link href="/admin/stock?status=low" className="inline-flex min-h-[40px] items-center gap-2 rounded-[10px] border border-white bg-white px-4 text-[13px] font-bold text-[#15803d] shadow-sm hover:-translate-y-px">
             <TriangleAlert size={15} aria-hidden /> Low stock
           </Link>
         </div>
@@ -89,7 +89,7 @@ export default async function Dashboard({ searchParams }) {
       <div className="card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fee2e2] text-danger dark:bg-[#450a0a]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fee2e2] text-danger-ink dark:bg-[#450a0a]">
               <TriangleAlert size={18} aria-hidden />
             </span>
             <div>
@@ -97,7 +97,7 @@ export default async function Dashboard({ searchParams }) {
               <p className="text-xs text-muted">Items at or below their low-stock level</p>
             </div>
           </div>
-          <Link href="/admin/stock?status=low" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+          <Link href="/admin/stock?status=low" className="inline-flex items-center gap-1 text-sm font-semibold text-primary-ink hover:underline">
             View all <ArrowRight size={15} aria-hidden />
           </Link>
         </div>

@@ -81,7 +81,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
                 <p className="mt-1 flex items-center gap-2 font-semibold text-heading">
                   <Truck size={16} className="text-muted" aria-hidden />
                   {isAdmin ? (
-                    <Link href={`/admin/suppliers/${p.supplier_id}`} className="hover:text-primary">{p.supplier_name}</Link>
+                    <Link href={`/admin/suppliers/${p.supplier_id}`} className="hover:text-primary-ink">{p.supplier_name}</Link>
                   ) : (
                     p.supplier_name
                   )}
@@ -105,7 +105,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
               {lines.map((l) => (
                 <li key={l.id} className="flex items-start justify-between gap-3 px-5 py-4">
                   <span className="min-w-0">
-                    <Link href={`/admin/stock/${l.item_id}`} className="block font-semibold text-heading hover:text-primary">{l.item_name}</Link>
+                    <Link href={`/admin/stock/${l.item_id}`} className="block font-semibold text-heading hover:text-primary-ink">{l.item_name}</Link>
                     <span className="num block text-xs text-muted">
                       {formatQty(l.qty)} {l.unit} x {money(l.rate)}
                     </span>
@@ -130,7 +130,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
                     <tr key={l.id}>
                       <td className="text-sm text-muted">{i + 1}</td>
                       <td>
-                        <Link href={`/admin/stock/${l.item_id}`} className="font-semibold text-heading hover:text-primary">{l.item_name}</Link>
+                        <Link href={`/admin/stock/${l.item_id}`} className="font-semibold text-heading hover:text-primary-ink">{l.item_name}</Link>
                         {l.brand_name ? <div className="text-xs text-muted">{l.brand_name}</div> : null}
                       </td>
                       <td className="num text-right">{formatQty(l.qty)} <span className="text-xs text-muted">{l.unit}</span></td>

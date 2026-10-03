@@ -20,7 +20,7 @@ function MovementNote({ m }) {
   const base = REF_PATHS[m.ref_table];
   if (base && m.ref_id) {
     return (
-      <Link href={`${base}/${m.ref_id}`} className="font-mono font-semibold text-primary hover:underline">
+      <Link href={`${base}/${m.ref_id}`} className="font-mono font-semibold text-primary-ink hover:underline">
         {m.note || "Open"}
       </Link>
     );
@@ -93,7 +93,7 @@ export default async function StockItemPage({ params, searchParams }) {
 
         <div className="card overflow-hidden">
           <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-light text-primary">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-light text-primary-ink">
               <History size={18} aria-hidden />
             </span>
             <div>
@@ -119,7 +119,7 @@ export default async function StockItemPage({ params, searchParams }) {
                           {formatDate(m.movement_date)} · {m.actor_name}
                         </span>
                       </span>
-                      <span className={`num shrink-0 text-base font-bold ${qty > 0 ? "text-primary" : "text-danger"}`}>
+                      <span className={`num shrink-0 text-base font-bold ${qty > 0 ? "text-primary-ink" : "text-danger-ink"}`}>
                         {qty > 0 ? "+" : "-"}
                         {formatQty(Math.abs(qty))} <span className="text-xs font-medium text-muted">{item.unit}</span>
                       </span>
@@ -149,7 +149,7 @@ export default async function StockItemPage({ params, searchParams }) {
                           </td>
                           <td><MovementType type={m.type} /></td>
                           <td className="min-w-[180px] text-sm text-secondary"><MovementNote m={m} /></td>
-                          <td className={`num text-right text-[15px] font-bold ${qty > 0 ? "text-primary" : "text-danger"}`}>
+                          <td className={`num text-right text-[15px] font-bold ${qty > 0 ? "text-primary-ink" : "text-danger-ink"}`}>
                             {qty > 0 ? "+" : "-"}
                             {formatQty(Math.abs(qty))} <span className="text-xs font-medium text-muted">{item.unit}</span>
                           </td>

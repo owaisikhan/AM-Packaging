@@ -158,7 +158,7 @@ export default function Header({ user, alerts, alertCount }) {
               <Link
                 href="/admin/stock?status=low"
                 onClick={() => setMenu(null)}
-                className="block border-t border-border px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-background"
+                className="block border-t border-border px-4 py-3 text-center text-sm font-semibold text-primary-ink hover:bg-background"
               >
                 View all low stock
               </Link>
@@ -174,7 +174,7 @@ export default function Header({ user, alerts, alertCount }) {
             aria-expanded={menu === "user"}
             aria-label="Account menu"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary-ink">
               {initials(user.full_name)}
             </span>
             <span className="hidden flex-col text-left leading-tight md:flex">

@@ -33,7 +33,7 @@ export default function Sidebar({ user, appName, appTagline }) {
           </span>
           <span className="sidebar-label flex min-w-0 flex-col border-l border-border pl-3 leading-tight">
             <span className="text-[17px] font-bold text-heading">{appName}</span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-primary">{appTagline}</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-primary-ink">{appTagline}</span>
           </span>
         </Link>
 

@@ -19,14 +19,14 @@ export default function UserForm({ profile = null, isSelf = false }) {
       {profile ? <input type="hidden" name="id" value={profile.id} /> : null}
       <div>
         <label htmlFor="full_name" className="form-label">
-          Full name<span className="ml-0.5 text-danger">*</span>
+          Full name<span className="ml-0.5 text-danger-ink">*</span>
         </label>
         <input id="full_name" name="full_name" defaultValue={profile?.full_name} required placeholder="e.g. Ali Raza" className="form-input" />
       </div>
       {profile ? null : (
         <div>
           <label htmlFor="email" className="form-label">
-            Email (they sign in with this)<span className="ml-0.5 text-danger">*</span>
+            Email (they sign in with this)<span className="ml-0.5 text-danger-ink">*</span>
           </label>
           <input id="email" name="email" type="email" required placeholder="e.g. ali@ampackaging.pk" className="form-input" />
         </div>
@@ -34,7 +34,7 @@ export default function UserForm({ profile = null, isSelf = false }) {
       <div>
         <label htmlFor="password" className="form-label">
           {profile ? "New password (leave empty to keep the current one)" : "Password"}
-          {profile ? null : <span className="ml-0.5 text-danger">*</span>}
+          {profile ? null : <span className="ml-0.5 text-danger-ink">*</span>}
         </label>
         <input id="password" name="password" type="text" autoComplete="new-password" minLength={8} required={!profile} placeholder="At least 8 characters" className="form-input" />
       </div>

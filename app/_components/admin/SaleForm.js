@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { Check, ExternalLink, Plus, Trash2, TriangleAlert } from "lucide-react";
+import { Check, Plus, Trash2, TriangleAlert } from "lucide-react";
 import { createSale } from "@/app/_lib/actions";
 import { formatMoney, formatQty } from "@/app/_lib/format-helpers";
 import FormMessage from "@/app/_components/ui/FormMessage";
@@ -21,7 +21,7 @@ function Label({ htmlFor, children, required }) {
   return (
     <label htmlFor={htmlFor} className="form-label">
       {children}
-      {required ? <span className="ml-0.5 text-danger">*</span> : null}
+      {required ? <span className="ml-0.5 text-danger-ink">*</span> : null}
     </label>
   );
 }
@@ -68,8 +68,8 @@ export default function SaleForm({ customers, items, settings, today, initialCus
             <div className="sm:col-span-2">
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="customer_id" required>Customer</Label>
-                <Link href="/admin/customers/new" target="_blank" className="mb-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                  New customer <ExternalLink size={12} aria-hidden />
+                <Link href="/admin/customers/new?from=invoice" className="mb-1.5 inline-flex min-h-[32px] items-center gap-1 text-[13px] font-semibold text-primary-ink hover:underline">
+                  <Plus size={14} aria-hidden /> New customer
                 </Link>
               </div>
               <select id="customer_id" name="customer_id" defaultValue={initialCustomer ?? ""} required className="form-select">
@@ -132,7 +132,7 @@ export default function SaleForm({ customers, items, settings, today, initialCus
                       </p>
                     ) : null}
                     {it && num(r.qty) > Number(it.on_hand) ? (
-                      <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-danger">
+                      <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-danger-ink">
                         <TriangleAlert size={13} aria-hidden /> Only {formatQty(it.on_hand)} {it.unit} in stock
                       </p>
                     ) : null}
@@ -153,7 +153,7 @@ export default function SaleForm({ customers, items, settings, today, initialCus
                     <button
                       type="button"
                       onClick={() => setRows((rs) => (rs.length > 1 ? rs.filter((x) => x.key !== r.key) : [blankRow()]))}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#dc2626]"
+                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
                       aria-label={`Remove row ${i + 1}`}
                     >
                       <Trash2 size={16} aria-hidden />
@@ -198,7 +198,7 @@ export default function SaleForm({ customers, items, settings, today, initialCus
             <div className="border-t border-border pt-4">
               <MoneyRow label="Grand total" strong tone="primary">{formatMoney(grand, { decimals: grand % 1 !== 0 })}</MoneyRow>
             </div>
-            {disc > subtotal ? <p className="text-xs font-medium text-danger">The discount is more than the items total.</p> : null}
+            {disc > subtotal ? <p className="text-xs font-medium text-danger-ink">The discount is more than the items total.</p> : null}
           </div>
         </section>
 

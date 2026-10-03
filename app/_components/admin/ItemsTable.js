@@ -78,7 +78,7 @@ export default function ItemsTable({ rows, total, page, perPage, basePath, param
               return (
                 <tr key={r.id} className={r.active ? "" : "opacity-60"}>
                   <td className="min-w-[220px]">
-                    <Link href={href} className="font-semibold text-heading hover:text-primary">
+                    <Link href={href} className="font-semibold text-heading hover:text-primary-ink">
                       {r.name}
                     </Link>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted">
@@ -102,7 +102,7 @@ export default function ItemsTable({ rows, total, page, perPage, basePath, param
                     <StockStatus status={r.stock_status} />
                   </td>
                   {isAdmin ? (
-                    <td className="num text-right text-sm font-semibold text-primary">
+                    <td className="num text-right text-sm font-semibold text-primary-ink">
                       {Number(r.default_rate) > 0 ? formatMoney(r.default_rate, { decimals: Number(r.default_rate) % 1 !== 0 }) : "None"}
                     </td>
                   ) : null}

@@ -47,7 +47,7 @@ export default function PaymentForm({ kind = "supplier", supplierId, partyId, pu
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="pay-amount" className="form-label">
-            Amount (Rs)<span className="ml-0.5 text-danger">*</span>
+            Amount (Rs)<span className="ml-0.5 text-danger-ink">*</span>
           </label>
           <input
             id="pay-amount"

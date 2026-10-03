@@ -52,7 +52,7 @@ export default function ChangesDialog({ entry, onClose }) {
     >
       <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary-ink">
             <FileSearch size={19} aria-hidden />
           </span>
           <div>
@@ -80,8 +80,8 @@ export default function ChangesDialog({ entry, onClose }) {
               {rows.map((r) => (
                 <tr key={r.field}>
                   <td className="whitespace-nowrap font-medium capitalize text-heading">{humanKey(r.field)}</td>
-                  {isCreate ? null : <td className="break-all text-sm text-danger">{show(r.from)}</td>}
-                  {isDelete ? null : <td className="break-all text-sm font-medium text-primary">{show(r.to)}</td>}
+                  {isCreate ? null : <td className="break-all text-sm text-danger-ink">{show(r.from)}</td>}
+                  {isDelete ? null : <td className="break-all text-sm font-medium text-primary-ink">{show(r.to)}</td>}
                 </tr>
               ))}
             </tbody>

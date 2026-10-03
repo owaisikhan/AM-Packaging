@@ -17,8 +17,8 @@ const money = (n) => formatMoney(n, { decimals: Number(n) % 1 !== 0 });
 
 function BalanceText({ value }) {
   const n = Number(value);
-  if (n > 0) return <span className="text-danger">{money(n)} <span className="text-xs font-semibold">owed</span></span>;
-  if (n < 0) return <span className="text-primary">{money(-n)} <span className="text-xs font-semibold">advance</span></span>;
+  if (n > 0) return <span className="text-danger-ink">{money(n)} <span className="text-xs font-semibold">owed</span></span>;
+  if (n < 0) return <span className="text-primary-ink">{money(-n)} <span className="text-xs font-semibold">advance</span></span>;
   return <span className="text-muted">Settled</span>;
 }
 
@@ -69,7 +69,7 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
 
           <section className="card overflow-hidden">
             <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-light text-primary">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-light text-primary-ink">
                 <BookOpen size={18} aria-hidden />
               </span>
               <div>
@@ -92,7 +92,7 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
                       {e.entry_date ? formatDate(e.entry_date) : "Before"}
                       {e.ref ? ` · ${e.ref}` : ""}
                     </span>
-                    <span className={`num block text-sm font-semibold ${Number(e.credit) > 0 ? "text-primary" : "text-heading"}`}>
+                    <span className={`num block text-sm font-semibold ${Number(e.credit) > 0 ? "text-primary-ink" : "text-heading"}`}>
                       {Number(e.credit) > 0 ? `-${money(e.credit)}` : Number(e.debit) > 0 ? `+${money(e.debit)}` : money(0)}
                     </span>
                   </span>
@@ -118,11 +118,11 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
                       <td className="min-w-[200px]">
                         <span className="block text-sm font-medium text-text">{e.description}</span>
                         {e.sale_id && e.ref ? (
-                          <Link href={`/admin/sales/${e.sale_id}`} className="font-mono text-xs font-semibold text-primary hover:underline">{e.ref}</Link>
+                          <Link href={`/admin/sales/${e.sale_id}`} className="font-mono text-xs font-semibold text-primary-ink hover:underline">{e.ref}</Link>
                         ) : null}
                       </td>
                       <td className="num text-right text-sm text-heading">{Number(e.debit) > 0 ? money(e.debit) : ""}</td>
-                      <td className="num text-right text-sm text-primary">{Number(e.credit) > 0 ? money(e.credit) : ""}</td>
+                      <td className="num text-right text-sm text-primary-ink">{Number(e.credit) > 0 ? money(e.credit) : ""}</td>
                       <td className="num text-right font-bold"><BalanceText value={e.balance} /></td>
                     </tr>
                   ))}
@@ -146,7 +146,7 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
             <div className="flex flex-col gap-2 border-b border-border pb-4 text-sm text-secondary">
               {customer.contact_person ? <p className="font-semibold text-heading">{customer.contact_person}</p> : null}
               {customer.phone ? (
-                <a href={`tel:${customer.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-primary">
+                <a href={`tel:${customer.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-primary-ink">
                   <Phone size={15} aria-hidden /> {customer.phone}
                 </a>
               ) : null}

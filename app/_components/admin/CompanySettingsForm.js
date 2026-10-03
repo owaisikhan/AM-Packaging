@@ -11,7 +11,7 @@ function Field({ label, name, defaultValue, placeholder, hint, required, wide, t
     <div className={wide ? "sm:col-span-2" : ""}>
       <label htmlFor={`set-${name}`} className="form-label">
         {label}
-        {required ? <span className="ml-0.5 text-danger">*</span> : null}
+        {required ? <span className="ml-0.5 text-danger-ink">*</span> : null}
       </label>
       <input id={`set-${name}`} name={name} type={type} defaultValue={defaultValue ?? ""} placeholder={placeholder} required={required} className="form-input" />
       {hint ? <p className="mt-1.5 text-xs text-muted">{hint}</p> : null}

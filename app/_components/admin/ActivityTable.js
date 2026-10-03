@@ -60,7 +60,7 @@ export default function ActivityTable({ rows }) {
                   </td>
                   <td className="whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-bold text-primary">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-bold text-primary-ink">
                         {initials(r.actor_name)}
                       </span>
                       <span className="font-medium text-heading">{r.actor_name}</span>
@@ -73,7 +73,7 @@ export default function ActivityTable({ rows }) {
                   <td className="hidden whitespace-nowrap text-sm text-secondary 2xl:table-cell">{MODULES[r.module] ?? r.module}</td>
                   <td className="min-w-[240px] text-sm text-text">
                     {href ? (
-                      <Link href={href} className="hover:text-primary hover:underline">
+                      <Link href={href} className="hover:text-primary-ink hover:underline">
                         {r.summary}
                       </Link>
                     ) : (

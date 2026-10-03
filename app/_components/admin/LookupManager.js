@@ -74,10 +74,10 @@ function DeleteButton({ table, id, label }) {
     >
       <input type="hidden" name="table" value={table} />
       <input type="hidden" name="id" value={id} />
-      <button type="submit" className="btn-ghost text-danger hover:bg-[#fee2e2] hover:text-[#dc2626]" aria-label={`Delete ${label}`} title="Delete">
+      <button type="submit" className="btn-ghost text-danger-ink hover:bg-[#fee2e2] hover:text-[#dc2626]" aria-label={`Delete ${label}`} title="Delete">
         <Trash2 size={16} aria-hidden />
       </button>
-      {state && !state.ok ? <span className="mt-1 block max-w-xs text-left text-xs text-danger">{state.message}</span> : null}
+      {state && !state.ok ? <span className="mt-1 block max-w-xs text-left text-xs text-danger-ink">{state.message}</span> : null}
     </form>
   );
 }

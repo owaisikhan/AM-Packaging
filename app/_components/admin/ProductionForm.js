@@ -29,7 +29,7 @@ function Label({ htmlFor, children, required }) {
   return (
     <label htmlFor={htmlFor} className="form-label">
       {children}
-      {required ? <span className="ml-0.5 text-danger">*</span> : null}
+      {required ? <span className="ml-0.5 text-danger-ink">*</span> : null}
     </label>
   );
 }
@@ -174,7 +174,7 @@ export default function ProductionForm({ products, rawItems, recipes, today, isA
                       <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">{it?.unit ?? ""}</span>
                     </div>
                     {short ? (
-                      <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-danger">
+                      <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-danger-ink">
                         <TriangleAlert size={13} aria-hidden /> Only {formatQty(it.on_hand)} in stock
                       </p>
                     ) : null}
@@ -183,7 +183,7 @@ export default function ProductionForm({ products, rawItems, recipes, today, isA
                     <button
                       type="button"
                       onClick={() => setRows((rs) => (rs.length > 1 ? rs.filter((x) => x.key !== r.key) : [blankRow()]))}
-                      className="flex h-11 w-11 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#dc2626]"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
                       aria-label={`Remove material ${i + 1}`}
                     >
                       <Trash2 size={16} aria-hidden />
@@ -206,7 +206,7 @@ export default function ProductionForm({ products, rawItems, recipes, today, isA
           <h2 className="card-title border-b border-border pb-4">When you save</h2>
           <div className="mt-4 flex flex-col gap-4 text-sm">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.06em] text-primary">Adds to stock</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.06em] text-primary-ink">Adds to stock</p>
               <p className="mt-1 font-semibold text-heading">
                 {product && madeN > 0 ? (
                   <>
@@ -218,7 +218,7 @@ export default function ProductionForm({ products, rawItems, recipes, today, isA
               </p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.06em] text-danger">Takes out of stock</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.06em] text-danger-ink">Takes out of stock</p>
               {used.length === 0 ? (
                 <p className="mt-1 text-muted">No materials yet</p>
               ) : (

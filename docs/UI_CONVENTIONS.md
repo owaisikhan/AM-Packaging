@@ -58,6 +58,13 @@ Font: Inter (next/font). Radius 8/12/16/20. Shadows are soft and rare.
   (300ms pause, `router.replace` so history is not flooded, focus kept, top
   bar while loading). Selects and dates apply on change. No Apply button; a
   Clear filters button shows when any filter is set.
+- **Text colour vs fill colour**: `text-primary-ink` and `text-danger-ink`
+  for words and figures; `bg-primary` / `bg-danger` for fills. Never put
+  `text-primary` or `text-danger` on text: the fills are too light to read
+  as text on white.
+- **Adding a missing record from inside a form** (New customer, New
+  supplier): a same-tab link with `?from=invoice` or `?from=purchase`;
+  saving returns to the form with the new record picked. No new tabs.
 - **Printable documents** (the invoice): an `article.invoice-sheet` card
   holding the whole document; actions and admin-only panels sit outside it
   in `no-print` wrappers. `PrintButton` calls `window.print()`, and the print

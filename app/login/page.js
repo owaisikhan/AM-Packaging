@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }) {
         </span>
         <span className="flex flex-col border-l border-border pl-3 leading-tight">
           <span className="text-lg font-bold text-heading">{siteConfig.appName}</span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary">{siteConfig.appTagline}</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary-ink">{siteConfig.appTagline}</span>
         </span>
       </div>
 

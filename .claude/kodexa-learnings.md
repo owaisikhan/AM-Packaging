@@ -28,6 +28,9 @@ for the rules.
 | L-010 | 2026-10-03 | gotcha | Never pass an icon component into a client component; pass an element | all | logged |
 | L-011 | 2026-10-03 | correction | Search boxes filter as you type, not on Enter or an Apply button | all | logged |
 | L-012 | 2026-10-03 | choice | Workers may take cash at the counter on a sale; all other customer money admin-only | project | project |
+| L-014 | 2026-10-03 | correction | "Add new X" links inside a form open in the same tab and return with X picked | all | logged |
+| L-015 | 2026-10-03 | gotcha | Dark mode: native select options need a solid background; translucent select fill does not reach them | all | logged |
+| L-016 | 2026-10-03 | gap | Run a measured contrast audit in both themes; brand fills often fail as text | all | logged |
 | L-013 | 2026-10-03 | gotcha | Four stat cards in a row clip seven-figure rupee totals at 1440 with the sidebar | type: dashboard | logged |
 
 ## Entries
@@ -134,4 +137,28 @@ for the rules.
 - **Lesson:** In rupee dashboards with a sidebar, put money StatCards four across only from 1536px (2xl) and two by two below; a clipped-figure check on `.num` elements catches it.
 - **Scope:** type: dashboard
 - **Target in skill:** references/types/dashboard.md; small-business-ledger-app references/verifying-ui.md
+- **Status:** logged
+
+### L-014 · 2026-10-03 · strong · correction
+- **Said / saw:** "when clicked on the new customer button it opens a new tab i dont want that"
+- **Context:** New Invoice form, "New customer" link had target="_blank"
+- **Lesson:** A link to add a missing record from inside a form opens in the same tab, and saving returns to the form with the new record picked (`?from=invoice`, then `?customer=:id`). Never open new tabs in an app for less screen-confident users.
+- **Scope:** all
+- **Target in skill:** references/types/dashboard.md (forms)
+- **Status:** logged
+
+### L-015 · 2026-10-03 · strong · gotcha
+- **Said / saw:** user screenshot: dark mode select opened as a white list with near-white option text (Windows Chrome)
+- **Context:** `.dark .form-select` had a translucent background (rgb 255 255 255 / 0.05); `color-scheme: dark` was set but options still painted white
+- **Lesson:** In dark mode give `select option, select optgroup` a solid background and text colour from the tokens, and set their font to inherit. Screenshots cannot show the open list, so check the computed style of `option` in the render check.
+- **Scope:** all
+- **Target in skill:** references/theming or dark-mode section; verifying-ui
+- **Status:** logged
+
+### L-016 · 2026-10-03 · medium · gap
+- **Said / saw:** "check any other areas which requires fixing" after a dark mode bug; a measured audit found brand green text at 2.65:1 and red at 3.8:1 on 300+ elements
+- **Context:** AM Packaging, both themes
+- **Lesson:** Ship a contrast audit with the render checks: walk every text node, composite its colour over the real background (alpha and opacity included), and flag below 4.5:1 (3:1 for large text) in light and dark. When a chosen brand colour fails as text, keep it as the fill and add an `-ink` text token rather than changing the palette.
+- **Scope:** all
+- **Target in skill:** small-business-ledger-app references/verifying-ui.md; anti-slop gate
 - **Status:** logged

@@ -31,7 +31,7 @@ function TotalRow({ label, children, strong }) {
   return (
     <div className={`flex justify-between gap-4 ${strong ? "border-t border-border pt-3" : ""}`}>
       <span className={strong ? "text-lg font-bold text-heading" : "text-sm text-muted"}>{label}</span>
-      <span className={`num text-right ${strong ? "text-xl font-extrabold text-primary" : "text-sm font-semibold text-heading"}`}>{children}</span>
+      <span className={`num text-right ${strong ? "text-xl font-extrabold text-primary-ink" : "text-sm font-semibold text-heading"}`}>{children}</span>
     </div>
   );
 }
@@ -97,7 +97,7 @@ export default async function InvoicePage({ params, searchParams }) {
       {/* The invoice sheet: this is all that prints */}
       <article className="invoice-sheet card relative mx-auto w-full max-w-[900px] overflow-hidden p-6 sm:p-10">
         {isVoid ? (
-          <div className="pointer-events-none absolute right-8 top-10 rotate-[-12deg] rounded-lg border-4 border-danger px-4 py-1 text-3xl font-black tracking-widest text-danger opacity-80" aria-hidden>
+          <div className="pointer-events-none absolute right-8 top-10 rotate-[-12deg] rounded-lg border-4 border-danger px-4 py-1 text-3xl font-black tracking-widest text-danger-ink opacity-80" aria-hidden>
             VOID
           </div>
         ) : null}
@@ -114,7 +114,7 @@ export default async function InvoicePage({ params, searchParams }) {
             )}
             <div>
               <p className="text-xl font-extrabold leading-tight text-heading">{co.company_name}</p>
-              {co.tagline ? <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary">{co.tagline}</p> : null}
+              {co.tagline ? <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary-ink">{co.tagline}</p> : null}
               <p className="mt-2 max-w-xs text-sm text-secondary">{co.address}</p>
               <p className="text-sm text-secondary">
                 {[co.phone, co.email].filter(Boolean).join(" · ")}
@@ -126,7 +126,7 @@ export default async function InvoicePage({ params, searchParams }) {
           </div>
           <div className="sm:text-right">
             <p className="text-3xl font-extrabold tracking-tight text-heading">INVOICE</p>
-            <p className="font-mono text-lg font-bold text-primary">{s.invoice_no}</p>
+            <p className="font-mono text-lg font-bold text-primary-ink">{s.invoice_no}</p>
           </div>
         </header>
 
@@ -143,7 +143,7 @@ export default async function InvoicePage({ params, searchParams }) {
             <MetaRow label="Invoice no.">{s.invoice_no}</MetaRow>
             <MetaRow label="Invoice date">{formatDate(s.sale_date)}</MetaRow>
             <MetaRow label="Payment due">{s.due_date ? formatDate(s.due_date) : "On receipt"}</MetaRow>
-            {isVoid ? <MetaRow label="Status"><span className="text-danger">Void</span></MetaRow> : null}
+            {isVoid ? <MetaRow label="Status"><span className="text-danger-ink">Void</span></MetaRow> : null}
           </div>
         </section>
 
@@ -192,13 +192,13 @@ export default async function InvoicePage({ params, searchParams }) {
             <TotalRow label="Grand total" strong>{money(s.total)}</TotalRow>
             {isAdmin && !isVoid ? (
               <>
-                <div className="flex justify-between gap-4 rounded-lg bg-primary-light px-3 py-2 text-sm font-semibold text-primary-dark dark:text-primary">
+                <div className="flex justify-between gap-4 rounded-lg bg-primary-light px-3 py-2 text-sm font-semibold text-primary-ink">
                   <span>Amount received</span>
                   <span className="num">{money(s.paid)}</span>
                 </div>
                 <div className="flex justify-between gap-4 px-3 text-sm font-semibold">
                   <span className="text-muted">Balance due</span>
-                  <span className={`num ${left > 0 ? "text-danger" : "text-primary"}`}>{money(left)}</span>
+                  <span className={`num ${left > 0 ? "text-danger-ink" : "text-primary-ink"}`}>{money(left)}</span>
                 </div>
               </>
             ) : null}
@@ -214,7 +214,7 @@ export default async function InvoicePage({ params, searchParams }) {
               </>
             ) : null}
             {co.invoice_footer ? <p className="mt-3 font-medium text-heading">{co.invoice_footer}</p> : null}
-            {isVoid ? <p className="mt-3 font-semibold text-danger">Void: {s.void_reason}</p> : null}
+            {isVoid ? <p className="mt-3 font-semibold text-danger-ink">Void: {s.void_reason}</p> : null}
           </div>
           <div className="text-center">
             <div className="h-12 border-b border-heading" aria-hidden />

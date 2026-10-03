@@ -1,17 +1,17 @@
 import clsx from "clsx";
 
 const TONES = {
-  primary: "bg-[rgb(34_181_115/0.1)] text-primary",
+  primary: "bg-[rgb(34_181_115/0.1)] text-primary-ink",
   info: "bg-[rgb(59_130_246/0.1)] text-info",
   warning: "bg-[rgb(245_158_11/0.1)] text-warning",
-  danger: "bg-[rgb(239_68_68/0.1)] text-danger",
+  danger: "bg-[rgb(239_68_68/0.1)] text-danger-ink",
 };
 
 const VALUE_TONES = {
-  primary: "text-primary",
+  primary: "text-primary-ink",
   info: "text-heading",
   warning: "text-[#b45309] dark:text-warning",
-  danger: "text-danger",
+  danger: "text-danger-ink",
   plain: "text-heading",
 };
 

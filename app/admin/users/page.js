@@ -48,7 +48,7 @@ export default async function UsersPage() {
                   <tr key={p.id} className={p.active ? "" : "opacity-60"}>
                     <td className="min-w-[200px]">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary-ink">
                           {initials(p.full_name)}
                         </span>
                         <span className="font-semibold text-heading">

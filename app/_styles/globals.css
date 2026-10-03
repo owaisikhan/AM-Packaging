@@ -12,6 +12,11 @@
   --color-primary: #22b573;
   --color-primary-dark: #15945a;
   --color-primary-light: #eaf8f1;
+  /* Text shades. The reference green and red are fills (buttons, banner,
+     icons); as text on white they read too faint for older eyes, so words
+     and figures use a deeper shade of the same colour. */
+  --color-primary-ink: #15803d;
+  --color-danger-ink: #dc2626;
 
   --color-background: #f6f8fa;
   --color-surface: #ffffff;
@@ -26,7 +31,7 @@
 
   --color-success: #22b573;
   --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-danger: #dc2626;
   --color-info: #3b82f6;
 
   --radius-sm: 8px;
@@ -60,6 +65,8 @@
   --color-muted: #94a3b8;
   --color-placeholder: #7c8aa0;
   --color-primary-light: #0d2b1d;
+  --color-primary-ink: #22b573;
+  --color-danger-ink: #f87171;
 }
 
 html {
@@ -152,7 +159,7 @@ button:not(:disabled),
   .nav-item:hover { background: var(--color-background); color: var(--color-text); }
   .nav-item[aria-current="page"] {
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-ink);
     font-weight: 600;
   }
 
@@ -328,7 +335,7 @@ button:not(:disabled),
     font-size: 14px; font-weight: 500; line-height: 1.4; white-space: nowrap;
     background: var(--color-danger); color: #fff; border: 1px solid var(--color-danger);
   }
-  .btn-danger:hover:not(:disabled) { background: #dc2626; }
+  .btn-danger:hover:not(:disabled) { background: #b91c1c; }
   .btn-danger:disabled { opacity: 0.55; cursor: not-allowed; }
 
   .btn-ghost {
@@ -433,6 +440,16 @@ button:not(:disabled),
 
 .dark .form-input,
 .dark .form-select { background-color: rgb(255 255 255 / 0.05); }
+/* The open list of a select is drawn by the browser. The see-through box
+   colour above does not reach it, so on Windows it fell back to white with
+   the light dark-mode text on top. Give every option a solid dark ground. */
+.dark select option,
+.dark select optgroup { background-color: var(--color-surface); color: var(--color-text); }
+/* Options read in the app's own type, not the browser's default. */
+select option,
+select optgroup { font-family: inherit; font-size: 16px; font-weight: 500; }
+select option[value=""] { color: var(--color-muted); }
+.dark select option:disabled { color: var(--color-muted); }
 .dark .data-table thead th { background: rgb(255 255 255 / 0.04); }
 .dark .data-table tbody tr:hover { background: rgb(255 255 255 / 0.04); }
 .dark .btn-secondary { background: rgb(255 255 255 / 0.07); }

@@ -8,7 +8,7 @@ export default function ComingSoon({ title, subtitle, phase, points }) {
     <div className="flex flex-col gap-6">
       <PageHeader title={title} subtitle={subtitle} crumbs={[{ label: "Home", href: "/admin" }, { label: title }]} />
       <div className="card flex flex-col items-center px-6 py-14 text-center">
-        <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary">
+        <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary-ink">
           <Hammer size={26} strokeWidth={1.8} aria-hidden />
         </span>
         <p className="text-base font-semibold text-heading">This screen is being built (phase {phase})</p>

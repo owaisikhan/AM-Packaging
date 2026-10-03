@@ -15,8 +15,8 @@ export const metadata = { title: "Customers" };
 
 function Balance({ value }) {
   const n = Number(value);
-  if (n > 0) return <span className="num font-bold text-danger">{formatMoney(n)} <span className="text-xs font-medium">owes you</span></span>;
-  if (n < 0) return <span className="num font-bold text-primary">{formatMoney(-n)} <span className="text-xs font-medium">in advance</span></span>;
+  if (n > 0) return <span className="num font-bold text-danger-ink">{formatMoney(n)} <span className="text-xs font-medium">owes you</span></span>;
+  if (n < 0) return <span className="num font-bold text-primary-ink">{formatMoney(-n)} <span className="text-xs font-medium">in advance</span></span>;
   return <span className="num text-sm text-muted">Settled</span>;
 }
 
@@ -96,7 +96,7 @@ export default async function CustomersPage({ searchParams }) {
                   {list.rows.map((r) => (
                     <tr key={r.id} className={r.active ? "" : "opacity-60"}>
                       <td className="min-w-[220px]">
-                        <Link href={rowHref(r)} className="font-semibold text-heading hover:text-primary">{r.name}</Link>
+                        <Link href={rowHref(r)} className="font-semibold text-heading hover:text-primary-ink">{r.name}</Link>
                         {r.active ? null : <Badge tone="gray" className="ml-2">Inactive</Badge>}
                       </td>
                       <td className="whitespace-nowrap text-sm text-secondary">{r.phone || "None"}</td>

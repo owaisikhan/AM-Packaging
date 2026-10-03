@@ -12,7 +12,7 @@ function Field({ id, label, required, hint, children }) {
     <div>
       <label htmlFor={id} className="form-label">
         {label}
-        {required ? <span className="ml-0.5 text-danger">*</span> : null}
+        {required ? <span className="ml-0.5 text-danger-ink">*</span> : null}
       </label>
       {children}
       {hint ? <p className="mt-1.5 text-xs text-muted">{hint}</p> : null}

@@ -34,14 +34,14 @@ export default function PaymentsTable({ payments, showBill = true, kind = "suppl
                   Against{" "}
                   <Link
                     href={isCustomer ? `/admin/sales/${p.sale_id}` : `/admin/purchases/${p.purchase_id}`}
-                    className="font-mono font-semibold text-primary hover:underline"
+                    className="font-mono font-semibold text-primary-ink hover:underline"
                   >
                     {isCustomer ? p.invoice_no : p.purchase_no}
                   </Link>
                 </p>
               ) : null}
               {p.note ? <p className="text-xs text-muted">{p.note}</p> : null}
-              {isVoid ? <p className="mt-1 text-xs font-medium text-danger">Void: {p.void_reason}</p> : null}
+              {isVoid ? <p className="mt-1 text-xs font-medium text-danger-ink">Void: {p.void_reason}</p> : null}
             </div>
             {isVoid ? (
               <Badge tone="gray">

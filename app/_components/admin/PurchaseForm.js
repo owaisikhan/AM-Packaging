@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { Check, ExternalLink, Info, Plus, Trash2 } from "lucide-react";
+import { Check, Info, Plus, Trash2 } from "lucide-react";
 import { createPurchase } from "@/app/_lib/actions";
 import { formatMoney, formatQty } from "@/app/_lib/format-helpers";
 import FormMessage from "@/app/_components/ui/FormMessage";
@@ -21,7 +21,7 @@ function Label({ htmlFor, children, required }) {
   return (
     <label htmlFor={htmlFor} className="form-label">
       {children}
-      {required ? <span className="ml-0.5 text-danger">*</span> : null}
+      {required ? <span className="ml-0.5 text-danger-ink">*</span> : null}
     </label>
   );
 }
@@ -68,8 +68,8 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
             <div className="sm:col-span-3 lg:col-span-1">
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="supplier_id" required>Supplier</Label>
-                <Link href="/admin/suppliers/new" target="_blank" className="mb-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                  New supplier <ExternalLink size={12} aria-hidden />
+                <Link href="/admin/suppliers/new?from=purchase" className="mb-1.5 inline-flex min-h-[32px] items-center gap-1 text-[13px] font-semibold text-primary-ink hover:underline">
+                  <Plus size={14} aria-hidden /> New supplier
                 </Link>
               </div>
               <select id="supplier_id" name="supplier_id" defaultValue={initialSupplier ?? ""} required className="form-select">
@@ -148,7 +148,7 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
                     <button
                       type="button"
                       onClick={() => setRows((rs) => (rs.length > 1 ? rs.filter((x) => x.key !== r.key) : [blankRow()]))}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#dc2626]"
+                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
                       aria-label={`Remove row ${i + 1}`}
                     >
                       <Trash2 size={16} aria-hidden />
@@ -193,7 +193,7 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
             <div className="border-t border-border pt-4">
               <MoneyRow label="Grand total" strong tone="primary">{formatMoney(grand, { decimals: grand % 1 !== 0 })}</MoneyRow>
             </div>
-            {disc > subtotal ? <p className="text-xs font-medium text-danger">The discount is more than the items total.</p> : null}
+            {disc > subtotal ? <p className="text-xs font-medium text-danger-ink">The discount is more than the items total.</p> : null}
           </div>
         </section>
 

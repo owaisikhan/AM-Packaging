@@ -51,7 +51,7 @@ export default async function ProductionPage({ searchParams }) {
         <StatCard icon={CalendarDays} label="Runs today" value={todays.runs} tone="primary" />
         <StatCard icon={Package} label={`Products made ${period}`} value={totals.products} tone="warning" valueTone="plain" />
         <div className="stat-card col-span-2 max-sm:flex-col max-sm:items-start max-sm:gap-3 max-sm:p-4 xl:col-span-1">
-          <span className="stat-icon bg-[rgb(34_181_115/0.1)] text-primary max-sm:h-10 max-sm:w-10 max-sm:rounded-xl">
+          <span className="stat-icon bg-[rgb(34_181_115/0.1)] text-primary-ink max-sm:h-10 max-sm:w-10 max-sm:rounded-xl">
             <Boxes size={22} strokeWidth={1.8} aria-hidden />
           </span>
           <div className="min-w-0">
@@ -126,7 +126,7 @@ export default async function ProductionPage({ searchParams }) {
                   {list.rows.map((r) => (
                     <tr key={r.id} className={r.status === "void" ? "opacity-60" : ""}>
                       <td className="whitespace-nowrap">
-                        <Link href={`/admin/production/${r.id}`} className="font-mono font-semibold text-heading hover:text-primary">{r.run_no}</Link>
+                        <Link href={`/admin/production/${r.id}`} className="font-mono font-semibold text-heading hover:text-primary-ink">{r.run_no}</Link>
                       </td>
                       <td className="whitespace-nowrap text-sm text-secondary">{formatDate(r.run_date)}</td>
                       <td className="min-w-[180px]">

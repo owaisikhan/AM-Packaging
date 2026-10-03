@@ -15,7 +15,7 @@ export const metadata = { title: "Production run" };
 function Difference({ qty, expected, unit }) {
   if (expected === null || expected === undefined) return <span className="text-sm text-muted">No recipe</span>;
   const d = Math.round((Number(qty) - Number(expected)) * 1000) / 1000;
-  if (d === 0) return <span className="text-sm font-semibold text-primary">On recipe</span>;
+  if (d === 0) return <span className="text-sm font-semibold text-primary-ink">On recipe</span>;
   if (d > 0) return <span className="num text-sm font-semibold text-[#b45309] dark:text-warning">+{formatQty(d)} {unit} over</span>;
   return <span className="num text-sm font-semibold text-info">{formatQty(-d)} {unit} under</span>;
 }
@@ -74,12 +74,12 @@ export default async function ProductionRunPage({ params, searchParams }) {
       <section className="card grid gap-5 p-5 sm:grid-cols-3 sm:p-6">
         <div className="sm:col-span-2">
           <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Product made</p>
-          <Link href={`/admin/stock/${r.item_id}`} className="mt-1 block text-lg font-bold text-heading hover:text-primary">{r.item_name}</Link>
+          <Link href={`/admin/stock/${r.item_id}`} className="mt-1 block text-lg font-bold text-heading hover:text-primary-ink">{r.item_name}</Link>
           <p className="text-sm text-muted">{r.category_name}{r.item_code ? ` · ${r.item_code}` : ""}</p>
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Quantity made</p>
-          <p className={`num mt-1 text-[28px] font-extrabold leading-tight text-primary ${isVoid ? "line-through opacity-60" : ""}`}>
+          <p className={`num mt-1 text-[28px] font-extrabold leading-tight text-primary-ink ${isVoid ? "line-through opacity-60" : ""}`}>
             {formatQty(r.qty_made)} <span className="text-base font-semibold text-muted">{r.unit}</span>
           </p>
         </div>
@@ -95,7 +95,7 @@ export default async function ProductionRunPage({ params, searchParams }) {
           {materials.map((m) => (
             <li key={m.id} className="flex items-start justify-between gap-3 px-5 py-4">
               <span className="min-w-0">
-                <Link href={`/admin/stock/${m.raw_item_id}`} className="block font-semibold text-heading hover:text-primary">{m.item_name}</Link>
+                <Link href={`/admin/stock/${m.raw_item_id}`} className="block font-semibold text-heading hover:text-primary-ink">{m.item_name}</Link>
                 <span className="num block text-xs text-muted">
                   Recipe: {m.expected_qty === null ? "none" : `${formatQty(m.expected_qty)} ${m.unit}`}
                 </span>
@@ -120,7 +120,7 @@ export default async function ProductionRunPage({ params, searchParams }) {
             <tbody>
               {materials.map((m) => (
                 <tr key={m.id}>
-                  <td><Link href={`/admin/stock/${m.raw_item_id}`} className="font-semibold text-heading hover:text-primary">{m.item_name}</Link></td>
+                  <td><Link href={`/admin/stock/${m.raw_item_id}`} className="font-semibold text-heading hover:text-primary-ink">{m.item_name}</Link></td>
                   <td className="num text-right text-secondary">{m.expected_qty === null ? "None" : `${formatQty(m.expected_qty)} ${m.unit}`}</td>
                   <td className="num text-right font-bold text-heading">{formatQty(m.qty)} <span className="text-xs font-medium text-muted">{m.unit}</span></td>
                   <td><Difference qty={m.qty} expected={m.expected_qty} unit={m.unit} /></td>
