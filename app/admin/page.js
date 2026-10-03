@@ -38,7 +38,7 @@ function KpiCard({ icon: Icon, value, label, note, tone, pct, href }) {
       <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${tile}`}>
         <Icon size={21} strokeWidth={1.9} aria-hidden />
       </span>
-      <p className="num mt-4 text-[19px] font-extrabold leading-none tracking-tight text-heading min-[400px]:text-[22px] sm:text-[28px]">{value}</p>
+      <p className="num mt-4 text-[17px] font-extrabold leading-none tracking-tight text-heading min-[360px]:text-[19px] min-[400px]:text-[22px] sm:text-[28px]">{value}</p>
       <p className="mt-2 text-[13px] font-medium uppercase tracking-[0.04em] text-muted">{label}</p>
       {pct !== undefined ? (
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-border" aria-hidden>
@@ -66,7 +66,7 @@ function CardHeader({ icon: Icon, tile, title, subtitle, href, linkLabel }) {
         </div>
       </div>
       {href ? (
-        <Link href={href} className="inline-flex min-h-[36px] items-center gap-1 text-sm font-semibold text-primary-ink hover:underline">
+        <Link href={href} className="inline-flex min-h-[36px] pointer-coarse:min-h-[44px] items-center gap-1 text-sm font-semibold text-primary-ink hover:underline">
           {linkLabel} <ArrowRight size={15} aria-hidden />
         </Link>
       ) : null}
@@ -156,10 +156,10 @@ export default async function Dashboard({ searchParams }) {
           </div>
         </div>
         <div className="relative z-10 flex flex-wrap gap-2.5">
-          <Link href="/admin/stock" className="inline-flex min-h-[40px] items-center gap-2 rounded-[10px] border border-white/25 bg-white/10 px-4 text-[13px] font-medium text-white hover:bg-white/20">
+          <Link href="/admin/stock" className="inline-flex min-h-[40px] pointer-coarse:min-h-[44px] items-center gap-2 rounded-[10px] border border-white/25 bg-white/10 px-4 text-[13px] font-medium text-white hover:bg-white/20">
             <Boxes size={15} aria-hidden /> View stock
           </Link>
-          <Link href="/admin/stock?status=low" className="inline-flex min-h-[40px] items-center gap-2 rounded-[10px] border border-white bg-white px-4 text-[13px] font-bold text-[#15803d] shadow-sm hover:-translate-y-px">
+          <Link href="/admin/stock?status=low" className="inline-flex min-h-[40px] pointer-coarse:min-h-[44px] items-center gap-2 rounded-[10px] border border-white bg-white px-4 text-[13px] font-bold text-[#15803d] shadow-sm hover:-translate-y-px">
             <TriangleAlert size={15} aria-hidden /> Low stock
           </Link>
         </div>
@@ -203,8 +203,8 @@ export default async function Dashboard({ searchParams }) {
               <MoneyRow label="Customers owe you" tone="danger">{formatMoney(receivable.receivable)}</MoneyRow>
               <MoneyRow label="You owe suppliers" tone="danger">{formatMoney(payable.payable)}</MoneyRow>
               <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                <Link href="/admin/customers?owing=1" className="btn-secondary min-h-[40px] flex-1 justify-center text-[13px]">Who owes you</Link>
-                <Link href="/admin/suppliers?owing=1" className="btn-secondary min-h-[40px] flex-1 justify-center text-[13px]">Who you owe</Link>
+                <Link href="/admin/customers?owing=1" className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] flex-1 justify-center text-[13px]">Who owes you</Link>
+                <Link href="/admin/suppliers?owing=1" className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] flex-1 justify-center text-[13px]">Who you owe</Link>
               </div>
             </div>
           </section>
@@ -232,7 +232,7 @@ export default async function Dashboard({ searchParams }) {
                 ["Out of stock", all.out, CircleX, "--status-bad", "/admin/stock?status=out"],
               ].map(([label, n, Icon, color, href]) => (
                 <li key={label}>
-                  <Link href={href} className="flex min-h-[40px] items-center justify-between gap-3 rounded-lg px-2 hover:bg-background">
+                  <Link href={href} className="flex min-h-[40px] pointer-coarse:min-h-[44px] items-center justify-between gap-3 rounded-lg px-2 hover:bg-background">
                     <span className="flex items-center gap-2.5 text-secondary">
                       <span className="h-3 w-3 rounded-[3px]" style={{ background: `var(${color})` }} aria-hidden />
                       <Icon size={16} className="text-muted" aria-hidden />

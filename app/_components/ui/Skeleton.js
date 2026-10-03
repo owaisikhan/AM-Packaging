@@ -14,11 +14,11 @@ import clsx from "clsx";
 //
 // `delay` staggers the sweep. Staggering rows makes a list read as one surface
 // filling in, rather than a grid of things flashing independently.
-export function Skeleton({ className, delay = 0 }) {
+export function Skeleton({ className, delay = 0, style }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <span aria-hidden className={clsx("relative block overflow-hidden rounded-md bg-[var(--color-surface-2)]", className)}>
+    <span aria-hidden style={style} className={clsx("relative block overflow-hidden rounded-md bg-[var(--color-surface-2)]", className)}>
       {/* Always rendered, never conditional: the server cannot know the
           viewer's motion preference, so dropping the element on the client
           causes a hydration mismatch. Under reduced motion it stays parked

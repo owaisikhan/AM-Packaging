@@ -6,7 +6,7 @@ import StatCard from "@/app/_components/ui/StatCard";
 import FilterBar from "@/app/_components/ui/FilterBar";
 import ItemsTable from "./ItemsTable";
 
-const COPY = {
+export const COPY = {
   stock: { title: "Stock", subtitle: "What is in the factory right now, worked out from every purchase, production run and sale.", crumb: "Stock" },
   raw: { title: "Raw Materials", subtitle: "Jumbo rolls, paper tubes, cartons, shrink film and anything else that goes into production.", crumb: "Raw Materials" },
   finished: { title: "Products", subtitle: "Tape cartons, stretch film, plastic strip and any product type you add.", crumb: "Products" },

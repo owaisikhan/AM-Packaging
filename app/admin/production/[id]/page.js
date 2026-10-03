@@ -74,7 +74,7 @@ export default async function ProductionRunPage({ params, searchParams }) {
       <section className="card grid gap-5 p-5 sm:grid-cols-3 sm:p-6">
         <div className="sm:col-span-2">
           <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Product made</p>
-          <Link href={`/admin/stock/${r.item_id}`} className="mt-1 block text-lg font-bold text-heading hover:text-primary-ink">{r.item_name}</Link>
+          <Link href={`/admin/stock/${r.item_id}`} className="tap-inline mt-1 block text-lg font-bold text-heading hover:text-primary-ink">{r.item_name}</Link>
           <p className="text-sm text-muted">{r.category_name}{r.item_code ? ` · ${r.item_code}` : ""}</p>
         </div>
         <div>
@@ -95,7 +95,7 @@ export default async function ProductionRunPage({ params, searchParams }) {
           {materials.map((m) => (
             <li key={m.id} className="flex items-start justify-between gap-3 px-5 py-4">
               <span className="min-w-0">
-                <Link href={`/admin/stock/${m.raw_item_id}`} className="block font-semibold text-heading hover:text-primary-ink">{m.item_name}</Link>
+                <Link href={`/admin/stock/${m.raw_item_id}`} className="tap-inline block font-semibold text-heading hover:text-primary-ink">{m.item_name}</Link>
                 <span className="num block text-xs text-muted">
                   Recipe: {m.expected_qty === null ? "none" : `${formatQty(m.expected_qty)} ${m.unit}`}
                 </span>
@@ -120,7 +120,7 @@ export default async function ProductionRunPage({ params, searchParams }) {
             <tbody>
               {materials.map((m) => (
                 <tr key={m.id}>
-                  <td><Link href={`/admin/stock/${m.raw_item_id}`} className="font-semibold text-heading hover:text-primary-ink">{m.item_name}</Link></td>
+                  <td><Link href={`/admin/stock/${m.raw_item_id}`} className="tap-inline font-semibold text-heading hover:text-primary-ink">{m.item_name}</Link></td>
                   <td className="num text-right text-secondary">{m.expected_qty === null ? "None" : `${formatQty(m.expected_qty)} ${m.unit}`}</td>
                   <td className="num text-right font-bold text-heading">{formatQty(m.qty)} <span className="text-xs font-medium text-muted">{m.unit}</span></td>
                   <td><Difference qty={m.qty} expected={m.expected_qty} unit={m.unit} /></td>

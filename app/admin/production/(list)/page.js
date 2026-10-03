@@ -126,7 +126,7 @@ export default async function ProductionPage({ searchParams }) {
                   {list.rows.map((r) => (
                     <tr key={r.id} className={r.status === "void" ? "opacity-60" : ""}>
                       <td className="whitespace-nowrap">
-                        <Link href={`/admin/production/${r.id}`} className="font-mono font-semibold text-heading hover:text-primary-ink">{r.run_no}</Link>
+                        <Link href={`/admin/production/${r.id}`} className="tap-inline font-mono font-semibold text-heading hover:text-primary-ink">{r.run_no}</Link>
                       </td>
                       <td className="whitespace-nowrap text-sm text-secondary">{formatDate(r.run_date)}</td>
                       <td className="min-w-[180px]">

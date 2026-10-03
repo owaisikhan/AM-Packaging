@@ -51,8 +51,8 @@ export default async function SettingsPage({ searchParams }) {
           </Link>
         }
       />
-      <nav aria-label="Settings sections" className="card overflow-x-auto px-2">
-        <ul className="flex min-w-max">
+      <nav aria-label="Settings sections" className="card px-2">
+        <ul className="flex flex-wrap">
           {TABS.map((t) => (
             <li key={t.key}>
               <Link

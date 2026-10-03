@@ -223,8 +223,20 @@ button:not(:disabled),
 
 /* Tablet and phone: the sidebar is an off-canvas drawer */
 @media (max-width: 1023px) {
-  .app-sidebar { transform: translateX(-100%); box-shadow: none; }
-  html.sidebar-open .app-sidebar { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  /* Closed, the drawer is hidden as well as moved, so its links cannot be
+     reached by Tab or a screen reader; visibility waits for the slide out. */
+  .app-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+    visibility: hidden;
+    transition: transform 0.3s var(--ease-sidebar), visibility 0s linear 0.3s;
+  }
+  html.sidebar-open .app-sidebar {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+    visibility: visible;
+    transition: transform 0.3s var(--ease-sidebar), visibility 0s;
+  }
   html.sidebar-open .sidebar-overlay { display: block; }
   .app-main { margin-left: 0; }
   .app-header { padding: 0 16px; gap: 10px; }
@@ -311,7 +323,7 @@ button:not(:disabled),
 
   .btn-primary {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 42px; padding: 9px 18px; border-radius: 10px;
+    min-height: 44px; padding: 10px 18px; border-radius: 10px;
     font-size: 14px; font-weight: 500; line-height: 1.4; white-space: nowrap;
     background: var(--color-primary); color: #fff; border: 1px solid var(--color-primary);
     transition: background-color 0.15s ease;
@@ -321,7 +333,7 @@ button:not(:disabled),
 
   .btn-secondary {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 42px; padding: 9px 18px; border-radius: 10px;
+    min-height: 44px; padding: 10px 18px; border-radius: 10px;
     font-size: 14px; font-weight: 500; line-height: 1.4; white-space: nowrap;
     background: var(--color-background); color: var(--color-text); border: 1px solid var(--color-border);
     transition: background-color 0.15s ease;
@@ -331,7 +343,7 @@ button:not(:disabled),
 
   .btn-danger {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 42px; padding: 9px 18px; border-radius: 10px;
+    min-height: 44px; padding: 10px 18px; border-radius: 10px;
     font-size: 14px; font-weight: 500; line-height: 1.4; white-space: nowrap;
     background: var(--color-danger); color: #fff; border: 1px solid var(--color-danger);
   }
@@ -340,7 +352,7 @@ button:not(:disabled),
 
   .btn-ghost {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 40px; min-width: 40px; padding: 8px; border-radius: 10px;
+    min-height: 44px; min-width: 44px; padding: 10px; border-radius: 10px;
     color: var(--color-muted); background: transparent; border: 1px solid transparent;
     transition: background-color 0.15s ease, color 0.15s ease;
   }
@@ -525,6 +537,19 @@ select option[value=""] { color: var(--color-muted); }
   width: 100%;
   opacity: 0;
   transition: width 180ms ease-out, opacity 280ms ease-out 160ms;
+}
+
+/* Invoice lines on a narrow phone: tighter cells so the amount fits. */
+@media (max-width: 639px) {
+  .invoice-lines th, .invoice-lines td { padding-left: 8px; padding-right: 8px; }
+}
+
+/* On touch screens a small text link (a breadcrumb, an invoice number, a
+   name in a list) gets a touch area 44px tall without moving anything: the
+   padding grows the area you can tap, the negative margin gives the space
+   back to the layout. */
+@media (pointer: coarse) {
+  .tap-inline { padding: 15px 6px; margin: -15px -6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

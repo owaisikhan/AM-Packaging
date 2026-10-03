@@ -95,7 +95,7 @@ export default async function InvoicePage({ params, searchParams }) {
       </div>
 
       {/* The invoice sheet: this is all that prints */}
-      <article className="invoice-sheet card relative mx-auto w-full max-w-[900px] overflow-hidden p-6 sm:p-10">
+      <article className="invoice-sheet card relative mx-auto w-full max-w-[900px] overflow-hidden p-4 min-[400px]:p-6 sm:p-10">
         {isVoid ? (
           <div className="pointer-events-none absolute right-8 top-10 rotate-[-12deg] rounded-lg border-4 border-danger px-4 py-1 text-3xl font-black tracking-widest text-danger-ink opacity-80" aria-hidden>
             VOID

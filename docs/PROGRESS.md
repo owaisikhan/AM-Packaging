@@ -18,12 +18,14 @@
       alerts with meters) and Reports (sales, purchases, production, raw
       material use vs recipe, stock value and flow, receivables and
       payables with ageing, gross profit), each with a table view and CSV.
+- [x] Phase 6: polish pass. Regression checks (`npm run check`), loading,
+      error and not-found screens, 44px touch targets, phone layouts for
+      Users and Settings, app icon, `no-undef` lint, docs.
 
 ## Next
 
 - [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0007,
       create the first admin, set the env vars on Vercel (region bom1).
-- [ ] Phase 6: polish pass, docs.
 
 ## Reminders
 

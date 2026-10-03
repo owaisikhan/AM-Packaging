@@ -19,13 +19,13 @@ const VALUE_TONES = {
 // label, big figure. The figure never wraps.
 export default function StatCard({ icon: Icon, label, value, tone = "primary", valueTone, note }) {
   return (
-    <div className="stat-card max-sm:flex-col max-sm:items-start max-sm:gap-3 max-sm:p-4">
+    <div className="stat-card max-sm:flex-col max-sm:items-start max-sm:gap-3 max-sm:p-4 max-[400px]:px-3.5">
       <span className={clsx("stat-icon max-sm:h-10 max-sm:w-10 max-sm:rounded-xl", TONES[tone])}>
         <Icon size={22} strokeWidth={1.8} aria-hidden />
       </span>
       <div className="min-w-0">
         <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-muted sm:text-[13px]">{label}</p>
-        <p className={clsx("num text-[21px] font-bold leading-tight sm:text-[26px]", VALUE_TONES[valueTone ?? tone] ?? VALUE_TONES.plain)}>
+        <p className={clsx("num text-[18px] font-bold leading-tight min-[400px]:text-[21px] sm:text-[26px]", VALUE_TONES[valueTone ?? tone] ?? VALUE_TONES.plain)}>
           {value}
         </p>
         {note ? <p className="mt-0.5 text-xs text-secondary">{note}</p> : null}

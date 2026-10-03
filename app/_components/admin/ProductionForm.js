@@ -113,11 +113,11 @@ export default function ProductionForm({ products, rawItems, recipes, today, isA
             </div>
             <div className="flex flex-wrap gap-2">
               {recipe ? (
-                <button type="button" onClick={resetToRecipe} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">
+                <button type="button" onClick={resetToRecipe} className="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
                   <BookOpen size={15} aria-hidden /> Back to recipe
                 </button>
               ) : null}
-              <button type="button" onClick={() => setRows((rs) => [...rs, blankRow()])} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">
+              <button type="button" onClick={() => setRows((rs) => [...rs, blankRow()])} className="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
                 <Plus size={15} aria-hidden /> Add material
               </button>
             </div>

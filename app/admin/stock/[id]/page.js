@@ -20,7 +20,7 @@ function MovementNote({ m }) {
   const base = REF_PATHS[m.ref_table];
   if (base && m.ref_id) {
     return (
-      <Link href={`${base}/${m.ref_id}`} className="font-mono font-semibold text-primary-ink hover:underline">
+      <Link href={`${base}/${m.ref_id}`} className="tap-inline font-mono font-semibold text-primary-ink hover:underline">
         {m.note || "Open"}
       </Link>
     );
@@ -74,7 +74,7 @@ export default async function StockItemPage({ params, searchParams }) {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-6 2xl:grid-cols-[340px_1fr]">
         <div className="card self-start p-5 sm:p-6">
           <p className="text-[13px] font-medium uppercase tracking-[0.04em] text-muted">In stock now</p>
           <p className="num mt-1 text-[34px] font-extrabold leading-tight text-heading">
@@ -107,7 +107,7 @@ export default async function StockItemPage({ params, searchParams }) {
             </EmptyState>
           ) : (
             <>
-              <ul className="divide-y divide-border md:hidden">
+              <ul className="divide-y divide-border xl:hidden">
                 {history.rows.map((m) => {
                   const qty = Number(m.qty);
                   return (
@@ -127,7 +127,7 @@ export default async function StockItemPage({ params, searchParams }) {
                   );
                 })}
               </ul>
-              <div className="hidden overflow-x-auto md:block">
+              <div className="hidden overflow-x-auto xl:block">
                 <table className="data-table">
                   <thead>
                     <tr>

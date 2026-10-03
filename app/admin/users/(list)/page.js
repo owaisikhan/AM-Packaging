@@ -32,7 +32,36 @@ export default async function UsersPage() {
 
       <div className="grid gap-6 2xl:grid-cols-[1fr_380px]">
         <div className="card self-start overflow-hidden">
-          <div className="overflow-x-auto">
+          <ul className="divide-y divide-border md:hidden">
+            {profiles.map((p) => (
+              <li key={p.id} className={`flex flex-col gap-3 px-4 py-4 ${p.active ? "" : "opacity-60"}`}>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary-ink">
+                    {initials(p.full_name)}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-semibold text-heading">
+                      {p.full_name}
+                      {p.id === me.id ? <span className="ml-1.5 text-xs font-medium text-muted">(you)</span> : null}
+                    </span>
+                    <span className="mt-1 flex flex-wrap gap-1.5">
+                      <Badge tone={p.role === "admin" ? "success" : "info"}>{p.role === "admin" ? "Admin" : "Worker"}</Badge>
+                      <Badge tone={p.active ? "success" : "gray"}>{p.active ? "Can sign in" : "Switched off"}</Badge>
+                    </span>
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <Link href={`/admin/activity?user=${p.id}`} className="btn-secondary flex-1 justify-center text-[13px]">
+                    <History size={15} aria-hidden /> Activity
+                  </Link>
+                  <Link href={`/admin/users/${p.id}`} className="btn-secondary flex-1 justify-center text-[13px]">
+                    <Pencil size={14} aria-hidden /> Edit
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto md:block">
             <table className="data-table">
               <thead>
                 <tr>
@@ -66,10 +95,10 @@ export default async function UsersPage() {
                     <td className="hidden whitespace-nowrap text-sm text-secondary xl:table-cell">{formatDate(p.created_at)}</td>
                     <td>
                       <div className="flex justify-end gap-2">
-                        <Link href={`/admin/activity?user=${p.id}`} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">
+                        <Link href={`/admin/activity?user=${p.id}`} className="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
                           <History size={15} aria-hidden /> Activity
                         </Link>
-                        <Link href={`/admin/users/${p.id}`} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">
+                        <Link href={`/admin/users/${p.id}`} className="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
                           <Pencil size={14} aria-hidden /> Edit
                         </Link>
                       </div>

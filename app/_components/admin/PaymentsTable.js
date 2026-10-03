@@ -34,7 +34,7 @@ export default function PaymentsTable({ payments, showBill = true, kind = "suppl
                   Against{" "}
                   <Link
                     href={isCustomer ? `/admin/sales/${p.sale_id}` : `/admin/purchases/${p.purchase_id}`}
-                    className="font-mono font-semibold text-primary-ink hover:underline"
+                    className="tap-inline font-mono font-semibold text-primary-ink hover:underline"
                   >
                     {isCustomer ? p.invoice_no : p.purchase_no}
                   </Link>
@@ -53,7 +53,7 @@ export default function PaymentsTable({ payments, showBill = true, kind = "suppl
                 id={p.id}
                 triggerLabel="Void"
                 icon={<Ban size={16} aria-hidden />}
-                triggerClassName="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]"
+                triggerClassName="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]"
                 title="Void this payment?"
                 warning={`The ${formatMoney(p.amount)} payment stays in the history marked void, and the ${isCustomer ? "customer" : "supplier"}'s balance goes back up by that amount.`}
                 confirmLabel="Void payment"

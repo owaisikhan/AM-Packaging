@@ -174,8 +174,8 @@ export default function LookupManager({ table, rows }) {
             <table className="data-table">
               <thead>
                 <tr>
-                  {display.map((d) => (
-                    <th key={d.label} scope="col">{d.label}</th>
+                  {display.map((d, i) => (
+                    <th key={d.label} scope="col" className={i > 0 ? "hidden sm:table-cell" : ""}>{d.label}</th>
                   ))}
                   <th scope="col" className="text-right">Actions</th>
                 </tr>
@@ -186,9 +186,21 @@ export default function LookupManager({ table, rows }) {
                     <EditRow key={row.id} table={table} fields={fields} row={row} onDone={() => setEditing(null)} />
                   ) : (
                     <tr key={row.id}>
-                      {display.map((d) => (
-                        <td key={d.label} className={d.className}>{d.render(row)}</td>
-                      ))}
+                      {display.map((d, i) =>
+                        i === 0 ? (
+                          <td key={d.label} className={d.className}>
+                            {d.render(row)}
+                            {/* On phones the other columns fold into one line here */}
+                            {display.length > 1 ? (
+                              <span className="mt-0.5 block text-xs font-normal text-muted sm:hidden">
+                                {display.slice(1).map((x) => x.render(row)).filter((v) => v !== null && v !== "").map(String).join(" · ")}
+                              </span>
+                            ) : null}
+                          </td>
+                        ) : (
+                          <td key={d.label} className={`hidden sm:table-cell ${d.className ?? ""}`}>{d.render(row)}</td>
+                        ),
+                      )}
                       <td className="whitespace-nowrap text-right">
                         <button type="button" onClick={() => setEditing(row.id)} className="btn-ghost" aria-label={`Edit ${display[0].render(row)}`} title="Edit">
                           <Pencil size={16} aria-hidden />

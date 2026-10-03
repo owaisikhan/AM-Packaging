@@ -104,7 +104,7 @@ export default function RecipeEditor({ products, rawItems, productId, recipe }) 
                         <button
                           type="button"
                           onClick={() => setRows((rs) => (rs.length > 1 ? rs.filter((x) => x.key !== r.key) : [newRow()]))}
-                          className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
+                          className="flex h-11 w-11 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
                           aria-label="Remove this material"
                         >
                           <Trash2 size={16} aria-hidden />

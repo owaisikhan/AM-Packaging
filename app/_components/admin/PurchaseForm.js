@@ -68,7 +68,7 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
             <div className="sm:col-span-3 lg:col-span-1">
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="supplier_id" required>Supplier</Label>
-                <Link href="/admin/suppliers/new?from=purchase" className="mb-1.5 inline-flex min-h-[32px] items-center gap-1 text-[13px] font-semibold text-primary-ink hover:underline">
+                <Link href="/admin/suppliers/new?from=purchase" className="mb-1.5 inline-flex min-h-[32px] pointer-coarse:min-h-[44px] items-center gap-1 text-[13px] font-semibold text-primary-ink hover:underline">
                   <Plus size={14} aria-hidden /> New supplier
                 </Link>
               </div>
@@ -95,7 +95,7 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
         <section className="card p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
             <h2 className="card-title">Items bought</h2>
-            <button type="button" onClick={() => setRows((rs) => [...rs, blankRow()])} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">
+            <button type="button" onClick={() => setRows((rs) => [...rs, blankRow()])} className="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
               <Plus size={15} aria-hidden /> Add item row
             </button>
           </div>
@@ -148,7 +148,7 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
                     <button
                       type="button"
                       onClick={() => setRows((rs) => (rs.length > 1 ? rs.filter((x) => x.key !== r.key) : [blankRow()]))}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg bg-danger text-white hover:bg-[#b91c1c]"
                       aria-label={`Remove row ${i + 1}`}
                     >
                       <Trash2 size={16} aria-hidden />

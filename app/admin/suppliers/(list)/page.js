@@ -96,7 +96,7 @@ export default async function SuppliersPage({ searchParams }) {
                   {list.rows.map((r) => (
                     <tr key={r.id} className={r.active ? "" : "opacity-60"}>
                       <td className="min-w-[220px]">
-                        <Link href={rowHref(r)} className="font-semibold text-heading hover:text-primary-ink">{r.name}</Link>
+                        <Link href={rowHref(r)} className="tap-inline font-semibold text-heading hover:text-primary-ink">{r.name}</Link>
                         {r.active ? null : <Badge tone="gray" className="ml-2">Inactive</Badge>}
                       </td>
                       <td className="whitespace-nowrap text-sm text-secondary">{r.phone || "None"}</td>

@@ -13,7 +13,7 @@ export default function PageHeader({ title, subtitle, crumbs = [], actions = nul
               <span key={c.label} className="flex items-center gap-1">
                 {i > 0 ? <ChevronRight size={12} aria-hidden /> : null}
                 {c.href ? (
-                  <Link href={c.href} className="hover:text-primary-ink">
+                  <Link href={c.href} className="tap-inline hover:text-primary-ink">
                     {c.label}
                   </Link>
                 ) : (

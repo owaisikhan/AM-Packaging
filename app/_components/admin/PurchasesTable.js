@@ -60,7 +60,7 @@ export default function PurchasesTable({ rows, total, page, perPage, params, isA
             {rows.map((r) => (
               <tr key={r.id} className={r.status === "void" ? "opacity-60" : ""}>
                 <td className="whitespace-nowrap">
-                  <Link href={`/admin/purchases/${r.id}`} className="font-mono font-semibold text-heading hover:text-primary-ink">
+                  <Link href={`/admin/purchases/${r.id}`} className="tap-inline font-mono font-semibold text-heading hover:text-primary-ink">
                     {r.purchase_no}
                   </Link>
                   {r.supplier_ref ? <div className="text-xs text-muted">Their bill {r.supplier_ref}</div> : null}

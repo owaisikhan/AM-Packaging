@@ -33,7 +33,23 @@ function Section({ s }) {
         {s.empty ? (
           <p className="px-5 py-10 text-center text-sm text-muted">Nothing recorded in this period yet.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <ul className="divide-y divide-border sm:hidden">
+            {s.table.rows.map((r, i) => (
+              <li key={i} className="px-5 py-3.5">
+                <p className="font-semibold text-heading">{r[0]}</p>
+                <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-4 gap-y-0.5 text-sm">
+                  {r.slice(1).map((cell, j) => (
+                    <div key={j} className="contents">
+                      <dt className="text-secondary">{s.table.columns[j + 1].label}</dt>
+                      <dd className={clsx("text-right text-heading", s.table.columns[j + 1].align === "right" && "num")}>{cell}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="data-table">
               <thead>
                 <tr>
@@ -53,6 +69,7 @@ function Section({ s }) {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
     );
@@ -110,7 +127,7 @@ export default async function ReportsPage({ searchParams }) {
         }
       />
 
-      <nav aria-label="Reports" className="card flex gap-1 overflow-x-auto p-1.5">
+      <nav aria-label="Reports" className="card flex flex-wrap gap-1 p-1.5">
         {REPORT_TABS.map((t) => {
           const href = new URLSearchParams({ tab: t.id });
           for (const k of ["range", "from", "to"]) if (sp[k]) href.set(k, sp[k]);

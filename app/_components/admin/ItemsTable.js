@@ -78,7 +78,7 @@ export default function ItemsTable({ rows, total, page, perPage, basePath, param
               return (
                 <tr key={r.id} className={r.active ? "" : "opacity-60"}>
                   <td className="min-w-[220px]">
-                    <Link href={href} className="font-semibold text-heading hover:text-primary-ink">
+                    <Link href={href} className="tap-inline font-semibold text-heading hover:text-primary-ink">
                       {r.name}
                     </Link>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted">

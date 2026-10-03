@@ -1,4 +1,5 @@
 import { CircleCheck, CircleAlert } from "lucide-react";
+import { withoutDashes } from "@/app/_lib/format-helpers";
 
 // Renders the { ok, message } every Server Action returns.
 export default function FormMessage({ state }) {
@@ -12,7 +13,7 @@ export default function FormMessage({ state }) {
       }`}
     >
       {ok ? <CircleCheck size={18} className="mt-px shrink-0" aria-hidden /> : <CircleAlert size={18} className="mt-px shrink-0" aria-hidden />}
-      <span>{state.message}</span>
+      <span>{withoutDashes(state.message)}</span>
     </p>
   );
 }

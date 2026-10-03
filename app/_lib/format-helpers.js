@@ -105,3 +105,14 @@ export function formatCompactMoney(value) {
   const s = formatCompact(value);
   return s.startsWith("-") ? `-Rs ${s.slice(1)}` : `Rs ${s}`;
 }
+
+/**
+ * Server messages reach the screen through FormMessage; this keeps the
+ * no-dash rule for text no file scan can see (Postgres refusals, outside
+ * services): a spaced dash becomes a comma, a range dash a hyphen.
+ */
+export function withoutDashes(text) {
+  return String(text ?? "")
+    .replace(/(\d)\s*[\u2013\u2014]\s*(\d)/g, "$1-$2")
+    .replace(/\s*[\u2013\u2014]\s*/g, ", ");
+}

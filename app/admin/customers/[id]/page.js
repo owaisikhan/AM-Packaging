@@ -118,7 +118,7 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
                       <td className="min-w-[200px]">
                         <span className="block text-sm font-medium text-text">{e.description}</span>
                         {e.sale_id && e.ref ? (
-                          <Link href={`/admin/sales/${e.sale_id}`} className="font-mono text-xs font-semibold text-primary-ink hover:underline">{e.ref}</Link>
+                          <Link href={`/admin/sales/${e.sale_id}`} className="tap-inline font-mono text-xs font-semibold text-primary-ink hover:underline">{e.ref}</Link>
                         ) : null}
                       </td>
                       <td className="num text-right text-sm text-heading">{Number(e.debit) > 0 ? money(e.debit) : ""}</td>
@@ -146,7 +146,7 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
             <div className="flex flex-col gap-2 border-b border-border pb-4 text-sm text-secondary">
               {customer.contact_person ? <p className="font-semibold text-heading">{customer.contact_person}</p> : null}
               {customer.phone ? (
-                <a href={`tel:${customer.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-primary-ink">
+                <a href={`tel:${customer.phone.replace(/\s/g, "")}`} className="tap-inline flex items-center gap-2 hover:text-primary-ink">
                   <Phone size={15} aria-hidden /> {customer.phone}
                 </a>
               ) : null}

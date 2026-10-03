@@ -65,16 +65,18 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 - Print: `PrintButton` and the `.invoice-sheet` / `no-print` classes.
 - Charts (`app/_components/charts/`): `ChartFrame` (card with Chart / Table toggle), `ColumnChart`, `TrendChart`, `DonutChart`, `RankBars`, `StackBar`; shape rows with `periodView` in `app/_lib/chart-data.js`. Load the `dataviz` skill before adding a chart. Never sum quantities across units.
 - Reports: `app/_lib/reports.js` builds each tab for both the page and the CSV; `demo-reports.js` mirrors `0007_reports.sql` for demo mode.
-- Formatting: `format-helpers.js` (money as "Rs 1,250", `amountInWords` in lakh/crore), `date-helpers.js` (Asia/Karachi).
+- Formatting: `format-helpers.js` (money as "Rs 1,250", `amountInWords` in lakh/crore, `withoutDashes` for server messages), `date-helpers.js` (Asia/Karachi).
+- Waiting and touch: `ui/PageSkeletons.js` for `loading.js` files (list pages keep theirs in a `(list)` route group), `tap-inline` for small text links, `pointer-coarse:min-h-[44px]` for compact controls.
 
 ## Verifying a change
 
-1. `npx eslint .` and `npm run build`.
+1. `npx eslint .` (includes `no-undef`) and `npm run build`.
 2. Database: `bash supabase/tests/run.sh` applies every migration to a local
    throwaway Postgres and runs the rule tests as an admin and a worker. Each
    "expect" line in `supabase/tests/rules_test.sql` says what should happen.
    Never run it against the live project.
-3. Screens: `npm start` with no env (demo mode) and screenshot at 1440, 1024,
-   390 and 360 wide. Tables switch to cards below 1280px; check that no figure
-   wraps or scrolls off screen, and that no table needs a sideways scroll at
-   1024 to 1440.
+3. Screens: `npm run build && npm start` with no env (demo mode), then
+   `npm run check` (about two minutes, all must pass). Add a check to
+   `scripts/checks/` for every bug that passed the build, and a new page to
+   `scripts/checks/pages.mjs`. Then look at the changed screens at 1440, 1024,
+   390 and 360 wide: tables switch to cards below 1280px.

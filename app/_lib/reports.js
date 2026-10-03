@@ -24,24 +24,9 @@ import { formatMoney as fullMoney, formatQty, formatQtyUnit } from "./format-hel
 // Reports show whole rupees; paisa from averages only add noise.
 const formatMoney = (v) => fullMoney(Math.round(Number(v) || 0));
 
-export const REPORT_TABS = [
-  { id: "sales", label: "Sales" },
-  { id: "purchases", label: "Purchases" },
-  { id: "production", label: "Production" },
-  { id: "materials", label: "Raw material use" },
-  { id: "stock", label: "Stock" },
-  { id: "balances", label: "Receivables & Payables" },
-  { id: "profit", label: "Profit" },
-];
+import { RANGE_PRESETS, REPORT_TABS } from "./report-tabs";
 
-export const RANGE_PRESETS = [
-  { value: "30d", label: "Last 30 days" },
-  { value: "month", label: "This month" },
-  { value: "last-month", label: "Last month" },
-  { value: "90d", label: "Last 3 months" },
-  { value: "year", label: "This year" },
-  { value: "custom", label: "Pick dates" },
-];
+export { RANGE_PRESETS, REPORT_TABS };
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 

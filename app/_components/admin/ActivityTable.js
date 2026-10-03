@@ -29,7 +29,7 @@ export default function ActivityTable({ rows }) {
             <span className="flex items-center justify-between gap-2">
               <span className="text-xs text-muted">{MODULES[r.module] ?? r.module}</span>
               {r.changes ? (
-                <button type="button" onClick={() => setOpen(r)} className="btn-secondary min-h-[40px] px-3 py-1.5 text-[13px]">
+                <button type="button" onClick={() => setOpen(r)} className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
                   <Eye size={15} aria-hidden /> View changes
                 </button>
               ) : null}
@@ -73,7 +73,7 @@ export default function ActivityTable({ rows }) {
                   <td className="hidden whitespace-nowrap text-sm text-secondary 2xl:table-cell">{MODULES[r.module] ?? r.module}</td>
                   <td className="min-w-[240px] text-sm text-text">
                     {href ? (
-                      <Link href={href} className="hover:text-primary-ink hover:underline">
+                      <Link href={href} className="tap-inline hover:text-primary-ink hover:underline">
                         {r.summary}
                       </Link>
                     ) : (
@@ -82,7 +82,7 @@ export default function ActivityTable({ rows }) {
                   </td>
                   <td className="text-right">
                     {r.changes ? (
-                      <button type="button" onClick={() => setOpen(r)} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">
+                      <button type="button" onClick={() => setOpen(r)} className="btn-secondary min-h-[38px] pointer-coarse:min-h-[44px] px-3 py-1.5 text-[13px]">
                         <Eye size={15} aria-hidden /> View changes
                       </button>
                     ) : (

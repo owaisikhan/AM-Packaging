@@ -16,7 +16,7 @@ export default function RankBars({ rows, color = "--series-1", diverging = false
       {rows.map((r) => {
         const pct = Math.max((Math.abs(r.value) / max) * 100, r.value === 0 ? 0 : 1.5);
         const name = r.href ? (
-          <Link href={r.href} className="font-medium text-heading hover:text-primary-ink hover:underline">{r.label}</Link>
+          <Link href={r.href} className="tap-inline font-medium text-heading hover:text-primary-ink hover:underline">{r.label}</Link>
         ) : (
           <span className="font-medium text-heading">{r.label}</span>
         );

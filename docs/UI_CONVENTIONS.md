@@ -107,6 +107,32 @@ Built with the `dataviz` skill; components in `app/_components/charts/`.
   above everything it scopes; the CSV download is built from the same
   tables as the page (`app/_lib/reports.js`).
 
+## Waiting, errors and touch
+
+- **Loading screens** (`loading.js`, built from `ui/PageSkeletons.js`): the
+  real page title, description and column headings render at once; only the
+  figures are placeheld, at their real line heights, so nothing jumps. List
+  pages have their own; `app/admin/loading.js` covers the dashboard, detail
+  pages and forms. Filter and page changes on the same page use the top
+  loading bar (PMC system), not a skeleton.
+- A `loading.js` covers its whole folder, so a list page and its loading
+  screen live in a `(list)` route group (`app/admin/sales/(list)/`). The URL
+  is unchanged, and `/admin/sales/new` or an invoice does not flash the list.
+- **Errors**: `app/admin/error.js` keeps the menu, says nothing was lost,
+  and offers Try again with a code to give an admin. A missing record shows
+  `app/admin/not-found.js` inside the shell; a wrong address outside the app
+  shows `app/not-found.js`.
+- **Touch**: every link, button and field is at least 44px on a phone.
+  Buttons are 44px everywhere; compact controls (Chart/Table, pills, row
+  buttons) stay small under a mouse and grow with `pointer-coarse:min-h-[44px]`;
+  small text links (breadcrumbs, document numbers, names in lists) get
+  `tap-inline`, which grows the touch area on touch screens without moving
+  the layout.
+- **Tabs and pills wrap** onto a second row on phones instead of scrolling
+  sideways, so none is hidden off screen.
+- Server messages pass through `withoutDashes` in `FormMessage`, so a dash
+  from the database never reaches the screen.
+
 ## Rules that do not bend
 
 - Money and quantities use `.num` (no wrap, tabular figures) and always carry

@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-10-04: Phase 6 (polish pass)
+
+- Regression checks: `npm run check` (`scripts/checks/`, Playwright) walks
+  42 pages in light and dark at phone, laptop and desktop widths: pages
+  render with a clean console, nothing past a phone's edge, no figure
+  clipped or spilling, no table scrolling sideways at 1024 to 1440, AA
+  contrast, readable dark-mode dropdowns, charts drawn with one-line axis
+  labels, 44px touch targets, search as you type, invoice printing, no new
+  tabs. Each check was proven by putting its bug back and watching it fail.
+- Bugs the checks and the audit found and fixed:
+  - Stock item history (phase 1) still switched to cards at 768px: its
+    table scrolled sideways by up to 434px at laptop widths.
+  - Users page and Settings lists ran off the side of a phone; Settings
+    and Reports tabs scrolled out of sight. They now stack or wrap.
+  - The closed phone menu was only moved off screen, so Tab and screen
+    readers still reached it. It is now hidden as well.
+  - No favicon: every tab logged a 404. Added the app icon (green tile,
+    package glyph) and an Apple touch icon.
+  - A sample activity entry linked a run that does not exist (`r11`).
+  - A refactor during this phase lost a name in `reports.js`; lint and
+    build passed and the Reports page showed its error screen. `no-undef`
+    is now on in `eslint.config.mjs`, so this fails at lint.
+  - Stat and KPI figures and the invoice did not fit a 320px phone.
+- Touch: buttons are 44px; compact controls grow to 44px on touch screens
+  (`pointer-coarse:`); small text links get a touch area (`tap-inline`).
+- Waiting and errors: loading screens with the real titles and column
+  headings (`ui/PageSkeletons.js`); list pages keep theirs inside a
+  `(list)` route group so detail and form pages do not flash a list;
+  `app/admin/error.js` and not-found pages in plain words.
+- Server messages pass through `withoutDashes` before they reach the screen.
+
 ## 2026-10-04: Phase 5 (dashboard charts and reports)
 
 - Database (`0007_reports.sql`): `item_costs` view (raw: average purchase

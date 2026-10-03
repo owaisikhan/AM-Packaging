@@ -34,7 +34,7 @@ export default function ChartFrame({ title, subtitle, controls, legend = [], tab
                 onClick={() => setView(v)}
                 aria-pressed={view === v}
                 className={clsx(
-                  "flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-[13px] font-semibold",
+                  "flex min-h-[36px] pointer-coarse:min-h-[44px] items-center gap-1.5 rounded-md px-3 text-[13px] font-semibold",
                   view === v ? "bg-surface text-heading shadow-sm" : "text-secondary hover:text-heading",
                 )}
               >
