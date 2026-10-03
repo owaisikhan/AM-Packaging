@@ -25,7 +25,7 @@ export default function ItemsTable({ rows, total, page, perPage, basePath, param
   return (
     <div className="card overflow-hidden">
       {/* Phones: one card per item, so the stock figure is never scrolled off screen */}
-      <ul className="divide-y divide-border md:hidden">
+      <ul className="divide-y divide-border xl:hidden">
         {rows.map((r) => (
           <li key={r.id} className={r.active ? "" : "opacity-60"}>
             <Link href={hrefFor(r)} className="flex flex-col gap-2 px-4 py-4 active:bg-background">
@@ -52,7 +52,7 @@ export default function ItemsTable({ rows, total, page, perPage, basePath, param
           </li>
         ))}
       </ul>
-      <div className="hidden overflow-x-auto md:block">
+      <div className="hidden overflow-x-auto xl:block">
         <table className="data-table">
           <thead>
             <tr>

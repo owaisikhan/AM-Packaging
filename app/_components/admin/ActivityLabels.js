@@ -44,6 +44,10 @@ export function recordHref(entry) {
   switch (entry.module) {
     case "item":
       return `/admin/stock/${id}`;
+    case "purchase":
+      return `/admin/purchases/${id}`;
+    case "supplier":
+      return `/admin/suppliers/${id}`;
     case "user":
       return "/admin/users";
     case "settings":

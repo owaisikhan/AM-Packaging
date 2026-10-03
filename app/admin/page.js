@@ -124,7 +124,7 @@ export default async function Dashboard({ searchParams }) {
       </div>
 
       <p className="rounded-xl border border-dashed border-border px-4 py-3 text-center text-sm text-muted">
-        Production, purchases, sales and the dashboard charts are added in the next phases.
+        Production, sales and the dashboard charts are added in the next phases.
       </p>
     </div>
   );

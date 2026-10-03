@@ -83,10 +83,12 @@ create table public.supplier_payments (
   reference     text not null default '',
   note          text not null default '',
   status        text not null default 'posted' check (status in ('posted', 'void')),
+  void_reason   text not null default '',
   created_by    uuid default auth.uid() references public.profiles (id),
   created_at    timestamptz not null default now()
 );
 
+create index supplier_payments_purchase_idx on public.supplier_payments (purchase_id);
 create index supplier_payments_supplier_idx on public.supplier_payments (supplier_id, payment_date);
 
 -- ---------------------------------------------------------------
@@ -133,10 +135,12 @@ create table public.customer_payments (
   reference     text not null default '',
   note          text not null default '',
   status        text not null default 'posted' check (status in ('posted', 'void')),
+  void_reason   text not null default '',
   created_by    uuid default auth.uid() references public.profiles (id),
   created_at    timestamptz not null default now()
 );
 
+create index customer_payments_sale_idx on public.customer_payments (sale_id);
 create index customer_payments_customer_idx on public.customer_payments (customer_id, payment_date);
 
 -- ---------------------------------------------------------------
@@ -251,6 +255,9 @@ begin
   if v_paid < 0 then
     raise exception 'The amount paid cannot be negative.';
   end if;
+  if v_paid > 0 and not public.is_admin() then
+    raise exception 'Only an admin can record a payment. Save the purchase without the amount paid; an admin adds the payment later.';
+  end if;
 
   v_no := public.next_doc_no('purchase');
 
@@ -359,7 +366,8 @@ begin
     values (l.item_id, -l.qty, 'purchase', 'purchases', p_id, 'Void ' || v_row.purchase_no);
   end loop;
 
-  update public.supplier_payments set status = 'void' where purchase_id = p_id;
+  update public.supplier_payments set status = 'void', void_reason = 'Purchase ' || v_row.purchase_no || ' voided'
+  where purchase_id = p_id and status = 'posted';
   update public.purchases set status = 'void', void_reason = trim(p_reason) where id = p_id;
 end $$;
 
@@ -382,7 +390,8 @@ begin
     values (l.item_id, l.qty, 'sale', 'sales', p_id, 'Void ' || v_row.invoice_no);
   end loop;
 
-  update public.customer_payments set status = 'void' where sale_id = p_id;
+  update public.customer_payments set status = 'void', void_reason = 'Invoice ' || v_row.invoice_no || ' voided'
+  where sale_id = p_id and status = 'posted';
   update public.sales set status = 'void', void_reason = trim(p_reason) where id = p_id;
 end $$;
 
@@ -427,3 +436,176 @@ left join (
   select supplier_id, sum(amount) as paid
   from public.supplier_payments where status = 'posted' group by supplier_id
 ) pm on pm.supplier_id = sp.id;
+
+-- ---------------------------------------------------------------
+-- Supplier payments (admin only), outside of a purchase
+-- p = { supplier_id, purchase_id?, payment_date, amount, method, reference, note }
+-- ---------------------------------------------------------------
+create or replace function public.record_supplier_payment(p jsonb)
+returns uuid
+language plpgsql
+as $$
+declare
+  v_id       uuid;
+  v_supplier uuid := (p->>'supplier_id')::uuid;
+  v_purchase uuid := nullif(p->>'purchase_id', '')::uuid;
+  v_amount   numeric := (p->>'amount')::numeric;
+  v_row      public.purchases;
+  v_name     text;
+begin
+  perform public.require_admin('record a payment to a supplier');
+  select name into v_name from public.suppliers where id = v_supplier;
+  if v_name is null then
+    raise exception 'Pick the supplier this payment was made to.';
+  end if;
+  if coalesce(v_amount, 0) <= 0 then
+    raise exception 'Enter the amount paid, above zero.';
+  end if;
+
+  if v_purchase is not null then
+    select * into v_row from public.purchases where id = v_purchase;
+    if v_row.id is null then
+      raise exception 'That purchase no longer exists. Refresh the page and try again.';
+    end if;
+    if v_row.supplier_id <> v_supplier then
+      raise exception 'Purchase % is from a different supplier, not %. Pick a bill from % or leave the bill empty.',
+        v_row.purchase_no, v_name, v_name;
+    end if;
+    if v_row.status = 'void' then
+      raise exception 'Purchase % is void, so a payment cannot be linked to it.', v_row.purchase_no;
+    end if;
+  end if;
+
+  insert into public.supplier_payments (supplier_id, purchase_id, payment_date, amount, method, reference, note)
+  values (v_supplier, v_purchase, coalesce((p->>'payment_date')::date, current_date), v_amount,
+    coalesce(nullif(p->>'method', ''), 'cash'), coalesce(p->>'reference', ''), coalesce(p->>'note', ''))
+  returning id into v_id;
+  return v_id;
+end $$;
+
+create or replace function public.void_supplier_payment(p_id uuid, p_reason text)
+returns void
+language plpgsql
+as $$
+declare v_row public.supplier_payments;
+begin
+  perform public.require_admin('void a payment');
+  if length(trim(coalesce(p_reason, ''))) = 0 then
+    raise exception 'Write a reason for voiding this payment.';
+  end if;
+  select * into v_row from public.supplier_payments where id = p_id for update;
+  if v_row.id is null then raise exception 'That payment no longer exists.'; end if;
+  if v_row.status = 'void' then raise exception 'This payment is already void.'; end if;
+  update public.supplier_payments set status = 'void', void_reason = trim(p_reason) where id = p_id;
+end $$;
+
+-- ---------------------------------------------------------------
+-- Purchase list with what has been paid against each bill.
+-- security_invoker: a worker cannot read payments, so "paid" reads 0 for
+-- them; the app shows workers no payment columns.
+-- ---------------------------------------------------------------
+create or replace view public.purchase_list
+with (security_invoker = true)
+as
+select
+  p.id, p.purchase_no, p.purchase_date, p.supplier_id, s.name as supplier_name, p.supplier_ref,
+  p.subtotal, p.discount, p.gst_rate, p.gst_amount, p.other_charges, p.total,
+  p.notes, p.status, p.void_reason, p.created_by, p.created_at,
+  coalesce(l.line_count, 0) as line_count,
+  coalesce(pm.paid, 0) as paid,
+  case
+    when p.status = 'void' then 'void'
+    when coalesce(pm.paid, 0) >= p.total then 'paid'
+    when coalesce(pm.paid, 0) > 0 then 'partly'
+    else 'unpaid'
+  end as payment_status
+from public.purchases p
+join public.suppliers s on s.id = p.supplier_id
+left join (select purchase_id, count(*) as line_count from public.purchase_lines group by purchase_id) l on l.purchase_id = p.id
+left join (
+  select purchase_id, sum(amount) as paid from public.supplier_payments
+  where status = 'posted' and purchase_id is not null group by purchase_id
+) pm on pm.purchase_id = p.id;
+
+-- Totals for the purchase list's cards, over the same filters as the list.
+create or replace function public.purchase_totals(p_from date default null, p_to date default null, p_supplier uuid default null)
+returns table (bills bigint, total numeric, paid numeric, unpaid numeric)
+language sql stable
+as $$
+  select count(*), coalesce(sum(total), 0), coalesce(sum(least(paid, total)), 0),
+         coalesce(sum(greatest(total - paid, 0)), 0)
+  from public.purchase_list
+  where status = 'posted'
+    and (p_from is null or purchase_date >= p_from)
+    and (p_to is null or purchase_date <= p_to)
+    and (p_supplier is null or supplier_id = p_supplier)
+$$;
+
+-- ---------------------------------------------------------------
+-- Supplier ledger with a running balance, worked out here so no screen
+-- adds money up itself. Positive balance = we owe the supplier.
+-- With p_from set, everything before it is carried in as one
+-- "brought forward" line.
+-- ---------------------------------------------------------------
+create or replace function public.supplier_ledger(p_supplier_id uuid, p_from date default null, p_to date default null)
+returns table (
+  entry_date date, kind text, entry_id uuid, purchase_id uuid, ref text,
+  description text, debit numeric, credit numeric, balance numeric
+)
+language plpgsql stable
+as $$
+declare v_open numeric;
+begin
+  perform public.require_admin('see a supplier ledger');
+
+  select opening_balance into v_open from public.suppliers where id = p_supplier_id;
+  if v_open is null then
+    raise exception 'That supplier no longer exists.';
+  end if;
+
+  if p_from is not null then
+    v_open := v_open
+      + coalesce((select sum(pu.total) from public.purchases pu
+                  where pu.supplier_id = p_supplier_id and pu.status = 'posted' and pu.purchase_date < p_from), 0)
+      - coalesce((select sum(sp.amount) from public.supplier_payments sp
+                  where sp.supplier_id = p_supplier_id and sp.status = 'posted' and sp.payment_date < p_from), 0);
+  end if;
+
+  return query
+  with e as (
+    select p_from as d, 0 as ord, null::timestamptz as ts, 'opening'::text as k, null::uuid as eid, null::uuid as pid, ''::text as r,
+      case when p_from is null then 'Opening balance' else 'Balance brought forward' end as descr,
+      greatest(v_open, 0) as dr, greatest(-v_open, 0) as cr
+    union all
+    select pu.purchase_date, 1, pu.created_at, 'purchase', pu.id, pu.id, pu.purchase_no,
+      'Purchase' || case when pu.supplier_ref <> '' then ', their bill ' || pu.supplier_ref else '' end,
+      pu.total, 0::numeric
+    from public.purchases pu
+    where pu.supplier_id = p_supplier_id and pu.status = 'posted'
+      and (p_from is null or pu.purchase_date >= p_from) and (p_to is null or pu.purchase_date <= p_to)
+    union all
+    select sp.payment_date, 1, sp.created_at, 'payment', sp.id, sp.purchase_id,
+      coalesce(pu.purchase_no, ''),
+      'Payment, ' || sp.method || case when sp.reference <> '' then ' (' || sp.reference || ')' else '' end,
+      0::numeric, sp.amount
+    from public.supplier_payments sp
+    left join public.purchases pu on pu.id = sp.purchase_id
+    where sp.supplier_id = p_supplier_id and sp.status = 'posted'
+      and (p_from is null or sp.payment_date >= p_from) and (p_to is null or sp.payment_date <= p_to)
+  )
+  select e.d, e.k, e.eid, e.pid, e.r, e.descr, e.dr, e.cr,
+    sum(e.dr - e.cr) over (order by e.ord, e.d, e.ts rows between unbounded preceding and current row)
+  from e
+  order by e.ord, e.d, e.ts;
+end $$;
+
+-- Totals for the suppliers page cards (admins; payments are admin-only).
+create or replace function public.supplier_totals()
+returns table (suppliers bigint, payable numeric, with_balance bigint)
+language sql stable
+as $$
+  select count(*) filter (where active),
+         coalesce(sum(balance) filter (where balance > 0), 0),
+         count(*) filter (where balance > 0)
+  from public.supplier_balances
+$$;

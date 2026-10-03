@@ -16,7 +16,7 @@ export default function ActivityTable({ rows }) {
   return (
     <>
       {/* Phones: one card per entry */}
-      <ul className="divide-y divide-border md:hidden">
+      <ul className="divide-y divide-border xl:hidden">
         {rows.map((r) => (
           <li key={r.id} className="flex flex-col gap-2 px-4 py-4">
             <span className="flex flex-wrap items-center justify-between gap-2">
@@ -37,14 +37,14 @@ export default function ActivityTable({ rows }) {
           </li>
         ))}
       </ul>
-      <div className="hidden overflow-x-auto md:block">
+      <div className="hidden overflow-x-auto xl:block">
         <table className="data-table">
           <thead>
             <tr>
               <th scope="col">When</th>
               <th scope="col">User</th>
               <th scope="col">Action</th>
-              <th scope="col">Module</th>
+              <th scope="col" className="hidden 2xl:table-cell">Module</th>
               <th scope="col">What happened</th>
               <th scope="col" className="text-right">Details</th>
             </tr>
@@ -66,9 +66,12 @@ export default function ActivityTable({ rows }) {
                       <span className="font-medium text-heading">{r.actor_name}</span>
                     </div>
                   </td>
-                  <td><ActionPill action={r.action} /></td>
-                  <td className="whitespace-nowrap text-sm text-secondary">{MODULES[r.module] ?? r.module}</td>
-                  <td className="min-w-[280px] text-sm text-text">
+                  <td>
+                    <ActionPill action={r.action} />
+                    <div className="mt-1 text-xs text-muted 2xl:hidden">{MODULES[r.module] ?? r.module}</div>
+                  </td>
+                  <td className="hidden whitespace-nowrap text-sm text-secondary 2xl:table-cell">{MODULES[r.module] ?? r.module}</td>
+                  <td className="min-w-[240px] text-sm text-text">
                     {href ? (
                       <Link href={href} className="hover:text-primary hover:underline">
                         {r.summary}

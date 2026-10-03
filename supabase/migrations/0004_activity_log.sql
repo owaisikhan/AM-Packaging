@@ -178,7 +178,8 @@ begin
       end;
     else
       v_summary := v_actor || ' ' || v_action || ' a payment of ' || v_label ||
-        case tg_table_name when 'customer_payments' then ' from ' else ' to ' end || v_party;
+        case tg_table_name when 'customer_payments' then ' from ' else ' to ' end || v_party ||
+        case when v_action = 'voided' and coalesce(v_row->>'void_reason', '') <> '' then ', reason: ' || (v_row->>'void_reason') else '' end;
     end if;
 
   elsif tg_table_name = 'sales' then

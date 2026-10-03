@@ -417,3 +417,156 @@ export async function updateUser(_prev, formData) {
   revalidatePath("/admin/users");
   return ok(password ? `${fullName} updated, with a new password.` : `${fullName} updated.`);
 }
+
+// ---------------------------------------------------------------
+// Purchases
+// ---------------------------------------------------------------
+function moneyField(formData, field) {
+  const n = number(formData, field);
+  return n === null ? 0 : n;
+}
+
+/** Collects the line rows the purchase and sale forms post as parallel arrays. */
+function collectLines(formData) {
+  const ids = formData.getAll("line_item_id").map(String);
+  const qtys = formData.getAll("line_qty").map((v) => String(v).replace(/,/g, "").trim());
+  const rates = formData.getAll("line_rate").map((v) => String(v).replace(/,/g, "").trim());
+  const lines = [];
+  for (let i = 0; i < ids.length; i += 1) {
+    if (!ids[i] && !qtys[i] && !rates[i]) continue; // an empty row left at the bottom
+    if (!ids[i]) return { error: `Row ${i + 1} has no item. Pick an item or remove the row.` };
+    const qty = Number(qtys[i]);
+    const rate = Number(rates[i] === "" ? NaN : rates[i]);
+    if (!Number.isFinite(qty) || qty <= 0) return { error: `Row ${i + 1} needs a quantity above zero.` };
+    if (!Number.isFinite(rate) || rate < 0) return { error: `Row ${i + 1} needs a rate of zero or more.` };
+    lines.push({ item_id: ids[i], qty, rate });
+  }
+  if (lines.length === 0) return { error: "Add at least one item." };
+  return { lines };
+}
+
+export async function createPurchase(_prev, formData) {
+  const { user, error: denied } = await guard(ROLES.WORKER);
+  if (denied) return denied;
+
+  const supplierId = text(formData, "supplier_id");
+  if (!supplierId) return fail("Pick the supplier.");
+  const { lines, error: lineError } = collectLines(formData);
+  if (lineError) return fail(lineError);
+
+  const discount = moneyField(formData, "discount");
+  const other = moneyField(formData, "other_charges");
+  const gstOn = formData.get("gst_enabled") === "on";
+  const gstRate = gstOn ? moneyField(formData, "gst_rate") : 0;
+  if ([discount, other, gstRate].some((n) => Number.isNaN(n) || n < 0)) {
+    return fail("Discount, other charges and GST must be numbers of zero or more.");
+  }
+  const paid = user.role === ROLES.ADMIN ? moneyField(formData, "amount_paid") : 0;
+  if (Number.isNaN(paid) || paid < 0) return fail("The amount paid must be zero or more.");
+
+  const supabase = await createClient();
+  const { data: id, error } = await supabase.rpc("post_purchase", {
+    p: {
+      supplier_id: supplierId,
+      purchase_date: text(formData, "purchase_date") || null,
+      supplier_ref: text(formData, "supplier_ref"),
+      discount,
+      gst_rate: gstRate,
+      other_charges: other,
+      notes: text(formData, "notes"),
+      lines,
+      payment: paid > 0 ? { amount: paid, method: text(formData, "payment_method") || "cash", reference: text(formData, "payment_reference") } : null,
+    },
+  });
+  if (error) return fail(describe(error, "Could not save the purchase."));
+
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/purchases/${id}?saved=1`);
+}
+
+export async function voidPurchase(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const id = text(formData, "id");
+  const reason = text(formData, "reason");
+  if (!reason) return fail("Write a reason for voiding this purchase.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("void_purchase", { p_id: id, p_reason: reason });
+  if (error) return fail(describe(error, "Could not void the purchase."));
+  revalidatePath("/admin", "layout");
+  return ok("Purchase voided. Its stock has been taken back out and any payments on it are void.");
+}
+
+// ---------------------------------------------------------------
+// Suppliers and supplier payments
+// ---------------------------------------------------------------
+export async function saveSupplier(_prev, formData) {
+  const id = text(formData, "id");
+  // Anyone signed in can add a supplier; changing one is for admins (RLS agrees).
+  const { user, error: denied } = await guard(id ? ROLES.ADMIN : ROLES.WORKER);
+  if (denied) return denied;
+
+  const name = text(formData, "name");
+  if (!name) return fail("Enter the supplier's name.");
+  const opening = number(formData, "opening_balance");
+  if (Number.isNaN(opening)) return fail("The opening balance must be a number, for example 25000 or 0.");
+
+  const row = {
+    name,
+    contact_person: text(formData, "contact_person"),
+    phone: text(formData, "phone"),
+    address: text(formData, "address"),
+    notes: text(formData, "notes"),
+  };
+  // Workers adding a supplier cannot set money owed; an admin enters it.
+  if (user.role === ROLES.ADMIN) row.opening_balance = opening ?? 0;
+  if (id && formData.has("active")) row.active = text(formData, "active") !== "false";
+
+  const supabase = await createClient();
+  const { data, error } = id
+    ? await supabase.from("suppliers").update(row).eq("id", id).select("id").single()
+    : await supabase.from("suppliers").insert(row).select("id").single();
+  if (error) return fail(describe(error, "Could not save the supplier."));
+
+  revalidatePath("/admin/suppliers");
+  revalidatePath("/admin/purchases/new");
+  return ok(id ? `${name} updated.` : `${name} added.`, { id: data.id });
+}
+
+export async function recordSupplierPayment(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const amount = number(formData, "amount");
+  if (amount === null || Number.isNaN(amount) || amount <= 0) return fail("Enter the amount paid, above zero.");
+
+  const supplierId = text(formData, "supplier_id");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("record_supplier_payment", {
+    p: {
+      supplier_id: supplierId,
+      purchase_id: text(formData, "purchase_id") || null,
+      payment_date: text(formData, "payment_date") || null,
+      amount,
+      method: text(formData, "method") || "cash",
+      reference: text(formData, "reference"),
+      note: text(formData, "note"),
+    },
+  });
+  if (error) return fail(describe(error, "Could not save the payment."));
+  revalidatePath("/admin/suppliers", "layout");
+  revalidatePath("/admin/purchases", "layout");
+  return ok(`Payment of Rs ${new Intl.NumberFormat("en-PK", { maximumFractionDigits: 2 }).format(amount)} saved.`);
+}
+
+export async function voidSupplierPayment(_prev, formData) {
+  const { error: denied } = await guard(ROLES.ADMIN);
+  if (denied) return denied;
+  const reason = text(formData, "reason");
+  if (!reason) return fail("Write a reason for voiding this payment.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("void_supplier_payment", { p_id: text(formData, "id"), p_reason: reason });
+  if (error) return fail(describe(error, "Could not void the payment."));
+  revalidatePath("/admin/suppliers", "layout");
+  revalidatePath("/admin/purchases", "layout");
+  return ok("Payment voided. The supplier's balance has gone back up by that amount.");
+}

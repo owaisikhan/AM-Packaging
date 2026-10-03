@@ -41,6 +41,8 @@ chose (invenza-html.vercel.app); do not "fix" them.
   2026-10-03, so 0001 to 0006 can still be edited.)
 - **Nothing is deleted from the ledger.** Purchases, sales and production
   runs are voided (admin, with a reason), which writes reversing stock entries.
+- **Supplier money is admin-only** (balances, ledger, payments, voiding).
+  Workers record purchases without a payment.
 - **Workers vs admins:** RLS is the real fence, `requirePageRole` /
   `requireRole` in pages and actions the second, hidden nav links cosmetic.
 - **Demo mode:** with no Supabase env vars the app runs on
@@ -53,8 +55,8 @@ chose (invenza-html.vercel.app); do not "fix" them.
 ## Shared pieces to reach for first
 
 - Layout: `PageHeader`, `Sidebar` (collapse state in `sidebarState.js`), `Header`, `NavigationProgress` (PMC loading bar).
-- UI: `StatCard`, `Badge`, `FilterBar` (filters as query strings), `Pagination`, `EmptyState`, `FormMessage`, `SubmitButton`.
-- Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists).
+- UI: `StatCard`, `Badge`, `FilterBar` (filters as query strings), `Pagination`, `EmptyState`, `FormMessage`, `SubmitButton`, `MoneyRow`, `ReasonDialog` (void with a reason; pass icons as elements, not components).
+- Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `SupplierPaymentForm`, `PaymentsTable`.
 - Formatting: `format-helpers.js` (money as "Rs 1,250"), `date-helpers.js` (Asia/Karachi).
 
 ## Verifying a change
@@ -65,5 +67,6 @@ chose (invenza-html.vercel.app); do not "fix" them.
    "expect" line in `supabase/tests/rules_test.sql` says what should happen.
    Never run it against the live project.
 3. Screens: `npm start` with no env (demo mode) and screenshot at 1440, 1024,
-   390 and 360 wide. Tables switch to cards below 768px; check that no figure
-   wraps or scrolls off screen.
+   390 and 360 wide. Tables switch to cards below 1280px; check that no figure
+   wraps or scrolls off screen, and that no table needs a sideways scroll at
+   1024 to 1440.

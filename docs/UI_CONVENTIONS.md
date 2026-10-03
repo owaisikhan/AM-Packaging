@@ -38,8 +38,20 @@ Font: Inter (next/font). Radius 8/12/16/20. Shadows are soft and rare.
 - **List pages**: PageHeader card (breadcrumb, title, subtitle, actions on the
   right), a row of 4 StatCards, a FilterBar card, then a table card with
   uppercase grey headers and Pagination ("Showing 1-20 of N entries").
-- **Below 768px tables become cards** (one per row) so figures never scroll
-  off screen. Stat cards go two per row and stack their icon above the figure.
+- **Below 1280px tables become cards** (one per row) so figures never scroll
+  off screen; with the 260px sidebar open, laptop widths cannot fit a
+  six-column money table. Stat cards go two per row on phones and stack their
+  icon above the figure.
+- **Payment status pills**: Paid (green), Partly paid (amber), Unpaid (red),
+  Void (grey), each with an icon. Workers, who cannot see payments, get
+  Recorded (blue) or Void instead.
+- **Ledgers**: oldest first, Purchase (+) and Payment (-) columns, the
+  running balance in the last column worked out by the database, an opening
+  or brought-forward first line, and the closing balance in a footer bar.
+  Balances read "Rs X to pay", "Rs X advance" or "Settled", never a bare
+  negative number.
+- **Voiding** uses `ReasonDialog`: it says what will happen in words, needs a
+  reason, and the record stays visible marked void with that reason.
 - **Form pages**: two columns; details on the left, a narrow right column with
   the summary/check card and a full-width green Save button.
 - Filters are query strings (shareable, back button works). Selects apply on

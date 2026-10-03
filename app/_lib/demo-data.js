@@ -132,10 +132,111 @@ export const demoActivity = [
   { id: 409, created_at: "2026-10-02T12:05:00Z", user_id: "demo-w2", actor_name: "Muhammad Bilal Hussain", action: "created", module: "production", record_id: "r11", record_label: "PRD-00011", summary: "Muhammad Bilal Hussain created production run PRD-00011: 60 x Tape 46mm x 72yd 40 mic Clear", changes: { after: { run_no: "PRD-00011", qty_made: 60, run_date: "2026-10-02" } } },
   { id: 408, created_at: "2026-10-02T09:40:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "updated", module: "item", record_id: "i-t-46-72-40c", record_label: "Tape 46mm x 72yd 40 mic Clear", summary: "Ahmed Munir updated item Tape 46mm x 72yd 40 mic Clear", changes: { default_rate: { from: 4650, to: 4800 }, low_stock_level: { from: 40, to: 50 } } },
   { id: 407, created_at: "2026-10-01T09:00:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "adjusted", module: "stock", record_id: "7", record_label: "Tape 46mm x 72yd 40 mic Clear (ctn)", summary: "Ahmed Munir adjusted stock of Tape 46mm x 72yd 40 mic Clear (ctn) by -2 (reason: Two cartons water damaged)", changes: { after: { qty: -2, type: "adjustment", note: "Two cartons water damaged" } } },
-  { id: 406, created_at: "2026-09-30T14:30:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "voided", module: "purchase", record_id: "pu7", record_label: "PUR-00007", summary: "Ahmed Munir voided purchase PUR-00007 from Lahore Films Co (Rs 86,850), reason: Entered twice", changes: { status: { from: "posted", to: "void" }, void_reason: { from: "", to: "Entered twice" } } },
+  { id: 406, created_at: "2026-09-30T14:30:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "voided", module: "purchase", record_id: "pu-6", record_label: "PUR-00006", summary: "Ahmed Munir voided purchase PUR-00006 from Pak Box Industries (Pvt) Ltd (Rs 34,400), reason: Entered twice, see PUR-00007", changes: { status: { from: "posted", to: "void" }, void_reason: { from: "", to: "Entered twice, see PUR-00007" } } },
   { id: 405, created_at: "2026-09-30T10:00:00Z", user_id: "demo-w1", actor_name: "Ali Raza", action: "created", module: "customer", record_id: "c9", record_label: "Gujranwala Packaging House", summary: "Ali Raza created customer Gujranwala Packaging House", changes: { after: { name: "Gujranwala Packaging House", phone: "0300 1234567", opening_balance: 0 } } },
   { id: 404, created_at: "2026-09-29T08:15:00Z", user_id: "demo-admin", actor_name: "Ahmed Munir", action: "created", module: "recipe", record_id: "rc1", record_label: "Tape 46mm x 72yd 40 mic Clear", summary: "Ahmed Munir created the recipe for Tape 46mm x 72yd 40 mic Clear (per unit: 1 pcs Carton Box 46mm, 3,950 m Jumbo Roll 40 micron Clear, 72 pcs Paper Tube 3 inch, 0.15 kg Shrink Film)", changes: { before: [], after: [{ material: "Carton Box 46mm", qty_per_unit: 1 }, { material: "Jumbo Roll 40 micron Clear", qty_per_unit: 3950 }] } },
   { id: 403, created_at: "2026-09-28T16:45:00Z", user_id: "demo-admin-2", actor_name: "Usman Ahmed", action: "deleted", module: "settings", record_id: "b-old", record_label: "Local Tubes", summary: "Usman Ahmed deleted brand Local Tubes", changes: { before: { name: "Local Tubes", active: true } } },
   { id: 402, created_at: "2026-09-28T16:40:00Z", user_id: "demo-admin-2", actor_name: "Usman Ahmed", action: "created", module: "user", record_id: "demo-w3", record_label: "Imran Khan", summary: "Usman Ahmed created user Imran Khan as worker", changes: { after: { full_name: "Imran Khan", role: "worker", active: true } } },
   { id: 401, created_at: "2026-09-28T16:00:00Z", user_id: "demo-admin-2", actor_name: "Usman Ahmed", action: "logout", module: "session", record_id: "demo-admin-2", record_label: "Usman Ahmed", summary: "Usman Ahmed signed out", changes: null },
 ];
+
+// ---------------------------------------------------------------
+// Phase 2: suppliers, purchases and supplier payments.
+// Totals are worked out once here so the sample figures agree with each
+// other the way the database would make them agree.
+// ---------------------------------------------------------------
+const round2 = (n) => Math.round(n * 100) / 100;
+
+export const demoSuppliers = [
+  { id: "sup-lfc", name: "Lahore Films Co", contact_person: "Tariq Mehmood", phone: "0300 4412233", address: "Sundar Industrial Estate, Lahore", opening_balance: 0, notes: "Jumbo rolls, all microns", active: true, created_at: "2026-09-05T06:00:00Z" },
+  { id: "sup-star", name: "Star Tubes Faisalabad", contact_person: "Naveed Akhtar", phone: "0321 6655441", address: "Jhang Road, Faisalabad", opening_balance: 15000, notes: "", active: true, created_at: "2026-09-05T06:05:00Z" },
+  { id: "sup-pakbox", name: "Pak Box Industries (Pvt) Ltd", contact_person: "Shahid Iqbal", phone: "041 8721100", address: "Small Industrial Estate, Sargodha Road, Faisalabad", opening_balance: 0, notes: "Cartons 46mm and 72mm", active: true, created_at: "2026-09-06T06:00:00Z" },
+  { id: "sup-kpt", name: "Karachi Polymer Traders", contact_person: "", phone: "021 32455667", address: "SITE Area, Karachi", opening_balance: 0, notes: "", active: true, created_at: "2026-09-10T06:00:00Z" },
+];
+
+const purchaseSeed = [
+  { id: "pu-1", purchase_no: "PUR-00001", supplier_id: "sup-lfc", purchase_date: "2026-09-08", supplier_ref: "LF-2291", discount: 0, gst_rate: 18, other_charges: 6500,
+    lines: [{ item_id: "i-jr-40c", qty: 120000, rate: 9.4 }, { item_id: "i-jr-45b", qty: 40000, rate: 10.1 }] },
+  { id: "pu-2", purchase_no: "PUR-00002", supplier_id: "sup-star", purchase_date: "2026-09-12", supplier_ref: "", discount: 1500, gst_rate: 0, other_charges: 0,
+    lines: [{ item_id: "i-pt-star", qty: 15000, rate: 6 }] },
+  { id: "pu-3", purchase_no: "PUR-00003", supplier_id: "sup-pakbox", purchase_date: "2026-09-15", supplier_ref: "PB/0915", discount: 0, gst_rate: 0, other_charges: 2500,
+    lines: [{ item_id: "i-cb-46", qty: 800, rate: 85 }, { item_id: "i-cb-72", qty: 300, rate: 92 }] },
+  { id: "pu-4", purchase_no: "PUR-00004", supplier_id: "sup-kpt", purchase_date: "2026-09-20", supplier_ref: "KPT-118", discount: 0, gst_rate: 18, other_charges: 0,
+    lines: [{ item_id: "i-sf", qty: 400, rate: 540 }] },
+  { id: "pu-5", purchase_no: "PUR-00005", supplier_id: "sup-lfc", purchase_date: "2026-09-29", supplier_ref: "LF-2350", discount: 5000, gst_rate: 18, other_charges: 4500,
+    lines: [{ item_id: "i-jr-40c", qty: 90000, rate: 9.5 }] },
+  { id: "pu-6", purchase_no: "PUR-00006", supplier_id: "sup-pakbox", purchase_date: "2026-09-30", supplier_ref: "PB/0930", discount: 0, gst_rate: 0, other_charges: 0,
+    lines: [{ item_id: "i-cb-46", qty: 400, rate: 86 }], status: "void", void_reason: "Entered twice, see PUR-00007" },
+  { id: "pu-7", purchase_no: "PUR-00007", supplier_id: "sup-pakbox", purchase_date: "2026-10-01", supplier_ref: "PB/0930", discount: 0, gst_rate: 0, other_charges: 0,
+    lines: [{ item_id: "i-cb-46", qty: 400, rate: 86 }] },
+];
+
+export const demoSupplierPayments = [
+  { id: "sp-1", supplier_id: "sup-lfc", purchase_id: "pu-1", payment_date: "2026-09-08", amount: 500000, method: "bank", reference: "HBL TT 55120", note: "", status: "posted", void_reason: "", created_at: "2026-09-08T10:00:00Z" },
+  { id: "sp-2", supplier_id: "sup-lfc", purchase_id: "pu-1", payment_date: "2026-09-25", amount: 1314260, method: "cheque", reference: "Chq 004417", note: "", status: "posted", void_reason: "", created_at: "2026-09-25T10:00:00Z" },
+  { id: "sp-3", supplier_id: "sup-star", purchase_id: null, payment_date: "2026-09-14", amount: 15000, method: "cash", reference: "", note: "Old balance", status: "posted", void_reason: "", created_at: "2026-09-14T10:00:00Z" },
+  { id: "sp-4", supplier_id: "sup-star", purchase_id: "pu-2", payment_date: "2026-09-30", amount: 50000, method: "cash", reference: "", note: "", status: "posted", void_reason: "", created_at: "2026-09-30T10:00:00Z" },
+  { id: "sp-5", supplier_id: "sup-pakbox", purchase_id: "pu-3", payment_date: "2026-09-15", amount: 98100, method: "bank", reference: "MCB 7781", note: "", status: "posted", void_reason: "", created_at: "2026-09-15T10:00:00Z" },
+  { id: "sp-6", supplier_id: "sup-kpt", purchase_id: "pu-4", payment_date: "2026-09-21", amount: 100000, method: "online", reference: "IBFT 33019", note: "", status: "void", void_reason: "Sent to the wrong account, reversed by bank", created_at: "2026-09-21T10:00:00Z" },
+  { id: "sp-7", supplier_id: "sup-kpt", purchase_id: "pu-4", payment_date: "2026-09-22", amount: 100000, method: "online", reference: "IBFT 33102", note: "", status: "posted", void_reason: "", created_at: "2026-09-22T10:00:00Z" },
+];
+
+const itemById = (id) => demoItems.find((i) => i.id === id);
+
+export const demoPurchaseLines = purchaseSeed.flatMap((p) =>
+  p.lines.map((l, i) => {
+    const it = itemById(l.item_id);
+    return { id: `${p.id}-l${i}`, purchase_id: p.id, item_id: l.item_id, item_name: it?.name ?? "", unit: it?.unit ?? "", brand_name: it?.brand_name ?? null, qty: l.qty, rate: l.rate, amount: round2(l.qty * l.rate) };
+  }),
+);
+
+export const demoPurchases = purchaseSeed.map((p) => {
+  const subtotal = round2(p.lines.reduce((s, l) => s + round2(l.qty * l.rate), 0));
+  const gst_amount = round2(((subtotal - p.discount) * p.gst_rate) / 100);
+  const total = round2(subtotal - p.discount + gst_amount + p.other_charges);
+  const status = p.status ?? "posted";
+  const paid = round2(demoSupplierPayments.filter((x) => x.purchase_id === p.id && x.status === "posted").reduce((s, x) => s + x.amount, 0));
+  const supplier = demoSuppliers.find((s) => s.id === p.supplier_id);
+  return {
+    id: p.id, purchase_no: p.purchase_no, purchase_date: p.purchase_date, supplier_id: p.supplier_id, supplier_name: supplier.name,
+    supplier_ref: p.supplier_ref, subtotal, discount: p.discount, gst_rate: p.gst_rate, gst_amount, other_charges: p.other_charges, total,
+    notes: "", status, void_reason: p.void_reason ?? "", created_at: `${p.purchase_date}T09:00:00Z`, created_by_name: "Ali Raza",
+    line_count: p.lines.length, paid,
+    payment_status: status === "void" ? "void" : paid >= total ? "paid" : paid > 0 ? "partly" : "unpaid",
+  };
+}).sort((a, b) => b.purchase_date.localeCompare(a.purchase_date) || b.purchase_no.localeCompare(a.purchase_no));
+
+export const demoSupplierBalances = demoSuppliers.map((s) => {
+  const billed = round2(demoPurchases.filter((p) => p.supplier_id === s.id && p.status === "posted").reduce((t, p) => t + p.total, 0));
+  const paid = round2(demoSupplierPayments.filter((p) => p.supplier_id === s.id && p.status === "posted").reduce((t, p) => t + p.amount, 0));
+  const last = demoPurchases.filter((p) => p.supplier_id === s.id && p.status === "posted").map((p) => p.purchase_date).sort().pop() ?? null;
+  return { id: s.id, name: s.name, phone: s.phone, active: s.active, opening_balance: s.opening_balance, billed, paid, balance: round2(s.opening_balance + billed - paid), last_purchase: last };
+});
+
+/** The same rows supplier_ledger() returns, for demo mode. */
+export function demoSupplierLedger(supplierId, from, to) {
+  const s = demoSuppliers.find((x) => x.id === supplierId);
+  if (!s) return [];
+  const inRange = (d) => (!from || d >= from) && (!to || d <= to);
+  let open = s.opening_balance;
+  if (from) {
+    open += demoPurchases.filter((p) => p.supplier_id === supplierId && p.status === "posted" && p.purchase_date < from).reduce((t, p) => t + p.total, 0);
+    open -= demoSupplierPayments.filter((p) => p.supplier_id === supplierId && p.status === "posted" && p.payment_date < from).reduce((t, p) => t + p.amount, 0);
+  }
+  const entries = [
+    ...demoPurchases.filter((p) => p.supplier_id === supplierId && p.status === "posted" && inRange(p.purchase_date)).map((p) => ({
+      entry_date: p.purchase_date, kind: "purchase", entry_id: p.id, purchase_id: p.id, ref: p.purchase_no,
+      description: `Purchase${p.supplier_ref ? `, their bill ${p.supplier_ref}` : ""}`, debit: p.total, credit: 0, ts: p.created_at,
+    })),
+    ...demoSupplierPayments.filter((p) => p.supplier_id === supplierId && p.status === "posted" && inRange(p.payment_date)).map((p) => ({
+      entry_date: p.payment_date, kind: "payment", entry_id: p.id, purchase_id: p.purchase_id, ref: demoPurchases.find((x) => x.id === p.purchase_id)?.purchase_no ?? "",
+      description: `Payment, ${p.method}${p.reference ? ` (${p.reference})` : ""}`, debit: 0, credit: p.amount, ts: p.created_at,
+    })),
+  ].sort((a, b) => a.entry_date.localeCompare(b.entry_date) || a.ts.localeCompare(b.ts));
+  const rows = [{ entry_date: from ?? null, kind: "opening", entry_id: null, purchase_id: null, ref: "", description: from ? "Balance brought forward" : "Opening balance", debit: Math.max(open, 0), credit: Math.max(-open, 0) }, ...entries];
+  let bal = 0;
+  return rows.map((r) => {
+    bal = round2(bal + r.debit - r.credit);
+    return { ...r, balance: bal };
+  });
+}

@@ -39,7 +39,7 @@ export default async function UsersPage() {
                   <th scope="col">Name</th>
                   <th scope="col">Role</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Added</th>
+                  <th scope="col" className="hidden xl:table-cell">Added</th>
                   <th scope="col" className="text-right">Actions</th>
                 </tr>
               </thead>
@@ -63,7 +63,7 @@ export default async function UsersPage() {
                     <td>
                       <Badge tone={p.active ? "success" : "gray"}>{p.active ? "Can sign in" : "Switched off"}</Badge>
                     </td>
-                    <td className="whitespace-nowrap text-sm text-secondary">{formatDate(p.created_at)}</td>
+                    <td className="hidden whitespace-nowrap text-sm text-secondary xl:table-cell">{formatDate(p.created_at)}</td>
                     <td>
                       <div className="flex justify-end gap-2">
                         <Link href={`/admin/activity?user=${p.id}`} className="btn-secondary min-h-[38px] px-3 py-1.5 text-[13px]">

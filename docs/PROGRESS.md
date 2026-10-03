@@ -4,13 +4,14 @@
 
 - [x] Phase 1: database (all phases' tables and posting functions), app shell,
       auth, Stock, Raw Materials, Products, Activity, Users, Settings, demo mode.
+- [x] Phase 2: Purchases (list, new, detail, void) and Suppliers (list, add,
+      edit, ledger with running balance, payments, void payment). Supplier
+      money is admin-only.
 
 ## Next
 
 - [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0006,
       create the first admin, set the env vars on Vercel (region bom1).
-- [ ] Phase 2: Purchases and Suppliers (new purchase form, list, detail,
-      supplier ledger, payments, void).
 - [ ] Phase 3: Production (run form pre-filled from recipe, list, detail, void).
 - [ ] Phase 4: Sales and Customers (invoice form, printable invoice, customer
       ledger, payments, void).

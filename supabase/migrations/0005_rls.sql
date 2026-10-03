@@ -26,7 +26,7 @@ begin
   foreach t in array array[
     'profiles', 'settings', 'item_categories', 'units', 'brands', 'sizes', 'microns', 'colors',
     'items', 'stock_movements', 'suppliers', 'customers', 'purchases', 'purchase_lines',
-    'supplier_payments', 'sales', 'sale_lines', 'customer_payments', 'recipes', 'recipe_lines',
+    'sales', 'sale_lines', 'customer_payments', 'recipes', 'recipe_lines',
     'production_runs', 'production_consumption'
   ] loop
     execute format(
@@ -62,7 +62,7 @@ declare t text;
 begin
   foreach t in array array[
     'stock_movements', 'suppliers', 'customers', 'purchases', 'purchase_lines',
-    'supplier_payments', 'sales', 'sale_lines', 'customer_payments',
+    'sales', 'sale_lines', 'customer_payments',
     'production_runs', 'production_consumption'
   ] loop
     execute format(
@@ -71,7 +71,7 @@ begin
   end loop;
 
   foreach t in array array[
-    'suppliers', 'customers', 'purchases', 'supplier_payments', 'sales',
+    'suppliers', 'customers', 'purchases', 'sales',
     'customer_payments', 'production_runs'
   ] loop
     execute format(
@@ -79,6 +79,15 @@ begin
       t || '_admin_update', t);
   end loop;
 end $$;
+
+-- Money paid to suppliers is for admins only (decided 2026-10-03): workers
+-- record purchases but do not see or record supplier payments.
+create policy supplier_payments_admin_read on public.supplier_payments
+for select to authenticated using (public.is_admin());
+create policy supplier_payments_admin_insert on public.supplier_payments
+for insert to authenticated with check (public.is_admin());
+create policy supplier_payments_admin_update on public.supplier_payments
+for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- A deactivated or non-admin user can still read their own profile, so the
 -- app can tell them why they were signed out.

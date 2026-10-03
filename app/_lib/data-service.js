@@ -299,3 +299,208 @@ export async function getLowStockAlerts() {
   if (error) return [];
   return data ?? [];
 }
+
+// ---------------------------------------------------------------
+// Suppliers
+// ---------------------------------------------------------------
+
+/** Active suppliers for pick lists. */
+export async function getSupplierOptions() {
+  if (isDemoMode) return demo.demoSuppliers.filter((s) => s.active).map(({ id, name }) => ({ id, name }));
+  const supabase = await createClient();
+  return unwrap(await supabase.from("suppliers").select("id, name").eq("active", true).order("name"), "the suppliers");
+}
+
+export async function getSupplier(id) {
+  if (isDemoMode) return demo.demoSuppliers.find((s) => s.id === id) ?? null;
+  const supabase = await createClient();
+  return unwrap(await supabase.from("suppliers").select("*").eq("id", id).maybeSingle(), "the supplier");
+}
+
+/**
+ * One page of suppliers. Admins get balances (supplier_balances); workers get
+ * the plain list, because supplier payments are admin-only.
+ */
+export async function getSuppliersPage({ q, page, owing, isAdmin }) {
+  if (isDemoMode) {
+    const needle = (q || "").toLowerCase();
+    const rows = demo.demoSupplierBalances
+      .map((b) => ({ ...demo.demoSuppliers.find((s) => s.id === b.id), ...b }))
+      .filter((r) => (!needle || `${r.name} ${r.phone}`.toLowerCase().includes(needle)) && (!owing || r.balance > 0))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return demoPage(rows, page);
+  }
+  const supabase = await createClient();
+  const { from, to } = pageRange(page);
+  let query = isAdmin
+    ? supabase.from("supplier_balances").select("*", { count: "exact" })
+    : supabase.from("suppliers").select("id, name, phone, active, contact_person", { count: "exact" });
+  if (q) {
+    const safe = q.replace(/[%,()]/g, " ").trim();
+    if (safe) query = query.or(`name.ilike.%${safe}%,phone.ilike.%${safe}%`);
+  }
+  if (owing && isAdmin) query = query.gt("balance", 0);
+  const { data, error, count } = await query.order("name").range(from, to);
+  if (error) throw new Error(`Could not load the suppliers: ${error.message}`);
+  return { rows: data ?? [], total: count ?? 0 };
+}
+
+export async function getSupplierTotals() {
+  if (isDemoMode) {
+    const rows = demo.demoSupplierBalances;
+    return {
+      suppliers: rows.filter((r) => r.active).length,
+      payable: rows.filter((r) => r.balance > 0).reduce((t, r) => t + r.balance, 0),
+      with_balance: rows.filter((r) => r.balance > 0).length,
+    };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("supplier_totals");
+  if (error) throw new Error(`Could not total the suppliers: ${error.message}`);
+  return data?.[0] ?? { suppliers: 0, payable: 0, with_balance: 0 };
+}
+
+export async function getSupplierBalance(id) {
+  if (isDemoMode) return demo.demoSupplierBalances.find((b) => b.id === id) ?? null;
+  const supabase = await createClient();
+  return unwrap(await supabase.from("supplier_balances").select("*").eq("id", id).maybeSingle(), "the supplier balance");
+}
+
+/** Running-balance ledger, worked out by supplier_ledger() in Postgres. */
+export async function getSupplierLedger(id, { from, to } = {}) {
+  if (isDemoMode) return demo.demoSupplierLedger(id, from || null, to || null);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("supplier_ledger", {
+    p_supplier_id: id,
+    p_from: from || null,
+    p_to: to || null,
+  });
+  if (error) throw new Error(`Could not load the ledger: ${error.message}`);
+  return data ?? [];
+}
+
+/** Every payment to a supplier, void ones included, newest first. */
+export async function getSupplierPayments(supplierId) {
+  if (isDemoMode) {
+    return demo.demoSupplierPayments
+      .filter((p) => p.supplier_id === supplierId)
+      .map((p) => ({ ...p, purchase_no: demo.demoPurchases.find((x) => x.id === p.purchase_id)?.purchase_no ?? null }))
+      .sort((a, b) => b.payment_date.localeCompare(a.payment_date) || b.created_at.localeCompare(a.created_at));
+  }
+  const supabase = await createClient();
+  const data = unwrap(
+    await supabase
+      .from("supplier_payments")
+      .select("*, purchases(purchase_no)")
+      .eq("supplier_id", supplierId)
+      .order("payment_date", { ascending: false })
+      .order("created_at", { ascending: false }),
+    "the payments",
+  );
+  return data.map((p) => ({ ...p, purchase_no: p.purchases?.purchase_no ?? null }));
+}
+
+/** Bills that still have something to pay, for the payment form's pick list. */
+export async function getOpenPurchases(supplierId) {
+  if (isDemoMode) {
+    return demo.demoPurchases.filter((p) => p.supplier_id === supplierId && (p.payment_status === "unpaid" || p.payment_status === "partly"));
+  }
+  const supabase = await createClient();
+  return unwrap(
+    await supabase
+      .from("purchase_list")
+      .select("id, purchase_no, purchase_date, total, paid, payment_status")
+      .eq("supplier_id", supplierId)
+      .in("payment_status", ["unpaid", "partly"])
+      .order("purchase_date"),
+    "the unpaid bills",
+  );
+}
+
+// ---------------------------------------------------------------
+// Purchases
+// ---------------------------------------------------------------
+
+/** filters: { supplier, status, from, to, q, page } */
+export async function getPurchasesPage(filters = {}) {
+  const { supplier, status, from: dateFrom, to: dateTo, q, page } = filters;
+  if (isDemoMode) {
+    const needle = (q || "").toLowerCase();
+    const rows = demo.demoPurchases.filter(
+      (r) =>
+        (!supplier || r.supplier_id === supplier) &&
+        (!status || r.payment_status === status) &&
+        (!dateFrom || r.purchase_date >= dateFrom) &&
+        (!dateTo || r.purchase_date <= dateTo) &&
+        (!needle || `${r.purchase_no} ${r.supplier_ref} ${r.supplier_name}`.toLowerCase().includes(needle)),
+    );
+    return demoPage(rows, page);
+  }
+  const supabase = await createClient();
+  const { from, to } = pageRange(page);
+  let query = supabase.from("purchase_list").select("*", { count: "exact" });
+  if (supplier) query = query.eq("supplier_id", supplier);
+  if (status) query = query.eq("payment_status", status);
+  if (dateFrom) query = query.gte("purchase_date", dateFrom);
+  if (dateTo) query = query.lte("purchase_date", dateTo);
+  if (q) {
+    const safe = q.replace(/[%,()]/g, " ").trim();
+    if (safe) query = query.or(`purchase_no.ilike.%${safe}%,supplier_ref.ilike.%${safe}%,supplier_name.ilike.%${safe}%`);
+  }
+  const { data, error, count } = await query
+    .order("purchase_date", { ascending: false })
+    .order("purchase_no", { ascending: false })
+    .range(from, to);
+  if (error) throw new Error(`Could not load the purchases: ${error.message}`);
+  return { rows: data ?? [], total: count ?? 0 };
+}
+
+/** Card totals over the given dates and supplier, from purchase_totals(). */
+export async function getPurchaseTotals({ from, to, supplier } = {}) {
+  if (isDemoMode) {
+    const rows = demo.demoPurchases.filter(
+      (r) => r.status === "posted" && (!from || r.purchase_date >= from) && (!to || r.purchase_date <= to) && (!supplier || r.supplier_id === supplier),
+    );
+    const total = rows.reduce((t, r) => t + r.total, 0);
+    const paid = rows.reduce((t, r) => t + Math.min(r.paid, r.total), 0);
+    return { bills: rows.length, total, paid, unpaid: Math.max(total - paid, 0) };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("purchase_totals", { p_from: from || null, p_to: to || null, p_supplier: supplier || null });
+  if (error) throw new Error(`Could not total the purchases: ${error.message}`);
+  return data?.[0] ?? { bills: 0, total: 0, paid: 0, unpaid: 0 };
+}
+
+/** A purchase with its lines, and its payments when the reader is an admin. */
+export async function getPurchase(id, { withPayments = false } = {}) {
+  if (isDemoMode) {
+    const purchase = demo.demoPurchases.find((p) => p.id === id);
+    if (!purchase) return null;
+    return {
+      purchase,
+      lines: demo.demoPurchaseLines.filter((l) => l.purchase_id === id),
+      payments: withPayments ? demo.demoSupplierPayments.filter((p) => p.purchase_id === id) : [],
+    };
+  }
+  const supabase = await createClient();
+  const purchase = unwrap(await supabase.from("purchase_list").select("*").eq("id", id).maybeSingle(), "the purchase");
+  if (!purchase) return null;
+  const [linesRes, creatorRes, paymentsRes] = await Promise.all([
+    supabase.from("purchase_lines").select("id, item_id, qty, rate, amount, items(name, code, brand_id, units(short_name), brands(name))").eq("purchase_id", id),
+    purchase.created_by ? supabase.from("profiles").select("full_name").eq("id", purchase.created_by).maybeSingle() : { data: null },
+    withPayments
+      ? supabase.from("supplier_payments").select("*").eq("purchase_id", id).order("payment_date")
+      : { data: [] },
+  ]);
+  const lines = unwrap(linesRes, "the purchase lines").map((l) => ({
+    ...l,
+    item_name: l.items?.name ?? "",
+    unit: l.items?.units?.short_name ?? "",
+    brand_name: l.items?.brands?.name ?? null,
+  }));
+  return {
+    purchase: { ...purchase, created_by_name: creatorRes.data?.full_name ?? "" },
+    lines,
+    payments: paymentsRes.data ?? [],
+  };
+}

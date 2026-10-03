@@ -56,9 +56,16 @@ select code, on_hand, unit, stock_status from item_stock order by kind, code;
 \echo '--- worker adds customer + supplier, purchase, sale'
 insert into customers (name, opening_balance) values ('Faisalabad Traders (Pvt) Ltd', 25000);
 insert into suppliers (name) values ('Lahore Films Co');
+\echo '--- worker purchase with a payment (expect: only an admin can record a payment)'
 select post_purchase(jsonb_build_object('supplier_id',(select id from suppliers limit 1),'gst_rate',18,'discount',1000,
   'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='CB-48'),'qty',100,'rate',85)),
-  'payment', jsonb_build_object('amount',5000,'method','cash'))) is not null as purchased;
+  'payment', jsonb_build_object('amount',5000,'method','cash')));
+\echo '--- worker purchase without a payment (expect purchased = t)'
+select post_purchase(jsonb_build_object('supplier_id',(select id from suppliers limit 1),'gst_rate',18,'discount',1000,
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='CB-48'),'qty',100,'rate',85)))) is not null as purchased;
+\echo '--- worker reads supplier payments (expect 0) and records one (expect admin error)'
+select count(*) as worker_sees_supplier_payments from supplier_payments;
+select record_supplier_payment(jsonb_build_object('supplier_id',(select id from suppliers limit 1),'amount',100));
 \echo '--- sale of raw item (expect kind error)'
 select post_sale(jsonb_build_object('customer_id',(select id from customers limit 1),'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='SF'),'qty',1,'rate',1))));
 \echo '--- sale of 12 cartons with only 10 (expect not enough stock)'
@@ -68,6 +75,7 @@ select post_sale(jsonb_build_object('customer_id',(select id from customers limi
 select invoice_no, subtotal, total from sales;
 select purchase_no, subtotal, discount, gst_amount, total from purchases;
 select name, billed, paid, balance from customer_balances;
+\echo '--- (worker view of supplier_balances: paid reads 0 because payments are admin-only)'
 select name, billed, paid, balance from supplier_balances;
 \echo '--- worker updates sale (expect 0 rows), voids (expect admin error), reads log (expect 0)'
 update sales set total = 1;
@@ -84,3 +92,41 @@ select name, balance from customer_balances;
 \echo '--- admin edits activity log (expect error)'
 update activity_log set summary='x';
 select created_at::time(0), actor_name, action, module, summary from activity_log where actor_name <> 'System' order by id;
+
+\echo ''
+\echo '=== Phase 2: supplier payments and ledger (as admin) ==='
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+insert into suppliers (name, opening_balance) values ('Karachi Core Mills', 2000);
+\echo '--- admin records 5,000 against PUR-00001 (expect id)'
+select record_supplier_payment(jsonb_build_object('supplier_id',(select id from suppliers where name='Lahore Films Co'),
+  'purchase_id',(select id from purchases where purchase_no='PUR-00001'),'amount',5000,'method','bank','reference','TT-778')) is not null as paid;
+\echo '--- payment linked to another supplier''s bill (expect: different supplier)'
+select record_supplier_payment(jsonb_build_object('supplier_id',(select id from suppliers where name='Karachi Core Mills'),
+  'purchase_id',(select id from purchases where purchase_no='PUR-00001'),'amount',10));
+\echo '--- zero payment (expect: above zero)'
+select record_supplier_payment(jsonb_build_object('supplier_id',(select id from suppliers where name='Karachi Core Mills'),'amount',0));
+\echo '--- purchase list status (expect PUR-00001 partly, paid 5000 of 8850)'
+select purchase_no, total, paid, payment_status, line_count from purchase_list order by purchase_no;
+select * from purchase_totals();
+\echo '--- ledger (expect last balance 3850 = supplier_balances)'
+select entry_date, kind, ref, description, debit, credit, balance from supplier_ledger((select id from suppliers where name='Lahore Films Co'));
+select balance as view_balance from supplier_balances where name='Lahore Films Co';
+\echo '--- ledger from tomorrow (expect one brought forward row of 3850)'
+select kind, description, debit, credit, balance from supplier_ledger((select id from suppliers where name='Lahore Films Co'), current_date + 1);
+\echo '--- void payment without reason (expect reason error), then with reason (expect balance back to 8850)'
+select void_supplier_payment((select id from supplier_payments where reference='TT-778'), ' ');
+select void_supplier_payment((select id from supplier_payments where reference='TT-778'), 'Cheque bounced');
+select void_supplier_payment((select id from supplier_payments where reference='TT-778'), 'again');
+select balance from supplier_balances where name='Lahore Films Co';
+select payment_status from purchase_list where purchase_no='PUR-00001';
+\echo '--- worker opens the ledger (expect admin error)'
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b',false);
+select * from supplier_ledger((select id from suppliers where name='Lahore Films Co'));
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+\echo '--- admin voids PUR-00001 (expect CB-48 back to 20 pcs, list status void)'
+select void_purchase((select id from purchases where purchase_no='PUR-00001'), 'Entered twice');
+select code, on_hand from item_stock where code='CB-48';
+select payment_status from purchase_list where purchase_no='PUR-00001';
+select summary from activity_log where module in ('payment','purchase') order by id;
+\echo '--- supplier totals (expect 2 suppliers, payable 2000 = Karachi opening balance, 1 with balance)'
+select * from supplier_totals();

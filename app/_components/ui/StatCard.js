@@ -25,7 +25,7 @@ export default function StatCard({ icon: Icon, label, value, tone = "primary", v
       </span>
       <div className="min-w-0">
         <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-muted sm:text-[13px]">{label}</p>
-        <p className={clsx("num text-[26px] font-bold leading-tight", VALUE_TONES[valueTone ?? tone] ?? VALUE_TONES.plain)}>
+        <p className={clsx("num text-[21px] font-bold leading-tight sm:text-[26px]", VALUE_TONES[valueTone ?? tone] ?? VALUE_TONES.plain)}>
           {value}
         </p>
       </div>

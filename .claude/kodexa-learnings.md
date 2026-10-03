@@ -23,6 +23,9 @@ for the rules.
 | L-005 | 2026-10-03 | rule | Business lists the client "will decide" go in Settings, not in questions | type: dashboard | logged |
 | L-006 | 2026-10-03 | gotcha | Playwright in cloud sessions cannot open external sites; mirror with wget | all | logged |
 | L-007 | 2026-10-03 | gotcha | Urdu voice notes: Whisper transcript is good, numbers in the translation are not | all | logged |
+| L-008 | 2026-10-03 | choice | Supplier money (balances, ledger, payments) admin-only; workers record bills | project | project |
+| L-009 | 2026-10-03 | gotcha | Card/table switch at 768px is too low with a 260px sidebar; use 1280px | type: dashboard | logged |
+| L-010 | 2026-10-03 | gotcha | Never pass an icon component into a client component; pass an element | all | logged |
 
 ## Entries
 
@@ -80,4 +83,28 @@ for the rules.
 - **Lesson:** For Urdu voice notes, read the Urdu transcript rather than the English translation, list every number heard, and ask the user to confirm them before seeding data.
 - **Scope:** all
 - **Target in skill:** SKILL.md section 2
+- **Status:** logged
+
+### L-008 · 2026-10-03 · strong · choice
+- **Said / saw:** chose "Admins only (Recommended)" for supplier balances, ledger and payments
+- **Context:** phase 2 planning, AM Packaging
+- **Lesson:** Recorded in CLAUDE.md for this project. Workers record purchases without a payment; RLS, post_purchase and the pages all enforce it.
+- **Scope:** project
+- **Target in skill:** none (project rule)
+- **Status:** project
+
+### L-009 · 2026-10-03 · medium · gotcha
+- **Said / saw:** scroll check: 1024 /admin/stock table needs sideways scroll by 238px; ledger hid its Balance column at 1440 beside a 380px side column
+- **Context:** phase 2 render checks
+- **Lesson:** In a dashboard with a 260px sidebar, switch money tables to cards below 1280px (not 768px), keep side columns beside a ledger only from 1536px, and add a render check that fails when any `.overflow-x-auto` table needs a sideways scroll at 1024 to 1440.
+- **Scope:** type: dashboard
+- **Target in skill:** references/types/dashboard.md; small-business-ledger-app references/verifying-ui.md
+- **Status:** logged
+
+### L-010 · 2026-10-03 · medium · gotcha
+- **Said / saw:** "Functions cannot be passed directly to Client Components" when a server page passed `triggerIcon={Ban}` to a client dialog
+- **Context:** purchase detail page, phase 2
+- **Lesson:** Props from server to client components must be serialisable: pass icons as elements (`icon={<Ban size={16} />}`), never as component references. The build does not catch it; only rendering the page does.
+- **Scope:** all
+- **Target in skill:** references/folder-structure.md or conventions
 - **Status:** logged
