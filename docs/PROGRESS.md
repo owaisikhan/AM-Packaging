@@ -21,7 +21,8 @@
 - [x] Phase 6: polish pass. Regression checks (`npm run check`), loading,
       error and not-found screens, 44px touch targets, phone layouts for
       Users and Settings, app icon, `no-undef` lint, docs.
-- [x] Guide page for workers and admins (`/admin/guide`).
+- [x] Guide page for workers and admins (`/admin/guide`), in English and Urdu.
+- [x] Per-worker permissions chosen by the admin (migration 0008).
 - [x] Live Supabase project connected: migrations 0001-0007 applied,
       first admin added (a test account for now).
 

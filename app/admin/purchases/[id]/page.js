@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Ban, Plus, Truck } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getPurchase } from "@/app/_lib/data-service";
 import { formatMoney, formatQty } from "@/app/_lib/format-helpers";
 import { formatDate, formatDateTime, todayISO } from "@/app/_lib/date-helpers";
@@ -18,12 +18,14 @@ export const metadata = { title: "Purchase" };
 const money = (n) => formatMoney(n, { decimals: Number(n) % 1 !== 0 });
 
 export default async function PurchaseDetailPage({ params, searchParams }) {
-  const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  const user = await requirePagePermission("purchases");
+  const seesMoney = can(user, "balances");
+  const canPay = can(user, "payments");
+  const canVoid = can(user, "void");
   const { id } = await params;
   const { saved } = await searchParams;
 
-  const data = await getPurchase(id, { withPayments: isAdmin });
+  const data = await getPurchase(id, { withPayments: seesMoney });
   if (!data) notFound();
   const { purchase: p, lines, payments } = data;
   const isVoid = p.status === "void";
@@ -40,7 +42,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
         title={`Purchase ${p.purchase_no}`}
         subtitle={`${p.supplier_name} · ${formatDate(p.purchase_date)}${p.created_by_name ? ` · entered by ${p.created_by_name}` : ""}`}
         crumbs={[{ label: "Home", href: "/admin" }, { label: "Purchases", href: "/admin/purchases" }, { label: p.purchase_no }]}
-        badge={<PaymentStatus status={isAdmin ? p.payment_status : isVoid ? "void" : "recorded"} />}
+        badge={<PaymentStatus status={seesMoney ? p.payment_status : isVoid ? "void" : "recorded"} />}
         actions={
           <>
             <Link href="/admin/purchases" className="btn-secondary">
@@ -51,7 +53,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
                 <Plus size={17} aria-hidden /> Another from this supplier
               </Link>
             ) : null}
-            {isAdmin && !isVoid ? (
+            {canVoid && !isVoid ? (
               <ReasonDialog
                 action={voidPurchase}
                 id={p.id}
@@ -80,7 +82,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Supplier</p>
                 <p className="mt-1 flex items-center gap-2 font-semibold text-heading">
                   <Truck size={16} className="text-muted" aria-hidden />
-                  {isAdmin ? (
+                  {seesMoney ? (
                     <Link href={`/admin/suppliers/${p.supplier_id}`} className="tap-inline hover:text-primary-ink">{p.supplier_name}</Link>
                   ) : (
                     p.supplier_name
@@ -155,7 +157,7 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
               <div className="border-t border-border pt-3">
                 <MoneyRow label="Grand total" strong tone="primary">{money(p.total)}</MoneyRow>
               </div>
-              {isAdmin && !isVoid ? (
+              {seesMoney && !isVoid ? (
                 <>
                   <MoneyRow label="Paid">{money(p.paid)}</MoneyRow>
                   <div className={`rounded-xl px-4 py-3 ${left > 0 ? "bg-[#fef2f2] dark:bg-[#450a0a]" : "bg-primary-light"}`}>
@@ -168,11 +170,11 @@ export default async function PurchaseDetailPage({ params, searchParams }) {
             </div>
           </section>
 
-          {isAdmin ? (
+          {seesMoney ? (
             <section className="card overflow-hidden">
               <h2 className="card-title border-b border-border px-5 py-4">Payments on this bill</h2>
-              <PaymentsTable payments={payments} showBill={false} />
-              {!isVoid && left > 0 ? (
+              <PaymentsTable payments={payments} showBill={false} canVoid={canVoid} />
+              {canPay && !isVoid && left > 0 ? (
                 <div className="border-t border-border p-5">
                   <p className="mb-3 text-sm font-semibold text-heading">Record a payment</p>
                   <PaymentForm supplierId={p.supplier_id} purchaseId={p.id} today={todayISO()} suggested={left} />

@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "./supabase-server";
 import { createAdminClient } from "./supabase-auth";
-import { requireRole, ROLES } from "./helpers";
+import { can, requirePermission, requireRole, ROLES } from "./helpers";
+import { PERMISSION_KEYS } from "./permissions";
 import { isDemoMode } from "./config";
 
 // Every write lives in this file. Each action returns { ok, message, ...extras }
@@ -54,6 +55,20 @@ async function guard(role) {
   } catch (error) {
     return { error: fail(error.message) };
   }
+}
+
+/** Like guard, for things a worker may have been given (see permissions.js). */
+async function permGuard(key, what) {
+  try {
+    return { user: await requirePermission(key, what) };
+  } catch (error) {
+    return { error: fail(error.message) };
+  }
+}
+
+/** The ticked permission boxes on the user form, keeping only known keys. */
+function permissionsFrom(formData) {
+  return formData.getAll("permissions").map(String).filter((k) => PERMISSION_KEYS.includes(k));
 }
 
 // ---------------------------------------------------------------
@@ -377,7 +392,7 @@ export async function createUser(_prev, formData) {
   const supabase = await createClient();
   const { error: profileError } = await supabase
     .from("profiles")
-    .insert({ id: data.user.id, full_name: fullName, role, active: true });
+    .insert({ id: data.user.id, full_name: fullName, role, active: true, permissions: permissionsFrom(formData) });
   if (profileError) {
     await admin.auth.admin.deleteUser(data.user.id);
     return fail(describe(profileError, "Could not save the user."));
@@ -405,7 +420,10 @@ export async function updateUser(_prev, formData) {
   if (password && password.length < 8) return fail("The new password must be at least 8 characters.");
 
   const supabase = await createClient();
-  const { error } = await supabase.from("profiles").update({ full_name: fullName, role, active }).eq("id", id);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name: fullName, role, active, permissions: permissionsFrom(formData) })
+    .eq("id", id);
   if (error) return fail(describe(error, "Could not update the user."));
 
   if (password) {
@@ -446,7 +464,7 @@ function collectLines(formData) {
 }
 
 export async function createPurchase(_prev, formData) {
-  const { user, error: denied } = await guard(ROLES.WORKER);
+  const { user, error: denied } = await permGuard("purchases", "record a purchase");
   if (denied) return denied;
 
   const supplierId = text(formData, "supplier_id");
@@ -461,7 +479,7 @@ export async function createPurchase(_prev, formData) {
   if ([discount, other, gstRate].some((n) => Number.isNaN(n) || n < 0)) {
     return fail("Discount, other charges and GST must be numbers of zero or more.");
   }
-  const paid = user.role === ROLES.ADMIN ? moneyField(formData, "amount_paid") : 0;
+  const paid = can(user, "payments") ? moneyField(formData, "amount_paid") : 0;
   if (Number.isNaN(paid) || paid < 0) return fail("The amount paid must be zero or more.");
 
   const supabase = await createClient();
@@ -485,7 +503,7 @@ export async function createPurchase(_prev, formData) {
 }
 
 export async function voidPurchase(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("void", "void a purchase");
   if (denied) return denied;
   const id = text(formData, "id");
   const reason = text(formData, "reason");
@@ -502,8 +520,8 @@ export async function voidPurchase(_prev, formData) {
 // ---------------------------------------------------------------
 export async function saveSupplier(_prev, formData) {
   const id = text(formData, "id");
-  // Anyone signed in can add a supplier; changing one is for admins (RLS agrees).
-  const { user, error: denied } = await guard(id ? ROLES.ADMIN : ROLES.WORKER);
+  // Adding needs the suppliers permission; changing one is for admins (RLS agrees).
+  const { user, error: denied } = id ? await guard(ROLES.ADMIN) : await permGuard("suppliers", "add a supplier");
   if (denied) return denied;
 
   const name = text(formData, "name");
@@ -534,7 +552,7 @@ export async function saveSupplier(_prev, formData) {
 }
 
 export async function recordSupplierPayment(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("payments", "record a payment");
   if (denied) return denied;
   const amount = number(formData, "amount");
   if (amount === null || Number.isNaN(amount) || amount <= 0) return fail("Enter the amount paid, above zero.");
@@ -559,7 +577,7 @@ export async function recordSupplierPayment(_prev, formData) {
 }
 
 export async function voidSupplierPayment(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("void", "void a payment");
   if (denied) return denied;
   const reason = text(formData, "reason");
   if (!reason) return fail("Write a reason for voiding this payment.");
@@ -575,7 +593,7 @@ export async function voidSupplierPayment(_prev, formData) {
 // Production
 // ---------------------------------------------------------------
 export async function createProduction(_prev, formData) {
-  const { error: denied } = await guard(ROLES.WORKER);
+  const { error: denied } = await permGuard("production", "record production");
   if (denied) return denied;
 
   const itemId = text(formData, "item_id");
@@ -615,7 +633,7 @@ export async function createProduction(_prev, formData) {
 }
 
 export async function voidProduction(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("void", "void a production run");
   if (denied) return denied;
   const reason = text(formData, "reason");
   if (!reason) return fail("Write a reason for voiding this production run.");
@@ -630,7 +648,7 @@ export async function voidProduction(_prev, formData) {
 // Sales and customers
 // ---------------------------------------------------------------
 export async function createSale(_prev, formData) {
-  const { error: denied } = await guard(ROLES.WORKER);
+  const { user, error: denied } = await permGuard("sales", "make an invoice");
   if (denied) return denied;
 
   const customerId = text(formData, "customer_id");
@@ -645,8 +663,9 @@ export async function createSale(_prev, formData) {
   if ([discount, other, gstRate].some((n) => Number.isNaN(n) || n < 0)) {
     return fail("Discount, other charges and GST must be numbers of zero or more.");
   }
-  // Workers may take cash at the counter; post_sale records it for them.
-  const received = moneyField(formData, "amount_received");
+  // Workers given "Take cash on invoices" may take cash at the counter;
+  // post_sale records it for them.
+  const received = can(user, "sales_cash") || can(user, "payments") ? moneyField(formData, "amount_received") : 0;
   if (Number.isNaN(received) || received < 0) return fail("The amount received must be zero or more.");
 
   const saleDate = text(formData, "sale_date") || null;
@@ -674,7 +693,7 @@ export async function createSale(_prev, formData) {
 }
 
 export async function voidSale(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("void", "void an invoice");
   if (denied) return denied;
   const reason = text(formData, "reason");
   if (!reason) return fail("Write a reason for voiding this invoice.");
@@ -687,8 +706,8 @@ export async function voidSale(_prev, formData) {
 
 export async function saveCustomer(_prev, formData) {
   const id = text(formData, "id");
-  // Anyone signed in can add a customer; changing one is for admins (RLS agrees).
-  const { user, error: denied } = await guard(id ? ROLES.ADMIN : ROLES.WORKER);
+  // Adding needs the customers permission; changing one is for admins (RLS agrees).
+  const { user, error: denied } = id ? await guard(ROLES.ADMIN) : await permGuard("customers", "add a customer");
   if (denied) return denied;
 
   const name = text(formData, "name");
@@ -720,7 +739,7 @@ export async function saveCustomer(_prev, formData) {
 }
 
 export async function recordCustomerPayment(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("payments", "record a payment");
   if (denied) return denied;
   const amount = number(formData, "amount");
   if (amount === null || Number.isNaN(amount) || amount <= 0) return fail("Enter the amount received, above zero.");
@@ -744,7 +763,7 @@ export async function recordCustomerPayment(_prev, formData) {
 }
 
 export async function voidCustomerPayment(_prev, formData) {
-  const { error: denied } = await guard(ROLES.ADMIN);
+  const { error: denied } = await permGuard("void", "void a payment");
   if (denied) return denied;
   const reason = text(formData, "reason");
   if (!reason) return fail("Write a reason for voiding this payment.");

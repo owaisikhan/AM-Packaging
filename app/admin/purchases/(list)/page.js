@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, Receipt, Wallet, CircleCheck, CircleAlert } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getPurchasesPage, getPurchaseTotals, getSupplierOptions, PAGE_SIZE } from "@/app/_lib/data-service";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { todayISO } from "@/app/_lib/date-helpers";
@@ -12,8 +12,9 @@ import PurchasesTable from "@/app/_components/admin/PurchasesTable";
 export const metadata = { title: "Purchases" };
 
 export default async function PurchasesPage({ searchParams }) {
-  const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  const user = await requirePagePermission("purchases");
+  // Payment status, paid amounts and money cards need "See balances and payments".
+  const isAdmin = can(user, "balances");
   const sp = await searchParams;
 
   // Cards follow the date filter; with no dates they show this month.

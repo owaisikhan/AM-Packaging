@@ -7,15 +7,16 @@ export const demoProfile = {
   full_name: "Ahmed Munir",
   role: "admin",
   active: true,
+  permissions: ["stock_view", "purchases", "production", "sales", "sales_cash", "customers", "suppliers", "balances", "payments", "reports", "void"],
   email: "admin@ampackaging.pk",
 };
 
 export const demoProfiles = [
-  { id: "demo-admin", full_name: "Ahmed Munir", role: "admin", active: true, email: "admin@ampackaging.pk", created_at: "2026-09-01T05:00:00Z" },
-  { id: "demo-admin-2", full_name: "Usman Ahmed", role: "admin", active: true, email: "usman@ampackaging.pk", created_at: "2026-09-01T05:10:00Z" },
-  { id: "demo-w1", full_name: "Ali Raza", role: "worker", active: true, email: "ali@ampackaging.pk", created_at: "2026-09-02T06:00:00Z" },
-  { id: "demo-w2", full_name: "Muhammad Bilal Hussain", role: "worker", active: true, email: "bilal@ampackaging.pk", created_at: "2026-09-02T06:05:00Z" },
-  { id: "demo-w3", full_name: "Imran Khan", role: "worker", active: false, email: "imran@ampackaging.pk", created_at: "2026-09-03T06:00:00Z" },
+  { id: "demo-admin", full_name: "Ahmed Munir", role: "admin", active: true, permissions: ["stock_view", "purchases", "production", "sales", "sales_cash", "customers", "suppliers", "balances", "payments", "reports", "void"], email: "admin@ampackaging.pk", created_at: "2026-09-01T05:00:00Z" },
+  { id: "demo-admin-2", full_name: "Usman Ahmed", role: "admin", active: true, permissions: ["stock_view", "purchases", "production", "sales", "sales_cash", "customers", "suppliers", "balances", "payments", "reports", "void"], email: "usman@ampackaging.pk", created_at: "2026-09-01T05:10:00Z" },
+  { id: "demo-w1", full_name: "Ali Raza", role: "worker", active: true, permissions: ["stock_view", "purchases", "production", "sales", "sales_cash", "customers", "suppliers"], email: "ali@ampackaging.pk", created_at: "2026-09-02T06:00:00Z" },
+  { id: "demo-w2", full_name: "Muhammad Bilal Hussain", role: "worker", active: true, permissions: ["stock_view", "production"], email: "bilal@ampackaging.pk", created_at: "2026-09-02T06:05:00Z" },
+  { id: "demo-w3", full_name: "Imran Khan", role: "worker", active: false, permissions: ["stock_view", "purchases", "production", "sales", "sales_cash", "customers", "suppliers"], email: "imran@ampackaging.pk", created_at: "2026-09-03T06:00:00Z" },
 ];
 
 export const demoCategories = [

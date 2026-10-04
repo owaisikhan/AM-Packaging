@@ -28,7 +28,7 @@ function Label({ htmlFor, children, required }) {
 
 // New purchase. The totals on the right are a preview; post_purchase in the
 // database works the real ones out again from the lines.
-export default function PurchaseForm({ suppliers, items, settings, isAdmin, today, initialSupplier }) {
+export default function PurchaseForm({ suppliers, items, settings, canPay, today, initialSupplier }) {
   const [state, formAction] = useActionState(createPurchase, null);
   const [rows, setRows] = useState(() => [blankRow()]);
   const [discount, setDiscount] = useState("");
@@ -199,7 +199,7 @@ export default function PurchaseForm({ suppliers, items, settings, isAdmin, toda
 
         <section className="card p-5 sm:p-6">
           <h2 className="card-title border-b border-border pb-4">Payment</h2>
-          {isAdmin ? (
+          {canPay ? (
             <div className="mt-4 flex flex-col gap-4">
               <div>
                 <Label htmlFor="amount_paid">Amount paid now (Rs)</Label>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getCustomerOptions, getItemOptions, getSettings } from "@/app/_lib/data-service";
 import { todayISO } from "@/app/_lib/date-helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
@@ -9,7 +9,7 @@ import SaleForm from "@/app/_components/admin/SaleForm";
 export const metadata = { title: "New Invoice" };
 
 export default async function NewSalePage({ searchParams }) {
-  await requirePageRole();
+  const user = await requirePagePermission("sales");
   const { customer } = await searchParams;
   const [customers, items, settings] = await Promise.all([getCustomerOptions(), getItemOptions("finished"), getSettings()]);
 
@@ -25,7 +25,7 @@ export default async function NewSalePage({ searchParams }) {
           </Link>
         }
       />
-      <SaleForm customers={customers} items={items} settings={settings} today={todayISO()} initialCustomer={customer} />
+      <SaleForm customers={customers} items={items} settings={settings} today={todayISO()} initialCustomer={customer} canTakeCash={can(user, "sales_cash") || can(user, "payments")} />
     </div>
   );
 }

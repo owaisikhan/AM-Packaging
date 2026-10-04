@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Package2 } from "lucide-react";
 import { NAV_GROUPS } from "@/app/_components/admin/navItems";
 import { initials } from "@/app/_lib/format-helpers";
+import { can } from "@/app/_lib/permissions";
 import { closeMobileSidebar } from "./sidebarState";
 
 // The fixed left sidebar. Collapsing to the 72px icon rail is a class on
@@ -38,12 +39,14 @@ export default function Sidebar({ user, appName, appTagline }) {
         </Link>
 
         <nav className="sidebar-nav flex-1 overflow-y-auto overflow-x-hidden px-3 py-2">
-          {NAV_GROUPS.filter((g) => isAdmin || !g.adminOnly).map((group) => (
+          {NAV_GROUPS.filter((g) => isAdmin || !g.adminOnly)
+            .map((g) => ({ ...g, items: g.items.filter((item) => (isAdmin || !item.adminOnly) && (!item.perm || can(user, item.perm))) }))
+            .filter((g) => g.items.length > 0)
+            .map((group) => (
             <div key={group.label}>
               <p className="sidebar-section-label">{group.label}</p>
               <ul className="flex flex-col gap-0.5">
                 {group.items
-                  .filter((item) => isAdmin || !item.adminOnly)
                   .map((item) => {
                     const active = item.exact
                       ? pathname === item.href

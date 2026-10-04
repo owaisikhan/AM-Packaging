@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getItemOptions, getSettings, getSupplierOptions } from "@/app/_lib/data-service";
 import { todayISO } from "@/app/_lib/date-helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
@@ -9,7 +9,7 @@ import PurchaseForm from "@/app/_components/admin/PurchaseForm";
 export const metadata = { title: "New Purchase" };
 
 export default async function NewPurchasePage({ searchParams }) {
-  const user = await requirePageRole();
+  const user = await requirePagePermission("purchases");
   const { supplier } = await searchParams;
   const [suppliers, items, settings] = await Promise.all([getSupplierOptions(), getItemOptions("raw"), getSettings()]);
 
@@ -29,7 +29,7 @@ export default async function NewPurchasePage({ searchParams }) {
         suppliers={suppliers}
         items={items}
         settings={settings}
-        isAdmin={user.role === "admin"}
+        canPay={can(user, "payments")}
         today={todayISO()}
         initialSupplier={supplier}
       />

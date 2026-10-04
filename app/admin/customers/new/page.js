@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
 import CustomerForm from "@/app/_components/admin/CustomerForm";
 
 export const metadata = { title: "Add Customer" };
 
 export default async function NewCustomerPage({ searchParams }) {
-  const user = await requirePageRole();
+  const user = await requirePagePermission("customers");
   // Opened from a new invoice form: save, then go straight back to it with this one picked.
   const fromForm = (await searchParams).from === "invoice";
   const isAdmin = user.role === "admin";
@@ -23,7 +23,7 @@ export default async function NewCustomerPage({ searchParams }) {
           </Link>
         }
       />
-      <CustomerForm isAdmin={isAdmin} afterSave={fromForm ? "/admin/sales/new?customer=:id" : isAdmin ? "/admin/customers/:id" : "/admin/customers"} />
+      <CustomerForm isAdmin={isAdmin} afterSave={fromForm ? "/admin/sales/new?customer=:id" : can(user, "balances") ? "/admin/customers/:id" : "/admin/customers"} />
     </div>
   );
 }

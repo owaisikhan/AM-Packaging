@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, Receipt, Wallet, CircleCheck, CircleAlert } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getCustomerOptions, getSalesPage, getSaleTotals, PAGE_SIZE } from "@/app/_lib/data-service";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { todayISO } from "@/app/_lib/date-helpers";
@@ -12,8 +12,9 @@ import SalesTable from "@/app/_components/admin/SalesTable";
 export const metadata = { title: "Sales & Invoices" };
 
 export default async function SalesPage({ searchParams }) {
-  const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  const user = await requirePagePermission("sales");
+  // Payment status, paid amounts and money cards need "See balances and payments".
+  const isAdmin = can(user, "balances");
   const sp = await searchParams;
 
   const today = todayISO();

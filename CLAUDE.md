@@ -39,18 +39,23 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
   and figures and saying what to do next.
 - **Migrations are append-only.** Never edit one that has been applied to the
   live project; add a new numbered file. 0001 to 0007 were applied to the
-  live project (ref fqvmljwlwfjensumiqws, Singapore) on 2026-10-04, so the
-  next change is 0008.
+  live project (ref fqvmljwlwfjensumiqws, Singapore) on 2026-10-04; 0008
+  (permissions) follows, so the next change is 0009.
 - **Nothing is deleted from the ledger.** Purchases, sales and production
   runs are voided (admin, with a reason), which writes reversing stock entries.
-- **Supplier money is admin-only** (balances, ledger, payments, voiding).
-  Workers record purchases without a payment.
-- **Customer money is admin-only too**, with one exception: a worker can
-  enter the cash received when making an invoice (through security-definer
-  `post_sale`). Workers never see balances, ledgers or what an invoice has
-  had paid against it.
-- **Workers vs admins:** RLS is the real fence, `requirePageRole` /
-  `requireRole` in pages and actions the second, hidden nav links cosmetic.
+- **Per-worker permissions** (0008): an admin ticks what each worker may do
+  under Users (add and Edit). Keys and labels live in `app/_lib/permissions.js`
+  (`PERMISSIONS`, `can(user, key)`); the database checks the same keys with
+  `has_perm` / `require_perm`. Floor keys (stock_view, purchases, production,
+  sales, sales_cash, customers, suppliers) are on by default; money keys
+  (balances, payments, reports, void) are off until ticked. Settings, items,
+  recipes, stock adjustments, users and activity stay admin-only. Voids and
+  payments go through security-definer functions, so table updates stay
+  admin-only. Opening balances and editing customers or suppliers are admin.
+- **Workers vs admins:** RLS and the `require_perm` checks are the real fence,
+  `requirePagePermission` / `requirePermission` (and `requirePageRole` /
+  `requireRole` for admin-only things) the second, hidden nav links cosmetic.
+  `DEMO_ROLE=demo-w2` shows a worker with only stock and production.
 - **Demo mode:** with no Supabase env vars the app runs on
   `app/_lib/demo-data.js` and saving is off. Keep demo rows shaped exactly like
   the real query rows. `DEMO_ROLE=worker` shows it as a worker.

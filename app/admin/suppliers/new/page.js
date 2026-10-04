@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
 import SupplierForm from "@/app/_components/admin/SupplierForm";
 
 export const metadata = { title: "Add Supplier" };
 
 export default async function NewSupplierPage({ searchParams }) {
-  const user = await requirePageRole();
+  const user = await requirePagePermission("suppliers");
   // Opened from a new purchase form: save, then go straight back to it with this one picked.
   const fromForm = (await searchParams).from === "purchase";
   const isAdmin = user.role === "admin";
@@ -23,7 +23,7 @@ export default async function NewSupplierPage({ searchParams }) {
           </Link>
         }
       />
-      <SupplierForm isAdmin={isAdmin} afterSave={fromForm ? "/admin/purchases/new?supplier=:id" : isAdmin ? "/admin/suppliers/:id" : "/admin/suppliers"} />
+      <SupplierForm isAdmin={isAdmin} afterSave={fromForm ? "/admin/purchases/new?supplier=:id" : can(user, "balances") ? "/admin/suppliers/:id" : "/admin/suppliers"} />
     </div>
   );
 }

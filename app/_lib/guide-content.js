@@ -21,7 +21,9 @@ import {
 // stars** are shown in bold: use them for the exact button and field names on
 // screen, and update this file whenever one of those labels changes.
 //
-// who: "all" shows to everyone, "admin" only to admins.
+// who: "all" shows to everyone, "admin" only to admins. perm: a worker sees
+// the section only with that permission (see permissions.js); an "admin"
+// section with a perm also shows to a worker who has been given it.
 
 export const DAY_WORKER = [
   "Raw material arrived? Record it under **Purchases** the same day.",
@@ -54,6 +56,7 @@ export const GUIDE_SECTIONS = [
   },
   {
     id: "stock",
+    perm: "stock_view",
     who: "all",
     icon: Boxes,
     title: "Check stock",
@@ -68,6 +71,7 @@ export const GUIDE_SECTIONS = [
   },
   {
     id: "purchase",
+    perm: "purchases",
     who: "all",
     icon: ShoppingCart,
     title: "Record a purchase (raw material arrived)",
@@ -78,11 +82,12 @@ export const GUIDE_SECTIONS = [
       "Under **Items bought**, pick the **Raw material**, then the **Quantity** and **Rate (Rs)**. Add a row for each item on the bill.",
       "Check the **Grand total** matches the paper bill, then tap **Save purchase**.",
     ],
-    tips: ["Saving adds these quantities to stock straight away.", "Workers do not enter payments to suppliers. An admin does that."],
+    tips: ["Saving adds these quantities to stock straight away.", "Payments to suppliers are entered only by someone allowed to record payments, usually an admin."],
     link: { href: "/admin/purchases/new", label: "Open New Purchase" },
   },
   {
     id: "production",
+    perm: "production",
     who: "all",
     icon: Factory,
     title: "Record production",
@@ -98,6 +103,7 @@ export const GUIDE_SECTIONS = [
   },
   {
     id: "invoice",
+    perm: "sales",
     who: "all",
     icon: Receipt,
     title: "Make an invoice (goods going out)",
@@ -116,6 +122,7 @@ export const GUIDE_SECTIONS = [
   },
   {
     id: "people",
+    perm: "customers",
     who: "all",
     icon: UserPlus,
     title: "Add a customer or supplier",
@@ -158,6 +165,7 @@ export const GUIDE_SECTIONS = [
   },
   {
     id: "payments",
+    perm: "payments",
     who: "admin",
     icon: Banknote,
     title: "Record payments",
@@ -173,6 +181,7 @@ export const GUIDE_SECTIONS = [
   },
   {
     id: "void",
+    perm: "void",
     who: "admin",
     icon: Ban,
     title: "Cancel a wrong entry (void)",
@@ -208,15 +217,18 @@ export const GUIDE_SECTIONS = [
     title: "Manage users",
     steps: [
       "Open **Users**. Under **Add a user**, type the name, email and a password (at least 8 characters).",
-      "Choose **Worker** or **Admin**, then tap **Add user**. Give them the email and password.",
+      "Choose **Worker** or **Admin**. For a worker, tick what they can do under **What this worker can do**. The money boxes are off unless you tick them.",
+      "Tap **Add user** and give them the email and password.",
+      "To change what a worker can do later, tap **Edit** on that user, change the ticks and tap **Save changes**. It works from their next page.",
       "Forgot password: tap **Edit** on that user and type a new password.",
       "Someone leaves: tap **Edit** and set them to **Switched off**. Their past entries stay.",
     ],
-    tips: ["Workers can record purchases, production and invoices. Only admins see money, reports, settings and can void."],
+    tips: ["Settings, items, recipes, stock corrections, users and the activity log are always for admins only."],
     link: { href: "/admin/users", label: "Open Users" },
   },
   {
     id: "reports",
+    perm: "reports",
     who: "admin",
     icon: BarChart3,
     title: "Reports",

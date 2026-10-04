@@ -4,19 +4,23 @@ import { redirect } from "next/navigation";
 import { createClient } from "./supabase-server";
 import { isDemoMode, ROLES } from "./config";
 import { demoProfile, demoProfiles } from "./demo-data";
+import { can } from "./permissions";
 
-export { ROLES };
+export { ROLES, can };
 
 /**
- * The signed-in user's profile ({ id, full_name, role, email }), or null.
+ * The signed-in user's profile ({ id, full_name, role, permissions, email }), or null.
  * Cached per request so the layout and the page share one lookup.
  */
 export const getCurrentUser = cache(async () => {
-  // DEMO_ROLE=worker shows the demo as a worker sees it, for reviewing screens.
+  // DEMO_ROLE=worker shows the demo as a worker sees it, for reviewing screens;
+  // DEMO_ROLE=demo-w2 picks that demo profile (a worker with fewer permissions).
   if (isDemoMode) {
-    if (process.env.DEMO_ROLE !== "worker") return demoProfile;
-    const { created_at: _c, ...worker } = demoProfiles.find((p) => p.role === "worker");
-    return worker;
+    const pick = process.env.DEMO_ROLE;
+    if (!pick || pick === "admin") return demoProfile;
+    const found = demoProfiles.find((p) => (pick === "worker" ? p.role === "worker" : p.id === pick)) ?? demoProfile;
+    const { created_at: _c, ...profile } = found;
+    return profile;
   }
 
   const supabase = await createClient();
@@ -26,7 +30,7 @@ export const getCurrentUser = cache(async () => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, full_name, role, active")
+    .select("id, full_name, role, active, permissions")
     .eq("id", claims.sub)
     .maybeSingle();
 
@@ -51,6 +55,22 @@ export async function requireRole(role) {
   if (!user) throw new Error("Your session has ended. Sign in again.");
   if (role === ROLES.ADMIN && user.role !== ROLES.ADMIN) {
     throw new Error("Only an admin can do this. Ask an admin to do it for you.");
+  }
+  return user;
+}
+
+/** For pages a worker may or may not have been given: redirect if not. */
+export async function requirePagePermission(key) {
+  const user = await requirePageRole();
+  if (!can(user, key)) redirect("/admin?denied=1");
+  return user;
+}
+
+/** For Server Actions: throws a readable error when the permission is missing. */
+export async function requirePermission(key, what) {
+  const user = await requireRole();
+  if (!can(user, key)) {
+    throw new Error(`You do not have permission to ${what}. Ask an admin to give you this permission in Users.`);
   }
   return user;
 }

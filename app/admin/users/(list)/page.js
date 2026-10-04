@@ -8,6 +8,10 @@ import PageHeader from "@/app/_components/layout/PageHeader";
 import StatCard from "@/app/_components/ui/StatCard";
 import Badge from "@/app/_components/ui/Badge";
 import UserForm from "@/app/_components/admin/UserForm";
+import { PERMISSIONS } from "@/app/_lib/permissions";
+
+// Short summary of what a person may do, shown under their role.
+const permText = (p) => (p.role === "admin" ? "Can do everything" : `${(p.permissions ?? []).length} of ${PERMISSIONS.length} permissions`);
 
 export const metadata = { title: "Users" };
 
@@ -48,6 +52,7 @@ export default async function UsersPage() {
                       <Badge tone={p.role === "admin" ? "success" : "info"}>{p.role === "admin" ? "Admin" : "Worker"}</Badge>
                       <Badge tone={p.active ? "success" : "gray"}>{p.active ? "Can sign in" : "Switched off"}</Badge>
                     </span>
+                    <span className="mt-1 block text-xs text-muted">{permText(p)}</span>
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -88,6 +93,7 @@ export default async function UsersPage() {
                     </td>
                     <td>
                       <Badge tone={p.role === "admin" ? "success" : "info"}>{p.role === "admin" ? "Admin" : "Worker"}</Badge>
+                      <span className="mt-1 block whitespace-nowrap text-xs text-muted">{permText(p)}</span>
                     </td>
                     <td>
                       <Badge tone={p.active ? "success" : "gray"}>{p.active ? "Can sign in" : "Switched off"}</Badge>

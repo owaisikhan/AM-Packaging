@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Ban, Plus } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getProductionRun } from "@/app/_lib/data-service";
 import { formatQty } from "@/app/_lib/format-helpers";
 import { formatDate, formatDateTime } from "@/app/_lib/date-helpers";
@@ -21,8 +21,8 @@ function Difference({ qty, expected, unit }) {
 }
 
 export default async function ProductionRunPage({ params, searchParams }) {
-  const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  const user = await requirePagePermission("production");
+  const canVoid = can(user, "void");
   const { id } = await params;
   const { saved } = await searchParams;
   const data = await getProductionRun(id);
@@ -50,7 +50,7 @@ export default async function ProductionRunPage({ params, searchParams }) {
             <Link href={`/admin/production/new?product=${r.item_id}`} className="btn-secondary">
               <Plus size={17} aria-hidden /> Make this again
             </Link>
-            {isAdmin && !isVoid ? (
+            {canVoid && !isVoid ? (
               <ReasonDialog
                 action={voidProduction}
                 id={r.id}

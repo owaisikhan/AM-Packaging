@@ -250,3 +250,11 @@ for the rules.
 - **Scope:** all (dashboards with a dark theme)
 - **Target in skill:** references/ui-conventions.md (dark mode)
 - **Status:** logged
+
+### L-027 · 2026-10-04 · high · preference
+- **Said / saw:** "i want the admin to select permission to give to the workers while creating their account ... it should be upto the owner", then "add voiding checkbox too" and "later there should be an option to update permissions too"
+- **Context:** fixed admin/worker roles were too coarse for a small factory where trust differs per person
+- **Lesson:** For small-business apps, plan per-person permissions from the start: a text[] of known keys on the profile (check constraint), `has_perm`/`require_perm` in Postgres, the same key list in one JS file for UI and actions, tick boxes on both the add and edit user forms, floor permissions on by default and money permissions off. Route voids and payments through security-definer functions so the permission never widens table update rights. A report built from payments needs both the report and the balances permission.
+- **Scope:** type: dashboard, ledger
+- **Target in skill:** references/types/dashboard.md (roles and permissions)
+- **Status:** logged

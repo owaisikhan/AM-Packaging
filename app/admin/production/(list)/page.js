@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, Factory, CalendarDays, Package, Boxes } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission } from "@/app/_lib/helpers";
 import { getItemOptions, getProductionPage, getProductionTotals, PAGE_SIZE } from "@/app/_lib/data-service";
 import { formatQty } from "@/app/_lib/format-helpers";
 import { formatDate, todayISO } from "@/app/_lib/date-helpers";
@@ -14,7 +14,7 @@ import RunStatus from "@/app/_components/admin/RunStatus";
 export const metadata = { title: "Production" };
 
 export default async function ProductionPage({ searchParams }) {
-  await requirePageRole();
+  await requirePagePermission("production");
   const sp = await searchParams;
 
   const today = todayISO();

@@ -10,7 +10,7 @@ const METHOD = { cash: "Cash", bank: "Bank transfer", cheque: "Cheque", online: 
 
 // Payments to a supplier or from a customer, void ones kept in view with
 // their reason.
-export default function PaymentsTable({ payments, showBill = true, kind = "supplier" }) {
+export default function PaymentsTable({ payments, showBill = true, kind = "supplier", canVoid = true }) {
   const isCustomer = kind === "customer";
   if (payments.length === 0) {
     return <p className="px-5 py-8 text-center text-sm text-muted">No payments yet.</p>;
@@ -47,7 +47,7 @@ export default function PaymentsTable({ payments, showBill = true, kind = "suppl
               <Badge tone="gray">
                 <Ban size={13} aria-hidden /> Void
               </Badge>
-            ) : (
+            ) : !canVoid ? null : (
               <ReasonDialog
                 action={isCustomer ? voidCustomerPayment : voidSupplierPayment}
                 id={p.id}

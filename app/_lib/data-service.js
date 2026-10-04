@@ -183,7 +183,7 @@ export async function getProfiles() {
   if (isDemoMode) return demo.demoProfiles;
   const supabase = await createClient();
   return unwrap(
-    await supabase.from("profiles").select("id, full_name, role, active, created_at").order("role").order("full_name"),
+    await supabase.from("profiles").select("id, full_name, role, active, permissions, created_at").order("role").order("full_name"),
     "the users",
   );
 }

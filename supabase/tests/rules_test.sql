@@ -239,3 +239,64 @@ select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b'
 select count(*) > 0 as worker_sees_production from report_production_series(current_date - 6, current_date, 'day');
 select * from report_profit(current_date - 31, current_date, 'month');
 select * from report_ageing();
+
+\echo '=== Phase 8: per-worker permissions'
+reset role;
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-00000000000c','maker@am'), ('00000000-0000-0000-0000-00000000000d','trusted@am');
+insert into profiles (id, full_name, role, permissions) values
+  ('00000000-0000-0000-0000-00000000000c','Bilal Maker','worker','{production}'),
+  ('00000000-0000-0000-0000-00000000000d','Usman Trusted','worker','{stock_view,purchases,production,sales,sales_cash,customers,suppliers,balances,payments,reports,void}');
+\echo '--- default permissions for the original worker (expect the seven floor permissions)'
+select permissions from profiles where id = '00000000-0000-0000-0000-00000000000b';
+\echo '--- unknown permission key (expect check constraint error)'
+update profiles set permissions = '{fly}' where id = '00000000-0000-0000-0000-00000000000c';
+set role authenticated;
+
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000c',false);
+\echo '--- production-only worker records a purchase (expect: You do not have permission to record a purchase)'
+select post_purchase(jsonb_build_object('supplier_id',(select id from suppliers limit 1),
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',1,'rate',1))));
+\echo '--- production-only worker makes an invoice (expect: You do not have permission to make an invoice)'
+select post_sale(jsonb_build_object('customer_id',(select id from customers limit 1),
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty',1,'rate',1))));
+\echo '--- production-only worker records production of 2 cartons (expect made = t)'
+select post_production(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty_made',2,'materials', jsonb_build_array(
+  jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',144)))) is not null as made;
+\echo '--- production-only worker adds a customer (expect RLS error)'
+insert into customers (name) values ('Should Not Exist');
+\echo '--- production-only worker reads customer payments (expect 0)'
+select count(*) as payments_seen from customer_payments;
+\echo '--- production-only worker runs a money report (expect: You do not have permission to see sales and purchase reports)'
+select * from report_trade_series(current_date - 2, current_date, 'day');
+\echo '--- production-only worker voids an invoice (expect: You do not have permission to void a sale)'
+select void_sale((select id from sales where status='posted' limit 1), 'test');
+\echo '--- production-only worker gives themselves reports (expect UPDATE 0, permissions unchanged)'
+update profiles set permissions = '{production,reports}' where id = '00000000-0000-0000-0000-00000000000c';
+select permissions from profiles where id = '00000000-0000-0000-0000-00000000000c';
+
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000d',false);
+\echo '--- trusted worker reads customer payments (expect payments_seen > 0 = t)'
+select count(*) > 0 as payments_seen from customer_payments;
+\echo '--- trusted worker records a customer payment (expect recorded = t)'
+select record_customer_payment(jsonb_build_object('customer_id',(select id from customers limit 1),'amount',50)) is not null as recorded;
+\echo '--- trusted worker sees balances that include payments (expect paid > 0 for some customer = t)'
+select bool_or(paid > 0) as paid_visible from customer_balances;
+\echo '--- trusted worker runs a money report and ageing (expect rows = t, t)'
+select count(*) > 0 as trade_rows from report_trade_series(current_date - 2, current_date, 'day');
+select count(*) >= 0 as ageing_ok from report_ageing();
+\echo '--- trusted worker makes an invoice of 1 carton, then voids it (expect stock back to where it was)'
+select on_hand as before_sale from item_stock where code='T-46-72-40C';
+select post_sale(jsonb_build_object('customer_id',(select id from customers limit 1),'gst_rate',0,
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty',1,'rate',4800)))) is not null as sold;
+select on_hand as after_sale from item_stock where code='T-46-72-40C';
+select void_sale((select id from sales where status='posted' order by created_at desc limit 1), 'Test of the void permission');
+select on_hand as after_void from item_stock where code='T-46-72-40C';
+\echo '--- trusted worker edits an invoice total directly (expect UPDATE 0)'
+update sales set total = 1;
+
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+\echo '--- admin takes reports away from the trusted worker (expect UPDATE 1)'
+update profiles set permissions = array_remove(permissions, 'reports') where id = '00000000-0000-0000-0000-00000000000d';
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000d',false);
+\echo '--- trusted worker runs the report again (expect: You do not have permission to see sales and purchase reports)'
+select * from report_trade_series(current_date - 2, current_date, 'day');

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil, SlidersHorizontal, History } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission } from "@/app/_lib/helpers";
 import { getItem, getItemMovements, PAGE_SIZE } from "@/app/_lib/data-service";
 import { formatMicron, formatMoney, formatQty } from "@/app/_lib/format-helpers";
 import { formatDate, formatDateTime } from "@/app/_lib/date-helpers";
@@ -38,7 +38,7 @@ function Detail({ label, children }) {
 }
 
 export default async function StockItemPage({ params, searchParams }) {
-  const user = await requirePageRole();
+  const user = await requirePagePermission("stock_view");
   const { id } = await params;
   const sp = await searchParams;
   const isAdmin = user.role === "admin";

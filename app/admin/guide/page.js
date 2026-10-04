@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Noto_Nastaliq_Urdu } from "next/font/google";
 import { ArrowLeft, ArrowRight, CircleHelp, Lightbulb, ShieldCheck } from "lucide-react";
-import { requirePageRole, ROLES } from "@/app/_lib/helpers";
+import { can, requirePageRole, ROLES } from "@/app/_lib/helpers";
 import { DAY_ADMIN, DAY_WORKER, GUIDE_SECTIONS, ROUTINE_ICON as RoutineIcon, TROUBLE } from "@/app/_lib/guide-content";
 import { DAY_ADMIN_UR, DAY_WORKER_UR, SECTIONS_UR, TROUBLE_UR, UI_UR } from "@/app/_lib/guide-content-ur";
 import PageHeader from "@/app/_components/layout/PageHeader";
@@ -54,7 +54,7 @@ function localise(s, ur) {
   return { ...s, title: t.title, steps: t.steps, tips: t.tips, link: s.link && { ...s.link, urLabel: t.linkLabel } };
 }
 
-function Section({ s, ui, ur }) {
+function Section({ s, ui, ur, badge }) {
   const Icon = s.icon;
   const Arrow = ur ? ArrowLeft : ArrowRight;
   return (
@@ -64,7 +64,7 @@ function Section({ s, ui, ur }) {
           <Icon size={20} aria-hidden />
         </span>
         <h2 className={`card-title min-w-0 flex-1 ${ur ? "leading-[2]" : ""}`}>{s.title}</h2>
-        {s.who === "admin" ? (
+        {s.who === "admin" && badge ? (
           <Badge tone="info">
             <ShieldCheck size={13} aria-hidden /> {ui.adminsOnly}
           </Badge>
@@ -123,7 +123,9 @@ export default async function GuidePage({ searchParams }) {
   const ur = (sp.lang ?? saved) === "ur";
   const ui = ur ? UI_UR : UI_EN;
   const sections = GUIDE_SECTIONS.map((s) => localise(s, ur));
-  const everyone = sections.filter((s) => s.who === "all");
+  // Workers see the sections for what they have been allowed to do.
+  const allowed = (s) => !s.perm || can(user, s.perm);
+  const everyone = sections.filter((s) => (s.who === "all" || (!isAdmin && s.perm)) && allowed(s));
   const adminOnly = isAdmin ? sections.filter((s) => s.who === "admin") : [];
   const day = isAdmin ? (ur ? DAY_ADMIN_UR : DAY_ADMIN) : ur ? DAY_WORKER_UR : DAY_WORKER;
   const trouble = ur ? TROUBLE_UR : TROUBLE;
@@ -177,7 +179,7 @@ export default async function GuidePage({ searchParams }) {
         </section>
 
         {everyone.map((s) => (
-          <Section key={s.id} s={s} ui={ui} ur={ur} />
+          <Section key={s.id} s={s} ui={ui} ur={ur} badge={isAdmin} />
         ))}
 
         {adminOnly.length ? (
@@ -186,7 +188,7 @@ export default async function GuidePage({ searchParams }) {
               <ShieldCheck size={20} aria-hidden /> {ui.forAdmins}
             </h2>
             {adminOnly.map((s) => (
-              <Section key={s.id} s={s} ui={ui} ur={ur} />
+              <Section key={s.id} s={s} ui={ui} ur={ur} badge={isAdmin} />
             ))}
           </>
         ) : null}

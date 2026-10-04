@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission } from "@/app/_lib/helpers";
 import { getItemOptions, getRecipesForProducts } from "@/app/_lib/data-service";
 import { todayISO } from "@/app/_lib/date-helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
@@ -9,7 +9,7 @@ import ProductionForm from "@/app/_components/admin/ProductionForm";
 export const metadata = { title: "Record Production" };
 
 export default async function NewProductionPage({ searchParams }) {
-  const user = await requirePageRole();
+  const user = await requirePagePermission("production");
   const { product } = await searchParams;
   const [products, rawItems, recipes] = await Promise.all([getItemOptions("finished"), getItemOptions("raw"), getRecipesForProducts()]);
 

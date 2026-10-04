@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil, Plus, Phone, MapPin, BookOpen } from "lucide-react";
-import { requirePageRole, ROLES } from "@/app/_lib/helpers";
+import { can, requirePagePermission, ROLES } from "@/app/_lib/helpers";
 import { getCustomer, getCustomerBalance, getCustomerLedger, getCustomerPayments, getOpenSales } from "@/app/_lib/data-service";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { formatDate, todayISO } from "@/app/_lib/date-helpers";
@@ -23,7 +23,10 @@ function BalanceText({ value }) {
 }
 
 export default async function CustomerLedgerPage({ params, searchParams }) {
-  await requirePageRole(ROLES.ADMIN);
+  const user = await requirePagePermission("balances");
+  const isAdmin = user.role === ROLES.ADMIN;
+  const canPay = can(user, "payments");
+  const canVoid = can(user, "void");
   const { id } = await params;
   const sp = await searchParams;
 
@@ -48,12 +51,16 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
             <Link href="/admin/customers" className="btn-secondary">
               <ArrowLeft size={17} aria-hidden /> Back
             </Link>
-            <Link href={`/admin/customers/${id}/edit`} className="btn-secondary">
-              <Pencil size={15} aria-hidden /> Edit
-            </Link>
-            <Link href={`/admin/sales/new?customer=${id}`} className="btn-primary">
-              <Plus size={18} aria-hidden /> New Invoice
-            </Link>
+            {isAdmin ? (
+              <Link href={`/admin/customers/${id}/edit`} className="btn-secondary">
+                <Pencil size={15} aria-hidden /> Edit
+              </Link>
+            ) : null}
+            {can(user, "sales") ? (
+              <Link href={`/admin/sales/new?customer=${id}`} className="btn-primary">
+                <Plus size={18} aria-hidden /> New Invoice
+              </Link>
+            ) : null}
           </>
         }
       />
@@ -137,7 +144,7 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
 
           <section className="card overflow-hidden">
             <h2 className="card-title border-b border-border px-5 py-4">Payments received</h2>
-            <PaymentsTable kind="customer" payments={payments} />
+            <PaymentsTable kind="customer" payments={payments} canVoid={canVoid} />
           </section>
         </div>
 
@@ -169,12 +176,14 @@ export default async function CustomerLedgerPage({ params, searchParams }) {
             </div>
           </section>
 
-          <section className="card self-start p-5 sm:p-6">
-            <h2 className="card-title border-b border-border pb-4">Record a payment received</h2>
-            <div className="mt-4">
-              <PaymentForm kind="customer" partyId={id} openBills={openBills} today={todayISO()} />
-            </div>
-          </section>
+          {canPay ? (
+            <section className="card self-start p-5 sm:p-6">
+              <h2 className="card-title border-b border-border pb-4">Record a payment received</h2>
+              <div className="mt-4">
+                <PaymentForm kind="customer" partyId={id} openBills={openBills} today={todayISO()} />
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

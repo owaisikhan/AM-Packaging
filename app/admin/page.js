@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Home, Layers, TriangleAlert, CircleX, CircleCheck, Boxes, ArrowRight, Banknote, ShoppingCart, Factory, Wallet } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { can, requirePageRole } from "@/app/_lib/helpers";
 import {
   getCustomerTotals,
   getLowStockAlerts,
@@ -76,7 +76,10 @@ function CardHeader({ icon: Icon, tile, title, subtitle, href, linkLabel }) {
 
 export default async function Dashboard({ searchParams }) {
   const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  // Money on the dashboard: sales and purchases need "See reports", what is
+  // owed needs "See balances and payments" (admins have both).
+  const isAdmin = can(user, "reports");
+  const seesBalances = can(user, "balances");
   const { denied } = await searchParams;
   const today = todayISO();
   const from30 = addDays(today, -29);
@@ -90,8 +93,8 @@ export default async function Dashboard({ searchParams }) {
     isAdmin ? getTradeSeries({ from: addDays(today, -7 * 11), to: today, grain: "week" }) : null,
     isAdmin ? getTradeSeries({ from: addMonths(today, -11), to: today, grain: "month" }) : null,
     isAdmin ? getTopProducts({ from: addDays(today, -89), to: today, limit: 5 }) : null,
-    isAdmin ? getCustomerTotals() : null,
-    isAdmin ? getSupplierTotals() : null,
+    seesBalances ? getCustomerTotals() : null,
+    seesBalances ? getSupplierTotals() : null,
   ]);
   const lowCount = all.low + all.out;
   const firstName = user.full_name.split(" ")[0];
@@ -180,7 +183,7 @@ export default async function Dashboard({ searchParams }) {
           href="/admin/production"
           note={madeToday.length ? madeToday.map((r) => `${formatQtyUnit(r.qty, r.unit)} ${r.category.toLowerCase()}`).join(", ") : "Nothing made yet today"}
         />
-        {isAdmin ? (
+        {isAdmin && seesBalances ? (
           <KpiCard icon={Wallet} value={formatCompactMoney(receivable.receivable)} label="To receive" tone="danger" href="/admin/customers?owing=1" note={`${receivable.owing} ${receivable.owing === 1 ? "customer owes" : "customers owe"} you`} />
         ) : (
           <>
@@ -195,17 +198,21 @@ export default async function Dashboard({ searchParams }) {
         <div className="grid gap-6 2xl:grid-cols-[1fr_360px]">
           <SalesPurchasesCard views={views} />
           <section className="card flex flex-col">
-            <CardHeader icon={Banknote} tile="bg-primary-light text-primary-ink" title="This month" subtitle="Sales and purchases since the 1st, and what is owed now" href="/admin/reports" linkLabel="Reports" />
+            <CardHeader icon={Banknote} tile="bg-primary-light text-primary-ink" title="This month" subtitle={seesBalances ? "Sales and purchases since the 1st, and what is owed now" : "Sales and purchases since the 1st"} href="/admin/reports" linkLabel="Reports" />
             <div className="flex flex-1 flex-col gap-3.5 p-5">
               <MoneyRow label={`Sales (${thisMonth.invoices} ${thisMonth.invoices === 1 ? "invoice" : "invoices"})`}>{formatMoney(thisMonth.sales)}</MoneyRow>
               <MoneyRow label={`Purchases (${thisMonth.bills} ${thisMonth.bills === 1 ? "bill" : "bills"})`}>{formatMoney(thisMonth.purchases)}</MoneyRow>
-              <div className="my-1 border-t border-border" />
-              <MoneyRow label="Customers owe you" tone="danger">{formatMoney(receivable.receivable)}</MoneyRow>
-              <MoneyRow label="You owe suppliers" tone="danger">{formatMoney(payable.payable)}</MoneyRow>
-              <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                <Link href="/admin/customers?owing=1" className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] flex-1 justify-center text-[13px]">Who owes you</Link>
-                <Link href="/admin/suppliers?owing=1" className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] flex-1 justify-center text-[13px]">Who you owe</Link>
-              </div>
+              {seesBalances ? (
+                <>
+                  <div className="my-1 border-t border-border" />
+                  <MoneyRow label="Customers owe you" tone="danger">{formatMoney(receivable.receivable)}</MoneyRow>
+                  <MoneyRow label="You owe suppliers" tone="danger">{formatMoney(payable.payable)}</MoneyRow>
+                  <div className="mt-auto flex flex-wrap gap-2 pt-2">
+                    <Link href="/admin/customers?owing=1" className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] flex-1 justify-center text-[13px]">Who owes you</Link>
+                    <Link href="/admin/suppliers?owing=1" className="btn-secondary min-h-[40px] pointer-coarse:min-h-[44px] flex-1 justify-center text-[13px]">Who you owe</Link>
+                  </div>
+                </>
+              ) : null}
             </div>
           </section>
         </div>

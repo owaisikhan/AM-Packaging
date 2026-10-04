@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Ban, Package2, Plus } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getSale, getSettings } from "@/app/_lib/data-service";
 import { amountInWords, formatMoney, formatQty } from "@/app/_lib/format-helpers";
 import { formatDate, todayISO } from "@/app/_lib/date-helpers";
@@ -37,12 +37,14 @@ function TotalRow({ label, children, strong }) {
 }
 
 export default async function InvoicePage({ params, searchParams }) {
-  const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  const user = await requirePagePermission("sales");
+  const seesMoney = can(user, "balances");
+  const canPay = can(user, "payments");
+  const canVoid = can(user, "void");
   const { id } = await params;
   const { saved } = await searchParams;
 
-  const [data, settings] = await Promise.all([getSale(id, { withPayments: isAdmin }), getSettings()]);
+  const [data, settings] = await Promise.all([getSale(id, { withPayments: seesMoney }), getSettings()]);
   if (!data) notFound();
   const { sale: s, customer: c, lines, payments } = data;
   const isVoid = s.status === "void";
@@ -63,8 +65,8 @@ export default async function InvoicePage({ params, searchParams }) {
           crumbs={[{ label: "Home", href: "/admin" }, { label: "Sales & Invoices", href: "/admin/sales" }, { label: s.invoice_no }]}
           badge={
             <span className="inline-flex flex-wrap gap-1.5">
-              <PaymentStatus status={isAdmin ? s.payment_status : isVoid ? "void" : "recorded"} />
-              {isAdmin && s.overdue ? <OverduePill due={s.due_date} /> : null}
+              <PaymentStatus status={seesMoney ? s.payment_status : isVoid ? "void" : "recorded"} />
+              {seesMoney && s.overdue ? <OverduePill due={s.due_date} /> : null}
             </span>
           }
           actions={
@@ -78,7 +80,7 @@ export default async function InvoicePage({ params, searchParams }) {
                   <Plus size={17} aria-hidden /> Another for this customer
                 </Link>
               ) : null}
-              {isAdmin && !isVoid ? (
+              {canVoid && !isVoid ? (
                 <ReasonDialog
                   action={voidSale}
                   id={s.id}
@@ -190,7 +192,7 @@ export default async function InvoicePage({ params, searchParams }) {
             {Number(s.other_charges) > 0 ? <TotalRow label="Freight / other">{money(s.other_charges)}</TotalRow> : null}
             {Number(s.gst_amount) > 0 ? <TotalRow label={`GST (${Number(s.gst_rate)}%)`}>{money(s.gst_amount)}</TotalRow> : null}
             <TotalRow label="Grand total" strong>{money(s.total)}</TotalRow>
-            {isAdmin && !isVoid ? (
+            {seesMoney && !isVoid ? (
               <>
                 <div className="flex justify-between gap-4 rounded-lg bg-primary-light px-3 py-2 text-sm font-semibold text-primary-ink">
                   <span>Amount received</span>
@@ -223,11 +225,11 @@ export default async function InvoicePage({ params, searchParams }) {
         </footer>
       </article>
 
-      {isAdmin ? (
+      {seesMoney ? (
         <section className="no-print card mx-auto w-full max-w-[900px] overflow-hidden">
           <h2 className="card-title border-b border-border px-5 py-4">Payments on this invoice</h2>
-          <PaymentsTable kind="customer" payments={payments} showBill={false} />
-          {!isVoid && left > 0 ? (
+          <PaymentsTable kind="customer" payments={payments} showBill={false} canVoid={canVoid} />
+          {canPay && !isVoid && left > 0 ? (
             <div className="border-t border-border p-5">
               <p className="mb-3 text-sm font-semibold text-heading">Record a payment received</p>
               <PaymentForm kind="customer" partyId={s.customer_id} docId={s.id} today={todayISO()} suggested={left} />

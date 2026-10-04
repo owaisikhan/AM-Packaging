@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { Check, Plus, Trash2, TriangleAlert } from "lucide-react";
+import { Check, Info, Plus, Trash2, TriangleAlert } from "lucide-react";
 import { createSale } from "@/app/_lib/actions";
 import { formatMoney, formatQty } from "@/app/_lib/format-helpers";
 import FormMessage from "@/app/_components/ui/FormMessage";
@@ -28,7 +28,7 @@ function Label({ htmlFor, children, required }) {
 
 // New sales invoice. The totals on the right are a preview; post_sale in the
 // database works the real ones out again and refuses anything more than stock.
-export default function SaleForm({ customers, items, settings, today, initialCustomer }) {
+export default function SaleForm({ customers, items, settings, today, initialCustomer, canTakeCash = true }) {
   const [state, formAction] = useActionState(createSale, null);
   const [rows, setRows] = useState(() => [blankRow()]);
   const [discount, setDiscount] = useState("");
@@ -204,6 +204,7 @@ export default function SaleForm({ customers, items, settings, today, initialCus
 
         <section className="card p-5 sm:p-6">
           <h2 className="card-title border-b border-border pb-4">Payment received</h2>
+          {canTakeCash ? (
           <div className="mt-4 flex flex-col gap-4">
             <div>
               <Label htmlFor="amount_received">Amount received now (Rs)</Label>
@@ -229,6 +230,12 @@ export default function SaleForm({ customers, items, settings, today, initialCus
             ) : null}
             <MoneyRow label="Left to receive on this invoice" tone={due > 0 ? "danger" : "primary"}>{formatMoney(due, { decimals: due % 1 !== 0 })}</MoneyRow>
           </div>
+          ) : (
+            <p className="mt-4 flex items-start gap-2 rounded-xl bg-background px-4 py-3 text-sm text-muted">
+              <Info size={17} className="mt-0.5 shrink-0" aria-hidden />
+              Money received from customers is recorded by an admin. Save the invoice and tell an admin what was paid.
+            </p>
+          )}
         </section>
 
         <FormMessage state={state} />

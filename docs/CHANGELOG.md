@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-04: Per-worker permissions
+
+- When adding a worker, or later with **Edit**, an admin ticks what that
+  worker can do: see stock, record purchases, record production, make
+  invoices, take cash on invoices, add customers, add suppliers, and, off by
+  default, see balances and payments, record payments, see reports and
+  cancel entries (void).
+- Enforced in the database by migration `0008_permissions.sql`
+  (`profiles.permissions`, `has_perm`, `require_perm`; posting, payment,
+  void, ledger and report functions check them; payment and insert policies
+  use them). Voids and payments run as security-definer functions, so a
+  permitted worker can cancel or pay but never edit amounts directly.
+- The menu, pages, dashboard money cards, report tabs and buttons follow the
+  same permissions. Existing workers keep exactly what they had.
+- Rule tests: Phase 8 covers a production-only worker and a trusted worker.
+
 ## 2026-10-04: Clearer side menu in dark mode
 
 - Menu words and icons are brighter (#cbd5e1), the current page is a clear

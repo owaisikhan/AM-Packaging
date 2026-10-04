@@ -1,7 +1,7 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { BarChart3, Calculator, Download, Layers3 } from "lucide-react";
-import { requirePageRole, ROLES } from "@/app/_lib/helpers";
+import { can, requirePagePermission } from "@/app/_lib/helpers";
 import { buildReport, RANGE_PRESETS, REPORT_TABS, resolveRange } from "@/app/_lib/reports";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { formatDate, todayISO } from "@/app/_lib/date-helpers";
@@ -104,9 +104,11 @@ function Section({ s }) {
 }
 
 export default async function ReportsPage({ searchParams }) {
-  await requirePageRole(ROLES.ADMIN);
+  const user = await requirePagePermission("reports");
   const sp = await searchParams;
-  const tab = REPORT_TABS.find((t) => t.id === sp.tab) ?? REPORT_TABS[0];
+  // Receivables & Payables is built from payments, so it also needs balances.
+  const tabs = REPORT_TABS.filter((t) => t.id !== "balances" || can(user, "balances"));
+  const tab = tabs.find((t) => t.id === sp.tab) ?? tabs[0];
   const today = todayISO();
   const range = resolveRange(sp, today);
   const report = await buildReport(tab.id, range, today);
@@ -128,7 +130,7 @@ export default async function ReportsPage({ searchParams }) {
       />
 
       <nav aria-label="Reports" className="card flex flex-wrap gap-1 p-1.5">
-        {REPORT_TABS.map((t) => {
+        {tabs.map((t) => {
           const href = new URLSearchParams({ tab: t.id });
           for (const k of ["range", "from", "to"]) if (sp[k]) href.set(k, sp[k]);
           return (

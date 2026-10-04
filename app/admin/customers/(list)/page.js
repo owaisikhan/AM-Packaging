@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, Users, Wallet, CircleAlert } from "lucide-react";
-import { requirePageRole } from "@/app/_lib/helpers";
+import { requirePagePermission, can } from "@/app/_lib/helpers";
 import { getCustomersPage, getCustomerTotals, PAGE_SIZE } from "@/app/_lib/data-service";
 import { formatMoney } from "@/app/_lib/format-helpers";
 import { formatDate } from "@/app/_lib/date-helpers";
@@ -21,8 +21,9 @@ function Balance({ value }) {
 }
 
 export default async function CustomersPage({ searchParams }) {
-  const user = await requirePageRole();
-  const isAdmin = user.role === "admin";
+  const user = await requirePagePermission("customers");
+  // Balances, totals and the ledger link need "See balances and payments".
+  const isAdmin = can(user, "balances");
   const sp = await searchParams;
 
   const [list, totals] = await Promise.all([
