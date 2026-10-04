@@ -2,6 +2,7 @@
 export const PAGES = [
   "/admin",
   "/admin/guide",
+  "/admin/guide?lang=ur",
   "/admin/stock",
   "/admin/stock/i-t-46-72-40c",
   "/admin/stock/adjust",

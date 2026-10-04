@@ -18,7 +18,7 @@ English UI, phones and a desktop. Design for the less screen-confident
 reader: full-word labels beside icons, 16px form text, 44px tap targets,
 money and quantities never wrap, colour never the only signal.
 
-Palette exceptions: Inter as the only typeface, green #22B573 primary and the
+Palette exceptions: Inter as the only typeface (one exception: Noto Nastaliq Urdu for the Urdu Guide, loaded on that page only), green #22B573 primary and the
 green gradient dashboard banner. All come from the reference design the user
 chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 `text-primary-ink` / `text-danger-ink` (the fills are too faint as text).
@@ -65,7 +65,7 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 - Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `PaymentForm` and `PaymentsTable` (both take `kind="supplier" | "customer"`), `ProductionForm`, `RunStatus`, `SaleForm`, `SalesTable` (with `OverduePill`), `CustomerForm`, `SupplierForm`.
 - Print: `PrintButton` and the `.invoice-sheet` / `no-print` classes.
 - Charts (`app/_components/charts/`): `ChartFrame` (card with Chart / Table toggle), `ColumnChart`, `TrendChart`, `DonutChart`, `RankBars`, `StackBar`; shape rows with `periodView` in `app/_lib/chart-data.js`. Load the `dataviz` skill before adding a chart. Never sum quantities across units.
-- Guide: `/admin/guide` reads its words from `app/_lib/guide-content.js`. When a button or field label changes on screen, change it there too.
+- Guide: `/admin/guide` reads its words from `app/_lib/guide-content.js`. When a button or field label changes on screen, change it there too, and in the Urdu copy `guide-content-ur.js` (same section ids; the on-screen names stay English inside the Urdu).
 - Reports: `app/_lib/reports.js` builds each tab for both the page and the CSV; `demo-reports.js` mirrors `0007_reports.sql` for demo mode.
 - Formatting: `format-helpers.js` (money as "Rs 1,250", `amountInWords` in lakh/crore, `withoutDashes` for server messages), `date-helpers.js` (Asia/Karachi).
 - Waiting and touch: `ui/PageSkeletons.js` for `loading.js` files (list pages keep theirs in a `(list)` route group), `tap-inline` for small text links, `pointer-coarse:min-h-[44px]` for compact controls.

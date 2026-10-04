@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-04: Guide in Urdu
+
+- An **اردو / English** button at the top right of the Guide switches the
+  whole page to Urdu, written right to left in Noto Nastaliq Urdu (loaded
+  on the Guide page only). Button and field names stay in English, in bold,
+  so they match the screens. The choice is remembered in a cookie, so the
+  Guide opens in the same language from the menu next time.
+- Urdu words live in `app/_lib/guide-content-ur.js`, matched to the English
+  sections by id; a missing section falls back to English.
+
 ## 2026-10-04: Guide page
 
 - New **Guide** page (`/admin/guide`, in the menu under Dashboard) for

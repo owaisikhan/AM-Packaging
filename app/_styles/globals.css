@@ -246,6 +246,12 @@ button:not(:disabled),
    Components from the reference: cards, buttons, forms, tables, badges
    ------------------------------------------------------------ */
 @layer components {
+  /* Urdu on the Guide page. The font is loaded by that page (next/font sets
+     --font-nastaliq on its wrapper), so no other page downloads it. */
+  .font-urdu {
+    font-family: var(--font-nastaliq), "Noto Nastaliq Urdu", serif;
+  }
+
   .card {
     position: relative;
     background: var(--color-surface);

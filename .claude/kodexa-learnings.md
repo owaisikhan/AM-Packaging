@@ -234,3 +234,11 @@ for the rules.
 - **Scope:** all
 - **Target in skill:** references/loading-states.md
 - **Status:** promoted v1.5.0
+
+### L-025 · 2026-10-04 · medium · preference
+- **Said / saw:** "add a button on top right to switch this guide to URDU version too, use good readable urdu font"
+- **Context:** in-app Guide page for a Faisalabad factory (workers more at home in Urdu)
+- **Lesson:** For Pakistani clients, offer an Urdu version of help and guide content, not of the app's screens. Use Noto Nastaliq Urdu via next/font on that page only (line height about 2.3, 17px), `dir="rtl"` on the content, logical spacing (`ps-`), and keep the on-screen button names in English inside `<bdi dir="ltr">` so readers can match them to the buttons. Remember the language in a cookie so the menu link opens it next time.
+- **Scope:** all (Pakistan clients)
+- **Target in skill:** references/ui-conventions.md (language and help pages)
+- **Status:** logged
