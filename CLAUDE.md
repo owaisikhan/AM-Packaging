@@ -38,8 +38,9 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 - **Database error messages are sentences for the owner**, naming the item
   and figures and saying what to do next.
 - **Migrations are append-only.** Never edit one that has been applied to the
-  live project; add a new numbered file. (None are applied yet as of
-  2026-10-03, so 0001 to 0007 can still be edited.)
+  live project; add a new numbered file. 0001 to 0007 were applied to the
+  live project (ref fqvmljwlwfjensumiqws, Singapore) on 2026-10-04, so the
+  next change is 0008.
 - **Nothing is deleted from the ledger.** Purchases, sales and production
   runs are voided (admin, with a reason), which writes reversing stock entries.
 - **Supplier money is admin-only** (balances, ledger, payments, voiding).
@@ -64,6 +65,7 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 - Admin: `ItemsTable` / `ItemsListPage` (Stock, Raw Materials, Products), `StockStatus`, `MovementType`, `ActivityTable`, `LookupManager` (Settings lists), `PurchasesTable`, `PurchaseForm`, `PaymentStatus`, `PaymentForm` and `PaymentsTable` (both take `kind="supplier" | "customer"`), `ProductionForm`, `RunStatus`, `SaleForm`, `SalesTable` (with `OverduePill`), `CustomerForm`, `SupplierForm`.
 - Print: `PrintButton` and the `.invoice-sheet` / `no-print` classes.
 - Charts (`app/_components/charts/`): `ChartFrame` (card with Chart / Table toggle), `ColumnChart`, `TrendChart`, `DonutChart`, `RankBars`, `StackBar`; shape rows with `periodView` in `app/_lib/chart-data.js`. Load the `dataviz` skill before adding a chart. Never sum quantities across units.
+- Guide: `/admin/guide` reads its words from `app/_lib/guide-content.js`. When a button or field label changes on screen, change it there too.
 - Reports: `app/_lib/reports.js` builds each tab for both the page and the CSV; `demo-reports.js` mirrors `0007_reports.sql` for demo mode.
 - Formatting: `format-helpers.js` (money as "Rs 1,250", `amountInWords` in lakh/crore, `withoutDashes` for server messages), `date-helpers.js` (Asia/Karachi).
 - Waiting and touch: `ui/PageSkeletons.js` for `loading.js` files (list pages keep theirs in a `(list)` route group), `tap-inline` for small text links, `pointer-coarse:min-h-[44px]` for compact controls.

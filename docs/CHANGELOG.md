@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-04: Guide page
+
+- New **Guide** page (`/admin/guide`, in the menu under Dashboard) for
+  everyone: a daily checklist, then numbered steps for checking stock,
+  purchases, production, invoices, adding customers and suppliers, and what
+  to do after a mistake, each with a button to the real page. Admins also
+  see first-time setup in order, payments, voiding, stock corrections,
+  users, reports and activity. Ends with "If something goes wrong".
+- The wording lives in `app/_lib/guide-content.js`, using the exact button
+  and field labels on screen in bold.
+- Live database: migrations 0001 to 0007 applied to the Supabase project
+  (Singapore) and checked against the local test run; first admin added.
+
 ## 2026-10-04: Phase 6 (polish pass)
 
 - Regression checks: `npm run check` (`scripts/checks/`, Playwright) walks

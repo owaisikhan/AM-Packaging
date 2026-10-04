@@ -42,8 +42,8 @@ Stock, production, purchases and sales for **Ahmed Munir Packaging Industry**,
 ## Stack
 
 Next.js 16 (App Router, plain JavaScript), Tailwind v4, Supabase (Postgres,
-RLS, password sign-in), Vercel. Deploy region `bom1` beside Supabase
-`ap-south-1`.
+RLS, password sign-in), Vercel. The live Supabase project is in Singapore
+(`ap-southeast-1`), so set the Vercel function region to `sin1`.
 
 ## Running it
 
@@ -55,7 +55,7 @@ DEMO_ROLE=worker npm run dev   # the demo as a worker sees it
 
 To connect a database:
 
-1. Create a Supabase project (region ap-south-1, Mumbai).
+1. Create a Supabase project (the live one is in Singapore, ap-southeast-1).
 2. Run `supabase/migrations/0001` to `0007` in order (SQL editor or `supabase db push`).
 3. Copy `.env.example` to `.env.local` and fill in the URL, anon key and service-role key.
 4. Create the first admin: add a user in Supabase Auth, then

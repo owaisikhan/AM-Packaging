@@ -1,6 +1,7 @@
 // The pages every check walks (demo mode ids). Keep in step with the app.
 export const PAGES = [
   "/admin",
+  "/admin/guide",
   "/admin/stock",
   "/admin/stock/i-t-46-72-40c",
   "/admin/stock/adjust",

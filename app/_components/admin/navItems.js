@@ -9,6 +9,7 @@ import {
   Users,
   Truck,
   BarChart3,
+  BookOpen,
   History,
   UserCog,
   Settings,
@@ -17,7 +18,13 @@ import {
 // The sidebar, grouped as in the reference design. adminOnly links are hidden
 // from workers; the pages themselves and the database refuse them anyway.
 export const NAV_GROUPS = [
-  { label: "Main", items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true }] },
+  {
+    label: "Main",
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/admin/guide", label: "Guide", icon: BookOpen },
+    ],
+  },
   {
     label: "Inventory",
     items: [

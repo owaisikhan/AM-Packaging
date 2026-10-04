@@ -21,11 +21,15 @@
 - [x] Phase 6: polish pass. Regression checks (`npm run check`), loading,
       error and not-found screens, 44px touch targets, phone layouts for
       Users and Settings, app icon, `no-undef` lint, docs.
+- [x] Guide page for workers and admins (`/admin/guide`).
+- [x] Live Supabase project connected: migrations 0001-0007 applied,
+      first admin added (a test account for now).
 
 ## Next
 
-- [ ] Connect a Supabase project (ap-south-1), apply migrations 0001-0007,
-      create the first admin, set the env vars on Vercel (region bom1).
+- [ ] Add the real admins and workers in Users, then switch off the test
+      admin (admin@gmail.com).
+- [ ] Set the Vercel function region to Singapore (sin1), beside the database.
 
 ## Reminders
 
