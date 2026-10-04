@@ -58,6 +58,8 @@ To connect a database:
 1. Create a Supabase project (the live one is in Singapore, ap-southeast-1).
 2. Run `supabase/migrations/0001` to `0007` in order (SQL editor or `supabase db push`).
 3. Copy `.env.example` to `.env.local` and fill in the URL, anon key and service-role key.
+   On Vercel, add the same three under Project Settings > Environment Variables and redeploy.
+   `SUPABASE_SERVICE_ROLE_KEY` is required for adding users and changing passwords.
 4. Create the first admin: add a user in Supabase Auth, then
    `insert into profiles (id, full_name, role) values ('<auth user id>', 'Ahmed Munir', 'admin');`
    That admin adds everyone else from the Users page.

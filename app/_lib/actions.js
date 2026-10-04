@@ -360,6 +360,9 @@ export async function saveRecipe(_prev, formData) {
   return ok(lines.length ? "Recipe saved." : "Recipe cleared. Production of this product will start with an empty materials list.");
 }
 
+const NO_SERVICE_KEY =
+  "Adding users and changing passwords is not set up yet: the SUPABASE_SERVICE_ROLE_KEY setting is missing on the server. Add it in Vercel under Project Settings > Environment Variables, then redeploy.";
+
 // ---------------------------------------------------------------
 // Users (admin). Sign-in accounts need the service-role client; the
 // profile row is written with the admin's own session so the activity log
@@ -380,7 +383,13 @@ export async function createUser(_prev, formData) {
   if (role !== "admin" && role !== "worker") return fail("Choose admin or worker.");
 
   const admin = createAdminClient();
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  if (!admin) return fail(NO_SERVICE_KEY);
+  let data, error;
+  try {
+    ({ data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true }));
+  } catch (e) {
+    return fail(`Could not create the sign-in: ${e.message}`);
+  }
   if (error) {
     return fail(
       error.message?.toLowerCase().includes("already")
@@ -394,7 +403,7 @@ export async function createUser(_prev, formData) {
     .from("profiles")
     .insert({ id: data.user.id, full_name: fullName, role, active: true, permissions: permissionsFrom(formData) });
   if (profileError) {
-    await admin.auth.admin.deleteUser(data.user.id);
+    await admin.auth.admin.deleteUser(data.user.id).catch(() => {});
     return fail(describe(profileError, "Could not save the user."));
   }
 
@@ -428,8 +437,13 @@ export async function updateUser(_prev, formData) {
 
   if (password) {
     const admin = createAdminClient();
-    const { error: pwError } = await admin.auth.admin.updateUserById(id, { password });
-    if (pwError) return fail(`Details saved, but the password was not changed: ${pwError.message}`);
+    if (!admin) return fail(`Details saved, but the password was not changed. ${NO_SERVICE_KEY}`);
+    try {
+      const { error: pwError } = await admin.auth.admin.updateUserById(id, { password });
+      if (pwError) return fail(`Details saved, but the password was not changed: ${pwError.message}`);
+    } catch (e) {
+      return fail(`Details saved, but the password was not changed: ${e.message}`);
+    }
   }
 
   revalidatePath("/admin/users");

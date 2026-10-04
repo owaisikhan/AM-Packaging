@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-04: Adding a user no longer crashes the page
+
+- With `SUPABASE_SERVICE_ROLE_KEY` missing on the server, **Add user** threw
+  "supabaseKey is required." and showed the error page. Now the form says
+  the setting is missing and where to add it; other sign-in service errors
+  also show as a message.
+
 ## 2026-10-04: Per-worker permissions
 
 - When adding a worker, or later with **Edit**, an admin ticks what that
