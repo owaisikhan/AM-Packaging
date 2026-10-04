@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-04: Clearer side menu in dark mode
+
+- Menu words and icons are brighter (#cbd5e1), the current page is a clear
+  green row instead of a near-invisible tint, hover is visible, and the
+  section headings are 11px (were 10px) in both themes.
+
 ## 2026-10-04: Guide in Urdu
 
 - An **اردو / English** button at the top right of the Guide switches the

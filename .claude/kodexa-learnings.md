@@ -242,3 +242,11 @@ for the rules.
 - **Scope:** all (Pakistan clients)
 - **Target in skill:** references/ui-conventions.md (language and help pages)
 - **Status:** logged
+
+### L-026 · 2026-10-04 · medium · correction
+- **Said / saw:** "this side panel in the dark theme can be improved, i think there might be a visibility problem"
+- **Context:** dark sidebar passed the AA check but read dim: grey menu words (#94a3b8) and a current-page tint (#0d2b1d on #1e293b) only about 1.2:1 against the panel
+- **Lesson:** Passing AA is not enough for older readers. In dark mode, menu text should be near-white (#cbd5e1 or brighter), and the active row's fill must stand out from the panel itself (around 18% of the brand colour), not just carry coloured text. Section labels no smaller than 11px.
+- **Scope:** all (dashboards with a dark theme)
+- **Target in skill:** references/ui-conventions.md (dark mode)
+- **Status:** logged

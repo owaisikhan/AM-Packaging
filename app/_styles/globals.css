@@ -171,7 +171,7 @@ button:not(:disabled),
 
   .sidebar-section-label {
     padding: 16px 12px 6px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -503,6 +503,12 @@ select option[value=""] { color: var(--color-muted); }
 .dark .data-table thead th { background: rgb(255 255 255 / 0.04); }
 .dark .data-table tbody tr:hover { background: rgb(255 255 255 / 0.04); }
 .dark .btn-secondary { background: rgb(255 255 255 / 0.07); }
+/* Side menu in dark mode: brighter words, and a current page that stands
+   out from the panel, not just green text (owner, 2026-10-04). */
+.dark .nav-item { color: #cbd5e1; }
+.dark .nav-item:hover { background: rgb(255 255 255 / 0.06); color: #f1f5f9; }
+.dark .nav-item[aria-current="page"] { background: rgb(34 181 115 / 0.18); color: #4ade80; }
+.dark .sidebar-section-label { color: #a3b1c6; }
 
 /* Dashboard welcome banner (reference design, kept by the client's choice) */
 .welcome-banner {
