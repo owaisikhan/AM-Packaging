@@ -32,9 +32,9 @@ export default function AddUserDialog() {
         ref={ref}
         aria-labelledby="add-user-title"
         onClick={(e) => e.target === ref.current && ref.current.close()}
-        className="m-auto max-h-[calc(100dvh-24px)] w-[min(560px,calc(100vw-24px))] overflow-y-auto rounded-[20px] border border-border bg-surface p-0 text-text shadow-lg backdrop:bg-black/50"
+        className="m-auto max-h-[calc(100dvh-24px)] w-[min(560px,calc(100vw-24px))] overflow-y-auto lg:w-[min(1040px,calc(100vw-48px))] rounded-[20px] border border-border bg-surface p-0 text-text shadow-lg backdrop:bg-black/50"
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-surface px-6 py-5">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-surface px-6 py-4 lg:py-3">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary-ink">
               <UserPlus size={19} aria-hidden />
@@ -43,16 +43,17 @@ export default function AddUserDialog() {
               <h2 id="add-user-title" className="text-lg font-bold text-heading">
                 Add a user
               </h2>
-              <p className="mt-1 text-sm leading-relaxed text-muted">They sign in with this email and password.</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted lg:mt-0">They sign in with this email and password.</p>
             </div>
           </div>
           <button type="button" onClick={() => ref.current?.close()} className="btn-ghost" aria-label="Close">
             <X size={18} aria-hidden />
           </button>
         </div>
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 lg:pb-5">
           <UserForm
             key={formKey}
+            layout="wide"
             onDone={(state) => {
               setDone(state);
               ref.current?.close();

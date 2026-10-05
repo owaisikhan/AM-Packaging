@@ -6,16 +6,16 @@
 
 export const PERMISSIONS = [
   { key: "stock_view", label: "See stock", hint: "Stock, Raw Materials and Products pages", group: "work", byDefault: true },
-  { key: "purchases", label: "Record purchases", hint: "Enter the bill when raw material arrives", group: "work", byDefault: true },
-  { key: "production", label: "Record production", hint: "Enter what was made and the materials used", group: "work", byDefault: true },
+  { key: "purchases", label: "Record purchases", hint: "The bill when raw material arrives", group: "work", byDefault: true },
+  { key: "production", label: "Record production", hint: "What was made and the materials used", group: "work", byDefault: true },
   { key: "sales", label: "Make invoices", hint: "New invoice and printing it", group: "work", byDefault: true },
-  { key: "sales_cash", label: "Take cash on invoices", hint: "Enter the amount received when making an invoice", group: "work", byDefault: true },
+  { key: "sales_cash", label: "Take cash on invoices", hint: "Cash received when making an invoice", group: "work", byDefault: true },
   { key: "customers", label: "Add customers", hint: "Customers list and Add Customer", group: "work", byDefault: true },
   { key: "suppliers", label: "Add suppliers", hint: "Suppliers list and Add Supplier", group: "work", byDefault: true },
-  { key: "balances", label: "See balances and payments", hint: "Who owes what, ledgers, and what each bill or invoice has had paid", group: "money", byDefault: false },
-  { key: "payments", label: "Record payments", hint: "Money paid to suppliers and received from customers", group: "money", byDefault: false },
-  { key: "reports", label: "See reports", hint: "Reports page and the money figures on the Dashboard", group: "money", byDefault: false },
-  { key: "void", label: "Cancel entries (void)", hint: "Cancel a purchase, invoice, production run or payment, with a reason", group: "money", byDefault: false },
+  { key: "balances", label: "See balances and payments", hint: "Who owes what, ledgers and payments", group: "money", byDefault: false },
+  { key: "payments", label: "Record payments", hint: "Money paid to suppliers or from customers", group: "money", byDefault: false },
+  { key: "reports", label: "See reports", hint: "Reports page and Dashboard money figures", group: "money", byDefault: false },
+  { key: "void", label: "Cancel entries (void)", hint: "Cancel a wrong entry, with a reason", group: "money", byDefault: false },
 ];
 
 export const PERMISSION_KEYS = PERMISSIONS.map((p) => p.key);
