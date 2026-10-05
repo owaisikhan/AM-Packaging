@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-05: Server region
+
+- `vercel.json` runs the app's server code in Singapore (`sin1`), next to the
+  Supabase database, so each page makes its database calls over a short hop.
+
 ## 2026-10-04: Adding a user no longer crashes the page
 
 - With `SUPABASE_SERVICE_ROLE_KEY` missing on the server, **Add user** threw

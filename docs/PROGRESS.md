@@ -30,7 +30,7 @@
 
 - [ ] Add the real admins and workers in Users, then switch off the test
       admin (admin@gmail.com).
-- [ ] Set the Vercel function region to Singapore (sin1), beside the database.
+- [x] Vercel function region set to Singapore (sin1) in `vercel.json`, beside the database.
 
 ## Reminders
 
