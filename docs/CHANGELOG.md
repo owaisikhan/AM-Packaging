@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-05: Moved to Mumbai
+
+- The live database is a new Supabase project in Mumbai (`ap-south-1`,
+  ref `cbdpijrrzjvkmyyhyubz`) with migrations 0001 to 0009; its tables,
+  functions, rules and starting lists match the local test run exactly.
+- `vercel.json` now runs the server code in Mumbai (`bom1`), next to it.
+
 ## 2026-10-05: Add user in a window; migration 0009
 
 - **Add user** is now a button at the top right of Users that opens the form

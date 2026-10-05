@@ -30,7 +30,10 @@
 
 - [ ] Add the real admins and workers in Users, then switch off the test
       admin (admin@gmail.com).
-- [x] Vercel function region set to Singapore (sin1) in `vercel.json`, beside the database.
+- [x] Moved to Mumbai: new Supabase project `cbdpijrrzjvkmyyhyubz` (0001 to 0009
+      applied and checked against the local test run), Vercel function region
+      `bom1` in `vercel.json`. Pause the old Singapore project once the live
+      site is confirmed working.
 
 ## Reminders
 

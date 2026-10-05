@@ -38,9 +38,10 @@ chose (invenza-html.vercel.app); do not "fix" them. Text in green or red uses
 - **Database error messages are sentences for the owner**, naming the item
   and figures and saying what to do next.
 - **Migrations are append-only.** Never edit one that has been applied to the
-  live project; add a new numbered file. 0001 to 0007 were applied to the
-  live project (ref fqvmljwlwfjensumiqws, Singapore) on 2026-10-04; 0008
-  (permissions) follows, so the next change is 0009.
+  live project; add a new numbered file. 0001 to 0009 are applied to the
+  live project (ref cbdpijrrzjvkmyyhyubz, Mumbai) since 2026-10-05, so the
+  next change is 0010. The old Singapore project (fqvmljwlwfjensumiqws) is
+  retired: do not apply anything to it.
 - **Nothing is deleted from the ledger.** Purchases, sales and production
   runs are voided (admin, with a reason), which writes reversing stock entries.
 - **Per-worker permissions** (0008): an admin ticks what each worker may do
