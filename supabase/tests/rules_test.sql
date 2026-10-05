@@ -300,3 +300,25 @@ update profiles set permissions = array_remove(permissions, 'reports') where id 
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000d',false);
 \echo '--- trusted worker runs the report again (expect: You do not have permission to see sales and purchase reports)'
 select * from report_trade_series(current_date - 2, current_date, 'day');
+
+\echo '=== Phase 9: hardening'
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b',false);
+\echo '--- worker takes a document number directly (expect: permission denied for function next_doc_no)'
+select next_doc_no('invoice');
+\echo '--- worker records a purchase (expect posted = t; numbers continue in order with no gap)'
+select post_purchase(jsonb_build_object('supplier_id',(select id from suppliers limit 1),
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',10,'rate',12)))) is not null as posted;
+select purchase_no from purchases order by created_at desc limit 3;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000c',false);
+\echo '--- production-only worker still refused a purchase (expect: You do not have permission to record a purchase)'
+select post_purchase(jsonb_build_object('supplier_id',(select id from suppliers limit 1),
+  'lines', jsonb_build_array(jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',1,'rate',1))));
+\echo '--- production-only worker still records production (expect made = t, created_by is the worker = t)'
+select post_production(jsonb_build_object('item_id',(select id from items where code='T-46-72-40C'),'qty_made',1,'materials', jsonb_build_array(
+  jsonb_build_object('item_id',(select id from items where code='PT-3'),'qty',72)))) is not null as made;
+select created_by = '00000000-0000-0000-0000-00000000000c' as by_worker from production_runs order by created_at desc limit 1;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
+\echo '--- admin changes the production-only worker (expect summary naming the change: added Record purchases, See reports; then switched off)'
+update profiles set permissions = '{production,purchases,reports}' where id = '00000000-0000-0000-0000-00000000000c';
+update profiles set active = false where id = '00000000-0000-0000-0000-00000000000c';
+select summary from activity_log where module = 'user' order by created_at desc, id desc limit 2;

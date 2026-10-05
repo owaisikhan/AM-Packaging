@@ -7,15 +7,18 @@ import { DEFAULT_PERMISSIONS, PERMISSIONS } from "@/app/_lib/permissions";
 import FormMessage from "@/app/_components/ui/FormMessage";
 import SubmitButton from "@/app/_components/ui/SubmitButton";
 
-export default function UserForm({ profile = null, isSelf = false }) {
+export default function UserForm({ profile = null, isSelf = false, onDone = null }) {
   const [state, formAction] = useActionState(profile ? updateUser : createUser, null);
   const formRef = useRef(null);
   const [role, setRole] = useState(profile?.role ?? "worker");
   const startPerms = profile?.permissions ?? DEFAULT_PERMISSIONS;
 
   useEffect(() => {
-    if (state?.ok && !profile) formRef.current?.reset();
-  }, [state, profile]);
+    if (state?.ok && !profile) {
+      formRef.current?.reset();
+      onDone?.(state);
+    }
+  }, [state, profile, onDone]);
 
   return (
     <form ref={formRef} action={formAction} onReset={() => setRole("worker")} className="mt-5 flex flex-col gap-4">

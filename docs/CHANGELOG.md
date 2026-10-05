@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-05: Add user in a window; migration 0009
+
+- **Add user** is now a button at the top right of Users that opens the form
+  in a window; it closes itself once the account is made. The users table
+  uses the full width. Guide wording updated (English and Urdu).
+- `0009_hardening.sql`: the Activity log names what changed on a user
+  ("removed Record purchases; added See reports", "switched off", "now
+  Admin"); `next_doc_no` can no longer be called from the API, and
+  `post_purchase` / `post_production` run as security definer, so invoice,
+  bill and run numbers cannot be skipped. Rule tests Phase 9.
+
 ## 2026-10-05: Server region
 
 - `vercel.json` runs the app's server code in Singapore (`sin1`), next to the

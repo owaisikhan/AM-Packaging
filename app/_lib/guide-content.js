@@ -216,7 +216,7 @@ export const GUIDE_SECTIONS = [
     icon: UserCog,
     title: "Manage users",
     steps: [
-      "Open **Users**. Under **Add a user**, type the name, email and a password (at least 8 characters).",
+      "Open **Users** and tap **Add user** at the top right. In the window that opens, type the name, email and a password (at least 8 characters).",
       "Choose **Worker** or **Admin**. For a worker, tick what they can do under **What this worker can do**. The money boxes are off unless you tick them.",
       "Tap **Add user** and give them the email and password.",
       "To change what a worker can do later, tap **Edit** on that user, change the ticks and tap **Save changes**. It works from their next page.",

@@ -7,7 +7,7 @@ import { initials } from "@/app/_lib/format-helpers";
 import PageHeader from "@/app/_components/layout/PageHeader";
 import StatCard from "@/app/_components/ui/StatCard";
 import Badge from "@/app/_components/ui/Badge";
-import UserForm from "@/app/_components/admin/UserForm";
+import AddUserDialog from "@/app/_components/admin/AddUserDialog";
 import { PERMISSIONS } from "@/app/_lib/permissions";
 
 // Short summary of what a person may do, shown under their role.
@@ -26,6 +26,7 @@ export default async function UsersPage() {
         title="Users"
         subtitle="Who can sign in, and what they can do. Admins see everything; workers record production, purchases and sales."
         crumbs={[{ label: "Home", href: "/admin" }, { label: "Users" }]}
+        actions={<AddUserDialog />}
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
@@ -34,8 +35,8 @@ export default async function UsersPage() {
         <StatCard icon={UserRound} label="Workers" value={active.filter((p) => p.role === "worker").length} tone="warning" valueTone="plain" />
       </div>
 
-      <div className="grid gap-6 2xl:grid-cols-[1fr_380px]">
-        <div className="card self-start overflow-hidden">
+      <div>
+        <div className="card overflow-hidden">
           <ul className="divide-y divide-border md:hidden">
             {profiles.map((p) => (
               <li key={p.id} className={`flex flex-col gap-3 px-4 py-4 ${p.active ? "" : "opacity-60"}`}>
@@ -114,10 +115,6 @@ export default async function UsersPage() {
               </tbody>
             </table>
           </div>
-        </div>
-        <div className="card w-full max-w-2xl self-start p-5 sm:p-6 2xl:max-w-none">
-          <h2 className="card-title border-b border-border pb-4">Add a user</h2>
-          <UserForm />
         </div>
       </div>
     </div>
