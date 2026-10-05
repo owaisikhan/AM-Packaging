@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-05: Reports "Pick dates" works
+
+- Choosing **Period > Pick dates** on Reports sent no dates, so the page
+  stayed on the last 30 days and the From/To boxes never appeared. It now
+  opens with From/To filled with the dates on show, ready to change. New
+  check `scripts/checks/dates.mjs` (also covers a list page's From date).
+
 ## 2026-10-05: Moved to Mumbai
 
 - The live database is a new Supabase project in Mumbai (`ap-south-1`,

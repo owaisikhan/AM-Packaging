@@ -21,7 +21,9 @@ export default function ReportFilters({ tab, presets, range, showGroup = true })
     const preset = fd.get("range");
     if (preset && preset !== "30d") sp.set("range", preset);
     if (preset === "custom") {
-      for (const k of ["from", "to"]) if (fd.get(k)) sp.set(k, fd.get(k));
+      // The date boxes only appear once the range is custom, so the first
+      // pick starts from the dates already on show.
+      for (const k of ["from", "to"]) sp.set(k, fd.get(k) || range[k]);
     }
     // A new range picks its own grouping unless one was chosen on purpose
     const group = fd.get("group");
@@ -33,7 +35,7 @@ export default function ReportFilters({ tab, presets, range, showGroup = true })
     <form ref={formRef} onSubmit={(e) => e.preventDefault()} className="card grid gap-3 p-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end">
       <div className="lg:w-56">
         <label htmlFor="r-range" className="form-label">Period</label>
-        <select id="r-range" name="range" defaultValue={range.preset} onChange={() => apply("range")} className="form-select">
+        <select key={range.preset} id="r-range" name="range" defaultValue={range.preset} onChange={() => apply("range")} className="form-select">
           {presets.map((p) => (
             <option key={p.value} value={p.value}>{p.label}</option>
           ))}

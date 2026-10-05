@@ -25,6 +25,7 @@ import taps from "./taps.mjs";
 import search from "./search.mjs";
 import print from "./print.mjs";
 import sameTab from "./same-tab.mjs";
+import dates from "./dates.mjs";
 
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => {
@@ -34,7 +35,7 @@ const args = Object.fromEntries(
 );
 
 const BASE = args.base || "http://localhost:3000";
-const ALL = { pages: pagesRender, overflow, figures, tables, contrast, "dark-selects": darkSelects, charts, taps, search, print, "same-tab": sameTab };
+const ALL = { pages: pagesRender, overflow, figures, tables, contrast, "dark-selects": darkSelects, charts, taps, search, print, "same-tab": sameTab, dates };
 const only = typeof args.only === "string" ? args.only.split(",") : Object.keys(ALL);
 
 // In Claude Code on the web, Chromium is preinstalled at /opt/pw-browsers and
